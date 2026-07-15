@@ -1,0 +1,106 @@
+:root {
+  color: #142019;
+  background: #f5f1e8;
+  font-family: Georgia, "Times New Roman", serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  color: #f5f1e8;
+  background: #264d3d;
+  font: inherit;
+  font-weight: 700;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.app-shell {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  gap: 1.5rem;
+  max-width: 58rem;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.hero,
+.privacy-note {
+  border: 1px solid #c9c1b0;
+  border-radius: 1rem;
+  background: #fffdf7;
+  box-shadow: 0.25rem 0.25rem 0 #d8d0c1;
+}
+
+.hero {
+  padding: clamp(2rem, 8vw, 5rem);
+}
+
+.eyebrow {
+  margin: 0;
+  color: #5a684e;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0.25rem 0;
+  font-size: clamp(3rem, 12vw, 7rem);
+  line-height: 0.95;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.lede {
+  max-width: 30rem;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.35;
+}
+
+.status {
+  color: #5c5548;
+}
+
+.privacy-note {
+  padding: 1.5rem 2rem;
+  color: #304238;
+}
+
+.privacy-note p {
+  max-width: 42rem;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+@media (min-width: 48rem) {
+  .app-shell {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .privacy-note {
+    align-self: end;
+  }
+}

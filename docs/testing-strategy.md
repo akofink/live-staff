@@ -1,0 +1,26 @@
+# Testing Strategy
+
+## Unit Tests
+
+Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, clef selection, accidental preference, ranges, and stabilizer sequences.
+
+## Synthetic Signals
+
+Generate deterministic tones for A4 at 440 Hz, concert B-flat4, middle C, low and high notes, small detuning, silence, and harmonic-rich signals where useful.
+Use them to test detector accuracy and confidence behavior without device variability.
+
+## Recorded Fixtures
+
+Use only small, project-owned recordings.
+Include sustained notes from different instrument families when practical.
+Do not commit large audio files without considering repository impact.
+
+## Browser Tests
+
+When microphone behavior exists, cover permission accepted and denied, absent input devices, suspended contexts, start and stop, instrument switching, local preference persistence, and responsive layout.
+Browser tests must mock audio where reliable device access is unavailable in CI.
+
+## Manual Validation
+
+Validate with voice, piano or generated tone, and at least one transposing instrument when available.
+Maintain a supported-browser and device matrix as real devices are tested.
