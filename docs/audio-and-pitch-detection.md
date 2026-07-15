@@ -39,6 +39,14 @@ The implementation asks for one channel and disables voice-processing constraint
 It resumes a suspended context after the user gesture and releases animation frames, media tracks, and the audio context on stop or failure.
 This is a browser-adapter boundary, not the final audio-processing design.
 
+## Published Demo Detector
+
+The initial public demo uses an in-repository normalized-autocorrelation detector over 4,096-sample local PCM frames.
+It is a deliberate dependency-free proof of concept, not a claim of production-grade pitch tracking across every instrument.
+The UI processes one estimate about every 80 ms and displays a note only after two consecutive matching MIDI pitches.
+The detector suppresses frames below a minimum RMS level and estimates below a correlation threshold.
+YIN and McLeod Pitch Method remain candidates for the next benchmark-driven detector decision.
+
 ## Open Technical Decisions
 
 - Select and benchmark a maintained detector.
