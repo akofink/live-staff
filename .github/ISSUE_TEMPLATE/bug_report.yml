@@ -1,0 +1,45 @@
+name: Bug report
+description: Report reproducible behavior that differs from expectations.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include private audio recordings or sensitive information.
+        For a security concern, use private vulnerability reporting instead.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Describe the actual and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Start listening ...
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Safari 18.0
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and operating system
+      placeholder: iPhone 16, iOS 18
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

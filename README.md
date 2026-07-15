@@ -47,4 +47,10 @@ npm test
 
 ## License
 
-License selection is intentionally deferred until the intended open-source posture is decided.
+Live Staff is available under the [MIT License](LICENSE).
+
+## Contributing and Support
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
+See [SUPPORT.md](SUPPORT.md) for questions and general help.
+Read [SECURITY.md](SECURITY.md) before reporting a security vulnerability.
