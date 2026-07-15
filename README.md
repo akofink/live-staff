@@ -44,6 +44,7 @@ npm test
 - [Music theory and transposition](docs/music-theory-and-transposition.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Roadmap](docs/roadmap.md)
+- [Working flow](docs/working-flow.md)
 
 ## License
 
