@@ -31,6 +31,14 @@ Request microphone access only after an explicit user gesture.
 Handle suspended contexts, interruption, missing devices, Safari behavior, rotation, and ignored audio constraints.
 Request disabled echo cancellation, noise suppression, and automatic gain control where available, but tolerate unsupported or ignored constraints.
 
+## Spike Result: Local Capture Foundation
+
+The first spike uses `getUserMedia`, `AudioContext`, and an `AnalyserNode` to make local PCM frames available to a future detector.
+It deliberately does not display raw pitch or add a detector dependency.
+The implementation asks for one channel and disables voice-processing constraints when browsers permit them.
+It resumes a suspended context after the user gesture and releases animation frames, media tracks, and the audio context on stop or failure.
+This is a browser-adapter boundary, not the final audio-processing design.
+
 ## Open Technical Decisions
 
 - Select and benchmark a maintained detector.
