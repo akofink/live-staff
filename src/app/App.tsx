@@ -101,70 +101,25 @@ export function App() {
         <p className="lede">
           Play a note. See its concert pitch appear live.
         </p>
-        <section className="preferences" aria-labelledby="preferences-heading">
-          <h2 id="preferences-heading">Display settings</h2>
-          <label>
-            Instrument
-            <select
-              value={preferences.instrumentId}
-              disabled={displaySettingsLocked}
-              aria-describedby="display-settings-guidance"
-              onChange={(event) => updatePreferences({ instrumentId: event.target.value as Preferences["instrumentId"] })}
-            >
-              {instrumentOptions.map((instrument) => (
-                <option key={instrument.id} value={instrument.id}>
-                  {instrument.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <fieldset disabled={displaySettingsLocked} aria-describedby="display-settings-guidance">
-            <legend>Pitch display</legend>
-            <label>
-              <input
-                type="radio"
-                name="pitch-display"
-                checked={preferences.pitchDisplay === "concert"}
-                onChange={() => updatePreferences({ pitchDisplay: "concert" })}
-              />
-              Concert pitch
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="pitch-display"
-                checked={preferences.pitchDisplay === "written"}
-                onChange={() => updatePreferences({ pitchDisplay: "written" })}
-              />
-              Written pitch
-            </label>
-          </fieldset>
-          <p id="display-settings-guidance" className="preferences-help" role="status" aria-live="polite">
-            {displaySettingsLocked
-              ? "Instrument and pitch display changes apply before your next listening session. Stop listening to change them."
-              : "Instrument and pitch display changes apply when you start your next listening session."}
-          </p>
-          <label>
-            Background hum
-            <select
-              value={preferences.mainsHumFrequency}
-              onChange={(event) =>
-                updatePreferences({
-                  mainsHumFrequency:
-                    event.target.value === "off" ? "off" : (Number(event.target.value) as 50 | 60),
-                })
-              }
-            >
-              <option value="off">Off</option>
-              <option value="50">Suppress 50 Hz</option>
-              <option value="60">Suppress 60 Hz</option>
-            </select>
-          </label>
-          <p className="preferences-help">
-            Use only when electrical hum masks your note. It removes a narrow local frequency band.
-          </p>
-          <p className="preferences-status" role="status" aria-live="polite">
-            {preferencesMessage}
+        <section className="listening-control" aria-label="Listening control">
+          <p className="signal-label">Input</p>
+          <button
+            type="button"
+            onClick={() => void toggleListening()}
+            disabled={listeningState === "starting"}
+            aria-describedby="listening-status"
+          >
+            <span className="listen-indicator" aria-hidden="true" />
+            {listeningState === "listening" ? "Stop listening" : "Start listening"}
+          </button>
+          <p
+            id="listening-status"
+            className="status"
+            role="status"
+            aria-live="polite"
+            data-state={listeningState}
+          >
+            {message}
           </p>
         </section>
         <TrebleStaff
@@ -193,23 +148,80 @@ export function App() {
             </div>
           </dl>
         </section>
-        <button
-          type="button"
-          onClick={() => void toggleListening()}
-          disabled={listeningState === "starting"}
-          aria-describedby="listening-status"
-        >
-          {listeningState === "listening" ? "Stop listening" : "Start listening"}
-        </button>
-        <p
-          id="listening-status"
-          className="status"
-          role="status"
-          aria-live="polite"
-          data-state={listeningState}
-        >
-          {message}
-        </p>
+        <details className="preferences">
+          <summary>
+            <span>
+              <span className="signal-label">Setup</span>
+              <span className="settings-title">Display and input settings</span>
+            </span>
+            <span className="settings-summary">{selectedInstrument.label}</span>
+          </summary>
+          <div className="preferences-panel">
+            <label>
+              Instrument
+              <select
+                value={preferences.instrumentId}
+                disabled={displaySettingsLocked}
+                aria-describedby="display-settings-guidance"
+                onChange={(event) => updatePreferences({ instrumentId: event.target.value as Preferences["instrumentId"] })}
+              >
+                {instrumentOptions.map((instrument) => (
+                  <option key={instrument.id} value={instrument.id}>
+                    {instrument.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <fieldset disabled={displaySettingsLocked} aria-describedby="display-settings-guidance">
+              <legend>Pitch display</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="pitch-display"
+                  checked={preferences.pitchDisplay === "concert"}
+                  onChange={() => updatePreferences({ pitchDisplay: "concert" })}
+                />
+                Concert pitch
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="pitch-display"
+                  checked={preferences.pitchDisplay === "written"}
+                  onChange={() => updatePreferences({ pitchDisplay: "written" })}
+                />
+                Written pitch
+              </label>
+            </fieldset>
+            <p id="display-settings-guidance" className="preferences-help" role="status" aria-live="polite">
+              {displaySettingsLocked
+                ? "Instrument and pitch display changes apply before your next listening session. Stop listening to change them."
+                : "Instrument and pitch display changes apply when you start your next listening session."}
+            </p>
+            <label>
+              Background hum
+              <select
+                value={preferences.mainsHumFrequency}
+                onChange={(event) =>
+                  updatePreferences({
+                    mainsHumFrequency:
+                      event.target.value === "off" ? "off" : (Number(event.target.value) as 50 | 60),
+                  })
+                }
+              >
+                <option value="off">Off</option>
+                <option value="50">Suppress 50 Hz</option>
+                <option value="60">Suppress 60 Hz</option>
+              </select>
+            </label>
+            <p className="preferences-help">
+              Use only when electrical hum masks your note. It removes a narrow local frequency band.
+            </p>
+            <p className="preferences-status" role="status" aria-live="polite">
+              {preferencesMessage}
+            </p>
+          </div>
+        </details>
       </section>
       <aside className="privacy-note">
         <h2>Private by design</h2>

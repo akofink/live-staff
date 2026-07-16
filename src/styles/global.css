@@ -18,8 +18,8 @@ body {
 
 button {
   border: 0;
-  border-radius: 999px;
-  padding: 0.85rem 1.25rem;
+  border-radius: 0.35rem;
+  padding: 0.85rem 1.1rem;
   color: #f5f1e8;
   background: #264d3d;
   font: inherit;
@@ -61,7 +61,7 @@ input:focus-visible {
 }
 
 .hero {
-  padding: clamp(2rem, 8vw, 5rem);
+  padding: clamp(1.5rem, 6vw, 4rem);
 }
 
 .eyebrow {
@@ -92,17 +92,74 @@ h2 {
 }
 
 .preferences {
-  display: grid;
-  gap: 1rem;
-  margin: 2rem 0;
-  padding: 1.25rem;
+  margin-top: 2rem;
   border: 1px solid #d8d0c1;
-  border-radius: 0.75rem;
+  border-radius: 0.4rem;
   background: #f8f4ea;
 }
 
-.preferences h2 {
-  margin: 0;
+.preferences summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.preferences summary::-webkit-details-marker {
+  display: none;
+}
+
+.preferences summary::after {
+  flex: 0 0 auto;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid #264d3d;
+  border-bottom: 2px solid #264d3d;
+  content: "";
+  transform: rotate(45deg) translateY(-0.15rem);
+}
+
+.preferences[open] summary {
+  border-bottom: 1px solid #d8d0c1;
+}
+
+.preferences[open] summary::after {
+  transform: rotate(225deg) translate(-0.15rem, -0.15rem);
+}
+
+.preferences summary:focus-visible {
+  outline: 3px solid #b15a23;
+  outline-offset: -3px;
+}
+
+.settings-title,
+.settings-summary {
+  display: block;
+}
+
+.settings-title {
+  margin-top: 0.15rem;
+  font-weight: 700;
+}
+
+.settings-summary {
+  color: #5c5548;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.preferences-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
 }
 
 .preferences label,
@@ -151,13 +208,13 @@ h2 {
   display: grid;
   justify-items: start;
   gap: 0.2rem;
-  margin: 2.5rem 0;
+  margin: 2rem 0 0;
   padding: 1.5rem 0;
   border-block: 1px solid #d8d0c1;
 }
 
 .staff-display {
-  margin: 2.5rem 0 0;
+  margin: 2rem 0 0;
   padding: 1rem 0;
   border-block: 1px solid #d8d0c1;
 }
@@ -236,11 +293,65 @@ h2 {
 }
 
 .status {
+  margin: 0;
   color: #5c5548;
 }
 
 .status[data-state="error"] {
   color: #9b2c2c;
+}
+
+.listening-control {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.45rem 1rem;
+  margin-top: 1.75rem;
+  padding: 0.85rem;
+  border: 1px solid #264d3d;
+  border-radius: 0.4rem;
+  background: #e4eadc;
+}
+
+.listening-control .signal-label {
+  grid-row: 1 / span 2;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-width: 1.5rem;
+  margin: 0;
+  border-right: 1px solid #9faf91;
+  padding-right: 0.75rem;
+  color: #264d3d;
+  writing-mode: vertical-rl;
+}
+
+.listening-control button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: fit-content;
+  min-height: 2.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.listen-indicator {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0.2rem #9faf91;
+}
+
+.signal-label {
+  color: #5a684e;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .privacy-note {
@@ -261,6 +372,20 @@ h2 {
 
   .privacy-note {
     align-self: end;
+  }
+}
+
+@media (max-width: 30rem) {
+  .app-shell {
+    padding: 1rem;
+  }
+
+  .settings-summary {
+    display: none;
+  }
+
+  .note-details {
+    gap: 1rem;
   }
 }
 

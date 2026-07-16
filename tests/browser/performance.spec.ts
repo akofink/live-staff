@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("locks display settings for microphone lifecycle without locking background hum", async ({ page }) => {
+test("progressively reveals settings and locks display controls for the microphone lifecycle", async ({ page }) => {
   await page.addInitScript(() => {
     const sourceContext = new AudioContext();
     const destination = sourceContext.createMediaStreamDestination();
@@ -20,6 +20,11 @@ test("locks display settings for microphone lifecycle without locking background
   });
 
   await page.goto("/");
+  const settings = page.locator("summary");
+  await expect(settings).toContainText("Display and input settings");
+  await expect(page.getByLabel("Instrument")).not.toBeVisible();
+  await settings.press("Enter");
+  await expect(page.getByLabel("Instrument")).toBeVisible();
   const instrument = page.getByLabel("Instrument");
   const concertPitch = page.getByRole("radio", { name: "Concert pitch" });
   const backgroundHum = page.getByLabel("Background hum");
@@ -51,12 +56,26 @@ test("restores display settings after microphone startup fails", async ({ page }
   });
 
   await page.goto("/");
+  await page.locator("summary").press("Enter");
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByText("Microphone access was denied. Allow access and try again.")).toBeVisible();
   await expect(page.getByLabel("Instrument")).toBeEnabled();
   await expect(page.getByRole("radio", { name: "Concert pitch" })).toBeEnabled();
   await expect(page.getByLabel("Background hum")).toBeEnabled();
+});
+
+test("keeps settings usable on a small screen and restores saved preferences", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  await page.locator("summary").press("Enter");
+  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
+
+  await page.reload();
+  await expect(page.locator("summary")).toContainText("B-flat trumpet");
+  await page.locator("summary").press("Enter");
+  await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
 });
 
 test("keeps notation out of the initial page load and updates the listening control within budget", async ({ page }) => {
