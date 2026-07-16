@@ -45,6 +45,8 @@ The initial public demo uses an in-repository normalized-autocorrelation detecto
 It is a deliberate dependency-free proof of concept, not a claim of production-grade pitch tracking across every instrument.
 The UI processes one estimate about every 80 ms and displays a note only after two consecutive matching MIDI pitches.
 The detector suppresses frames below a minimum RMS level and estimates below a correlation threshold.
+`npm run evaluate:fixtures` decodes the project-owned M4A recordings in a local browser and reports stable-window estimates against their expected concert MIDI pitches.
+It is an evaluation aid, not evidence of production-grade accuracy.
 YIN and McLeod Pitch Method remain candidates for the next benchmark-driven detector decision.
 
 ## Open Technical Decisions

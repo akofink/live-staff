@@ -32,6 +32,7 @@ npm run dev
 npm run build
 npm run lint
 npm test
+npm run evaluate:fixtures
 ```
 
 ## Documentation
@@ -43,6 +44,7 @@ npm test
 - [Audio and pitch detection](docs/audio-and-pitch-detection.md)
 - [Music theory and transposition](docs/music-theory-and-transposition.md)
 - [Testing strategy](docs/testing-strategy.md)
+- [Browser fixture evaluation](docs/browser-fixture-evaluation.md)
 - [Release policy](docs/release-policy.md)
 - [Roadmap](docs/roadmap.md)
 - [Working flow](docs/working-flow.md)
