@@ -2,7 +2,8 @@
 
 ## First Run
 
-The first screen explains the value in one sentence, offers an instrument selector, and provides a prominent Start listening action.
+The first screen explains the value in one sentence and provides a prominent Start listening action beside the listening state.
+Instrument, pitch-display, and background-hum controls are available in a collapsed Settings disclosure.
 It states clearly that audio remains on the device.
 
 ## Listening States
@@ -14,7 +15,7 @@ It states clearly that audio remains on the device.
 
 ## Main Screen
 
-The primary visual hierarchy is compact header, instrument selector, large staff, current note, secondary details, listening control, and compact settings.
+The primary visual hierarchy is compact header, listening control, large staff, current note, secondary details, and compact settings.
 Frequency, cents, and confidence are secondary to notation.
 
 ## Responsive Behavior
@@ -33,10 +34,9 @@ Respect reduced-motion preferences and do not communicate state by color alone.
 ## Conceptual Wireframe
 
 ```text
-Live Staff                         Settings
+Live Staff
 
-Instrument: B-flat trumpet
-Display: Written + concert
+[ Start listening ]
 
              [ staff and note ]
 
@@ -44,5 +44,5 @@ Written: C5
 Concert: B-flat4
 Listening: Stable
 
-[ Stop listening ]
+[ Settings: Concert pitch ]
 ```
