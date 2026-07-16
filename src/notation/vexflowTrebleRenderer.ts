@@ -1,4 +1,4 @@
-import { Accidental, Renderer, Stave, StaveNote } from "vexflow";
+import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflow";
 import { concertMidiToTrebleNote } from "./treble";
 
 const staffHeight = 190;
@@ -26,7 +26,7 @@ export function renderTrebleStaff(element: HTMLDivElement, midi: number | undefi
     note.addModifier(new Accidental(pitch.accidental));
   }
 
-  note.setStave(stave).setContext(context);
-  note.setX(staffInset + Math.max((width - 100) / 2, 110));
-  note.draw();
+  const voice = new Voice({ numBeats: 1, beatValue: 4 }).addTickables([note]);
+  new Formatter().joinVoices([voice]).format([voice], stave.getNoteEndX() - stave.getNoteStartX());
+  voice.draw(context, stave);
 }
