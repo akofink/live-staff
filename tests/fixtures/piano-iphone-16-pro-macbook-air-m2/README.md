@@ -1,4 +1,4 @@
-# Piano Fixtures: MacBook Air M2
+# Piano Fixtures: iPhone 16 Pro via MacBook Air M2
 
 ## Purpose
 
@@ -9,8 +9,8 @@ They intentionally preserve the original room, instrument, microphone, attack, d
 
 - Instrument: Steinway A3 grand piano.
 - Environment: residential one-bedroom apartment.
-- Microphone: default built-in microphone on a MacBook Air M2.
-- Capture: QuickTime Player audio recording.
+- Microphone: iPhone 16 Pro microphone.
+- Capture: QuickTime Player audio recording on a MacBook Air M2 using iPhone Continuity Camera microphone integration.
 - Format: mono AAC in an M4A container at 48 kHz.
 - Performance: one sustained concert-pitch piano note per file.
 - Processing: none after recording.

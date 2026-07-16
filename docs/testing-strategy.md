@@ -15,8 +15,8 @@ Use only small, project-owned recordings.
 Include sustained notes from different instrument families when practical.
 Do not commit large audio files without considering repository impact.
 
-The initial `tests/fixtures/piano-macbook-air-m2/` corpus is 1.6 MB total and is tracked directly in Git.
-It is raw AAC/M4A recorded through a default MacBook Air M2 microphone in a residential room, so it represents realistic rather than laboratory-clean input.
+The initial `tests/fixtures/piano-iphone-16-pro-macbook-air-m2/` corpus is 1.6 MB total and is tracked directly in Git.
+It is raw AAC/M4A recorded in a residential room through an iPhone 16 Pro microphone connected to a MacBook Air M2 with QuickTime Player, so it represents realistic rather than laboratory-clean input.
 Keep source recordings unchanged and retain recording context plus checksums in the fixture-set README.
 Use a browser decoding harness for M4A analysis because Node unit tests do not natively decode it.
 Introduce Git LFS only when a future fixture corpus materially increases clone size or includes larger lossless recordings.
