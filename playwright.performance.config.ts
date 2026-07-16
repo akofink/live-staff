@@ -4,7 +4,7 @@ const port = Number(process.env.PLAYWRIGHT_PORT ?? 4173);
 
 export default defineConfig({
   testDir: "./tests/browser",
-  testMatch: "fixture-evaluation.spec.ts",
+  testMatch: "performance.spec.ts",
   timeout: 60_000,
   use: {
     browserName: "chromium",
@@ -12,7 +12,7 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${port}`,
   },
   webServer: {
-    command: `vite --host 127.0.0.1 --port ${port}`,
+    command: `npm run build && vite preview --host 127.0.0.1 --port ${port}`,
     env: { VITE_BASE_PATH: "/" },
     port,
     reuseExistingServer: false,

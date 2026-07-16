@@ -44,7 +44,9 @@ test("decodes every local M4A fixture and records the evaluator output", async (
   expect(runtimeErrors).toEqual([]);
   expect(
     requestUrls.every(
-      ({ hostname, port }) => (hostname === "127.0.0.1" || hostname === "localhost") && port === "4173",
+      ({ hostname, port }) =>
+        (hostname === "127.0.0.1" || hostname === "localhost") &&
+        port === (process.env.PLAYWRIGHT_PORT ?? "4173"),
     ),
   ).toBe(true);
   expect(report.status, report.error).toBe("complete");
