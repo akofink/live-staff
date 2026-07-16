@@ -24,7 +24,6 @@ declare global {
     fixtureEvaluationReport?: FixtureEvaluationReport;
   }
 }
-
 function fixtureUrl(fileName: string): string {
   return `${import.meta.env.BASE_URL}tests/fixtures/piano-iphone-16-pro-macbook-air-m2/${fileName}`;
 }
