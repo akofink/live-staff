@@ -5,9 +5,9 @@
 The project-owned piano fixtures are raw AAC/M4A recordings.
 Node's test runtime does not decode M4A, so this developer-run browser harness uses the browser's `AudioContext.decodeAudioData` implementation instead.
 
-This is intentionally not a Playwright suite.
-The project has no existing browser-test runner, and adding Playwright plus managed browser binaries only to decode fixtures would add a substantial dependency and CI surface without testing a user-facing browser flow.
-The small Vite harness uses the same local browser audio decoding API that needs evaluation and requires no added package, backend, upload, or network service.
+The interactive page remains available for investigation.
+The automated command uses Playwright Chromium to run that same page headlessly and records its browser-decoded results.
+Playwright is a maintained browser-test runner with an explicit Chromium binary, making the decoding environment reproducible in local runs and CI.
 
 ## Run Locally
 
@@ -17,8 +17,13 @@ From the repository root, run:
 npm run evaluate:fixtures
 ```
 
-Vite opens `fixture-evaluation.html`.
-Select **Evaluate fixtures** and wait for all 12 fixture cards to render.
+The command installs Playwright Chromium when needed, starts Vite on a loopback-only local server, opens `fixture-evaluation.html` headlessly, selects **Evaluate fixtures**, and waits for all results.
+It writes the machine-readable report to `test-results/fixture-evaluation.json` and attaches it to the Playwright test result.
+It fails for browser runtime errors, fetch or decode failures, incomplete fixture evaluation, or unavailable analysis windows.
+It intentionally does not fail for detector mismatches or absent estimates because the current proof-of-concept detector has no published accuracy threshold.
+
+For interactive debugging, run `npm run dev` and open `/fixture-evaluation.html`.
+Select **Evaluate fixtures** and inspect the rendered cards.
 The harness fetches only the local files served by Vite from `tests/fixtures/piano-iphone-16-pro-macbook-air-m2/`.
 It does not request microphone permission, record audio, retain decoded PCM, or transmit audio.
 
@@ -39,5 +44,7 @@ Confirm that every card includes its expected pitch and reports all detected est
 Investigate decode failures, missing estimates, octave errors, and pitch mismatches before changing detector behavior.
 Do not replace, normalize, trim, re-encode, or otherwise modify a fixture while investigating.
 
-The harness makes results reproducible for a given browser and detector revision, but it does not establish detector accuracy by itself.
+The headless command uses a pinned Playwright Chromium revision, so it makes decoder and runtime behavior reproducible for a given browser and detector revision.
+The result JSON retains matching, mismatching, and absent estimates without converting them into an accuracy assertion.
+The harness does not establish detector accuracy by itself.
 No accuracy threshold is claimed until browser results are recorded across the fixture set and reviewed alongside additional instruments and devices.

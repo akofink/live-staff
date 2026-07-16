@@ -35,6 +35,8 @@ npm test
 npm run evaluate:fixtures
 ```
 
+`npm run evaluate:fixtures` writes the headless browser report to `test-results/fixture-evaluation.json`.
+
 ## Documentation
 
 - [Product vision](docs/product-vision.md)

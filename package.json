@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "evaluate:fixtures": "vite --open /fixture-evaluation.html"
+    "test": "vitest run --exclude tests/browser/**",
+    "test:watch": "vitest --exclude tests/browser/**",
+    "evaluate:fixtures": "playwright install chromium && playwright test --config=playwright.fixture-evaluation.config.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "latest",
+    "@playwright/test": "^1.61.1",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
