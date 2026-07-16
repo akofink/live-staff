@@ -6,6 +6,25 @@ const evaluateButton = document.querySelector<HTMLButtonElement>("#evaluate")!;
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
 const results = document.querySelector<HTMLDivElement>("#results")!;
 
+interface FixtureResult {
+  readonly fileName: string;
+  readonly expectedPitch: string;
+  readonly expectedMidi: number;
+  readonly evaluation: FixtureEvaluation;
+}
+
+interface FixtureEvaluationReport {
+  readonly status: "complete" | "failed";
+  readonly fixtures: readonly FixtureResult[];
+  readonly error?: string;
+}
+
+declare global {
+  interface Window {
+    fixtureEvaluationReport?: FixtureEvaluationReport;
+  }
+}
+
 function fixtureUrl(fileName: string): string {
   return `${import.meta.env.BASE_URL}tests/fixtures/piano-iphone-16-pro-macbook-air-m2/${fileName}`;
 }
@@ -30,31 +49,43 @@ function renderResult(fixture: PianoFixture, evaluation: FixtureEvaluation): voi
   results.append(item);
 }
 
-async function evaluateFixture(context: AudioContext, fixture: PianoFixture): Promise<void> {
+async function evaluateFixture(context: AudioContext, fixture: PianoFixture): Promise<FixtureResult> {
   const response = await fetch(fixtureUrl(fixture.fileName));
   if (!response.ok) {
     throw new Error(`${fixture.fileName}: ${response.status} ${response.statusText}`);
   }
 
   const audio = await context.decodeAudioData(await response.arrayBuffer());
-  renderResult(fixture, evaluateFixturePcm(audio.getChannelData(0), audio.sampleRate, fixture.expectedMidi));
+  const evaluation = evaluateFixturePcm(audio.getChannelData(0), audio.sampleRate, fixture.expectedMidi);
+  renderResult(fixture, evaluation);
+  return { ...fixture, evaluation };
+}
+
+function publishReport(report: FixtureEvaluationReport): void {
+  window.fixtureEvaluationReport = report;
+  window.dispatchEvent(new CustomEvent("fixture-evaluation-complete", { detail: report }));
 }
 
 evaluateButton.addEventListener("click", async () => {
   evaluateButton.disabled = true;
   results.replaceChildren();
-  const context = new AudioContext();
+  const fixtureResults: FixtureResult[] = [];
+  let context: AudioContext | undefined;
 
   try {
+    context = new AudioContext();
     for (const [index, fixture] of pianoFixtures.entries()) {
       status.textContent = `Decoding ${fixture.fileName} (${index + 1} of ${pianoFixtures.length}).`;
-      await evaluateFixture(context, fixture);
+      fixtureResults.push(await evaluateFixture(context, fixture));
     }
     status.textContent = "Evaluation complete. Review all observed estimates, including mismatches and missing estimates.";
+    publishReport({ status: "complete", fixtures: fixtureResults });
   } catch (error) {
-    status.textContent = `Evaluation failed: ${error instanceof Error ? error.message : "Unknown error"}`;
+    const message = error instanceof Error ? error.message : "Unknown error";
+    status.textContent = `Evaluation failed: ${message}`;
+    publishReport({ status: "failed", fixtures: fixtureResults, error: message });
   } finally {
-    await context.close();
+    await context?.close();
     evaluateButton.disabled = false;
   }
 });
