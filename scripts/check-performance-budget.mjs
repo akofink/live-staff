@@ -11,9 +11,20 @@ if (scripts.length === 0) {
   throw new Error("The production entry HTML does not reference a JavaScript module.");
 }
 
+function getOutputPath(script) {
+  const pathname = new URL(script, "https://live-staff.invalid").pathname;
+  const assetsIndex = pathname.indexOf("/assets/");
+
+  if (assetsIndex === -1) {
+    throw new Error(`The production entry script is not a Vite asset: ${script}`);
+  }
+
+  return resolve(distDirectory, `.${pathname.slice(assetsIndex)}`);
+}
+
 const initialBytes = (
   await Promise.all(
-    scripts.map(async (script) => gzipSync(await readFile(resolve(distDirectory, `.${script}`))).byteLength),
+    scripts.map(async (script) => gzipSync(await readFile(getOutputPath(script))).byteLength),
   )
 ).reduce((total, size) => total + size, 0);
 
