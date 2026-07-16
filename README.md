@@ -1,5 +1,7 @@
 # Live Staff
 
+Try the production site at [live-staff.akofink.com](https://live-staff.akofink.com/).
+
 Live Staff is a free, client-side web app that listens to a monophonic instrument or voice and displays the detected concert pitch live.
 The published demo validates local browser audio capture and pitch detection before staff notation and instrument transposition are added.
 
