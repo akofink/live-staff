@@ -36,6 +36,7 @@ Add target-instrument selection and a dual display derived independently from ca
 ## Milestone 7: Version 1.0 Hardening
 
 Add local preferences, browser coverage, accessibility review, offline shell, privacy copy, performance review, and deployment documentation.
+The milestone exits through the 1.0 hardening gate in the [release policy](release-policy.md).
 
 ## Deferred Work
 

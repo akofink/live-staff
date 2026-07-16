@@ -43,6 +43,7 @@ npm test
 - [Audio and pitch detection](docs/audio-and-pitch-detection.md)
 - [Music theory and transposition](docs/music-theory-and-transposition.md)
 - [Testing strategy](docs/testing-strategy.md)
+- [Release policy](docs/release-policy.md)
 - [Roadmap](docs/roadmap.md)
 - [Working flow](docs/working-flow.md)
 
