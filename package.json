@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:privacy": "node scripts/verify-privacy.mjs dist",
+    "verify:production-privacy": "node scripts/verify-production-privacy.mjs",
     "evaluate:fixtures": "vite --open /fixture-evaluation.html"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@playwright/test": "^1.61.1",
     "eslint": "latest",
     "eslint-plugin-react-hooks": "latest",
     "eslint-plugin-react-refresh": "latest",

@@ -27,7 +27,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: VITE_BASE_PATH=/ npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
@@ -35,3 +35,5 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
       - run: node scripts/verify-privacy.mjs dist "${{ steps.deployment.outputs.page_url }}"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify:production-privacy -- "${{ steps.deployment.outputs.page_url }}"
