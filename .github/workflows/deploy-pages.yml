@@ -28,9 +28,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npm run verify:privacy
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
       - id: deployment
         uses: actions/deploy-pages@v4
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify:production-privacy
