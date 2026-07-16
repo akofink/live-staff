@@ -38,6 +38,9 @@ npm run evaluate:performance
 
 `npm run evaluate:fixtures` writes the headless browser report to `test-results/fixture-evaluation.json`.
 
+The production build serves assets from the custom-domain root.
+Set `VITE_BASE_PATH` only when building for a non-root deployment path.
+
 ## Documentation
 
 - [Product vision](docs/product-vision.md)
