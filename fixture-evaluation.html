@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Staff Fixture Evaluation</title>
+  </head>
+  <body>
+    <main class="fixture-evaluation">
+      <p class="fixture-evaluation__eyebrow">Local browser harness</p>
+      <h1>Piano fixture evaluation</h1>
+      <p>
+        Decode the project-owned M4A recordings in this browser and compare sampled detector
+        estimates with each fixture's expected concert pitch.
+      </p>
+      <p>
+        Audio remains in this browser. This page does not request microphone access or send audio
+        over the network.
+      </p>
+      <button id="evaluate" type="button">Evaluate fixtures</button>
+      <p id="status" role="status">Ready to decode 12 local fixtures.</p>
+      <div id="results" aria-live="polite"></div>
+    </main>
+    <script type="module" src="/src/fixture-evaluation/main.ts"></script>
+  </body>
+</html>
