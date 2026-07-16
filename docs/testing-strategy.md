@@ -19,14 +19,15 @@ The initial `tests/fixtures/piano-iphone-16-pro-macbook-air-m2/` corpus is 1.6 M
 It is raw AAC/M4A recorded in a residential room through an iPhone 16 Pro microphone connected to a MacBook Air M2 with QuickTime Player, so it represents realistic rather than laboratory-clean input.
 Keep source recordings unchanged and retain recording context plus checksums in the fixture-set README.
 Use a browser decoding harness for M4A analysis because Node unit tests do not natively decode it.
-Run `npm run evaluate:fixtures` to evaluate the original files in a developer's browser without adding a browser-test dependency solely for codec support.
+Run `npm run evaluate:fixtures` to evaluate the original files through a pinned headless Chromium browser and save its machine-readable result.
 Introduce Git LFS only when a future fixture corpus materially increases clone size or includes larger lossless recordings.
 
 ## Browser Tests
 
 When microphone behavior exists, cover permission accepted and denied, absent input devices, suspended contexts, start and stop, instrument switching, local preference persistence, and responsive layout.
 Browser tests must mock audio where reliable device access is unavailable in CI.
-The M4A fixture harness is a manual browser protocol, not a CI accuracy claim.
+The M4A fixture harness runs in CI to catch decode, browser-runtime, and local-serving regressions.
+It is not a CI accuracy claim: mismatches and absent estimates remain reported data until a reviewed accuracy threshold exists.
 
 ## Manual Validation
 

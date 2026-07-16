@@ -8,7 +8,7 @@ Microphone audio, frames, and detections remain in the browser and are never per
 
 ## Milestone Exit Gates
 
-Each roadmap milestone is complete only when its scoped behavior has tests and the full automated gate passes: `npm run lint`, `npm test`, and `npm run build`.
+Each roadmap milestone is complete only when its scoped behavior has tests and the full automated gate passes: `npm run lint`, `npm test`, `npm run build`, and `npm run evaluate:fixtures`.
 Audio, music-domain, notation, privacy, or UI changes also require the applicable evidence below before release.
 
 | Milestone | Exit gate |
@@ -23,6 +23,7 @@ Audio, music-domain, notation, privacy, or UI changes also require the applicabl
 Every release records the version, commit, linked issues, automated results, and outstanding manual validation in its pull request or release notes.
 
 Required automated evidence is a clean lockfile install and the full CI gate.
+The fixture evaluator proves its browser decode and runtime harness, but its detector match data is not a release accuracy gate until a reviewed threshold exists.
 Changed domain logic needs focused unit coverage.
 Changed browser behavior needs browser tests for permission, start and stop, interruption, preferences, and responsive layout when that behavior is available.
 
