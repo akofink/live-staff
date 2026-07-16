@@ -23,6 +23,7 @@ Audio, music-domain, notation, privacy, or UI changes also require the applicabl
 Every release records the version, commit, linked issues, automated results, and outstanding manual validation in its pull request or release notes.
 
 Required automated evidence is a clean lockfile install and the full CI gate.
+The CI gate verifies the built `dist` artifact contains no known telemetry endpoint or third-party executable script.
 The fixture evaluator proves its browser decode and runtime harness, but its detector match data is not a release accuracy gate until a reviewed threshold exists.
 Changed domain logic needs focused unit coverage.
 Changed browser behavior needs browser tests for permission, start and stop, interruption, preferences, and responsive layout when that behavior is available.
@@ -50,6 +51,12 @@ Investigate a new bundle-size warning, budget failure, or material increase befo
 ## Pages Deployment And Rollback
 
 GitHub Pages deploys the `dist` artifact produced from `main` by the existing deploy workflow.
+Before upload, the workflow verifies the artifact contains no telemetry endpoint or third-party executable script.
+After Pages deploys, it opens `https://live-staff.akofink.com/` in Chromium and fails on telemetry or third-party executable requests.
+The post-deploy check intentionally does not use the GitHub Pages deployment URL because the public privacy promise applies to the custom domain.
+It does not start listening or request microphone permission, so audio remains local to user-initiated browser capture.
+Cloudflare configuration is outside this repository and can inject analytics after GitHub Pages publishes a clean artifact.
+If the check detects Cloudflare Insights or `/cdn-cgi/rum`, the Cloudflare administrator must disable Web Analytics for `live-staff.akofink.com`, remove any equivalent Zaraz or HTML rewrite injection rule, purge the affected cache, and redeploy.
 Release only after the corresponding CI workflow succeeds, then smoke-test the published URL for load, start, stop, and the privacy copy.
 If a release is unsafe or materially broken, revert the offending commit on `main` and allow Pages to deploy the reverted build.
 For an urgent static recovery, use the existing manual Pages workflow only for a previously verified commit; follow with a revert or fix commit so `main` remains the deployed source of truth.

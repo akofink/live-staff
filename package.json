@@ -8,8 +8,11 @@
     "build": "tsc -b && vite build && npm run check:performance-budget",
     "check:performance-budget": "node scripts/check-performance-budget.mjs",
     "lint": "eslint .",
-    "test": "vitest run --exclude 'tests/browser/**'",
-    "test:watch": "vitest --exclude 'tests/browser/**'",
+    "test": "vitest run --exclude 'tests/browser/**' --exclude 'scripts/**/*.test.mjs'",
+    "test:privacy": "node --test scripts/verify-privacy.test.mjs",
+    "test:watch": "vitest --exclude 'tests/browser/**' --exclude 'scripts/**/*.test.mjs'",
+    "verify:privacy": "node scripts/verify-privacy.mjs dist",
+    "verify:production-privacy": "node scripts/verify-production-privacy.mjs",
     "evaluate:fixtures": "playwright install chromium && playwright test --config=playwright.fixture-evaluation.config.ts",
     "evaluate:performance": "playwright install chromium && playwright test --config=playwright.performance.config.ts"
   },
