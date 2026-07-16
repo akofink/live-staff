@@ -35,6 +35,13 @@ button:not(:disabled):hover {
   background: #17382b;
 }
 
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid #b15a23;
+  outline-offset: 3px;
+}
+
 .app-shell {
   display: grid;
   min-height: 100vh;
@@ -82,6 +89,62 @@ h2 {
   max-width: 30rem;
   font-size: clamp(1.25rem, 3vw, 1.75rem);
   line-height: 1.35;
+}
+
+.preferences {
+  display: grid;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid #d8d0c1;
+  border-radius: 0.75rem;
+  background: #f8f4ea;
+}
+
+.preferences h2 {
+  margin: 0;
+}
+
+.preferences label,
+.preferences fieldset {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 700;
+}
+
+.preferences select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.45rem;
+  border: 1px solid #5c5548;
+  border-radius: 0.35rem;
+  background: #fffdf7;
+  color: inherit;
+  font: inherit;
+}
+
+.preferences fieldset {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid #c9c1b0;
+}
+
+.preferences fieldset label {
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+}
+
+.preferences input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0 0.5rem 0 0;
+}
+
+.preferences-status {
+  min-height: 1.25rem;
+  margin: 0;
+  color: #5c5548;
 }
 
 .note-display {
@@ -141,6 +204,13 @@ h2 {
   text-transform: uppercase;
 }
 
+.display-notice {
+  max-width: 36rem;
+  margin: 0.5rem 0 0;
+  color: #5c5548;
+  line-height: 1.4;
+}
+
 .note-details {
   display: flex;
   gap: 2rem;
@@ -191,5 +261,13 @@ h2 {
 
   .privacy-note {
     align-self: end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
   }
 }
