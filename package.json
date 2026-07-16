@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run check:performance-budget",
+    "check:performance-budget": "node scripts/check-performance-budget.mjs",
     "lint": "eslint .",
-    "test": "vitest run --exclude tests/browser/**",
-    "test:watch": "vitest --exclude tests/browser/**",
-    "evaluate:fixtures": "playwright install chromium && playwright test --config=playwright.fixture-evaluation.config.ts"
+    "test": "vitest run --exclude 'tests/browser/**'",
+    "test:watch": "vitest --exclude 'tests/browser/**'",
+    "evaluate:fixtures": "playwright install chromium && playwright test --config=playwright.fixture-evaluation.config.ts",
+    "evaluate:performance": "playwright install chromium && playwright test --config=playwright.performance.config.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

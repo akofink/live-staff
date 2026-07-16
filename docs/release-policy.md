@@ -8,7 +8,7 @@ Microphone audio, frames, and detections remain in the browser and are never per
 
 ## Milestone Exit Gates
 
-Each roadmap milestone is complete only when its scoped behavior has tests and the full automated gate passes: `npm run lint`, `npm test`, `npm run build`, and `npm run evaluate:fixtures`.
+Each roadmap milestone is complete only when its scoped behavior has tests and the full automated gate passes: `npm run lint`, `npm test`, `npm run build`, `npm run evaluate:fixtures`, and `npm run evaluate:performance`.
 Audio, music-domain, notation, privacy, or UI changes also require the applicable evidence below before release.
 
 | Milestone | Exit gate |
@@ -37,10 +37,15 @@ Required manual evidence for an audio or UI release is:
 
 ## Performance And Accessibility
 
-The release target is responsive controls and a stable displayed note about 100 to 250 ms after a pitch settles on the tested devices.
+The production entry JavaScript, measured from the files referenced by `dist/index.html` after `gzip`, must not exceed 100 KB.
+The notation renderer is a separately loaded chunk so it does not consume the initial-load budget.
+`npm run build` enforces this budget and reports its measured size.
+The release target is a responsive start or stop control within 100 ms of input and a stable displayed note about 100 to 250 ms after a pitch settles on the tested devices.
+The staff may finish drawing after the text alternative updates, but it must remain labeled and render without a layout shift that obscures controls.
 Reject a release that blocks interaction during analysis, makes the primary staff or listening control unusable at 320 px, relies on color alone, loses keyboard access, or disregards reduced-motion preferences.
-Review the production-build output on every release.
-Investigate a new bundle-size warning or material increase before publishing; document an accepted increase and its reason in release evidence.
+The production browser check at a 320 px viewport records that notation is absent from the initial request path, the empty staff has an accessible label, and the listening-control status update completes within the 100 ms interaction budget.
+Record the build budget report and browser evidence for the initial app render, accessible staff label, and start or stop responsiveness in release evidence.
+Investigate a new bundle-size warning, budget failure, or material increase before publishing; document an accepted exception and its reason in release evidence.
 
 ## Pages Deployment And Rollback
 

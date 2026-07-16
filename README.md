@@ -33,6 +33,7 @@ npm run build
 npm run lint
 npm test
 npm run evaluate:fixtures
+npm run evaluate:performance
 ```
 
 `npm run evaluate:fixtures` writes the headless browser report to `test-results/fixture-evaluation.json`.

@@ -130,7 +130,11 @@ export function App() {
             {preferencesMessage}
           </p>
         </section>
-        <TrebleStaff midi={note?.midi} noteName={note?.name} />
+        <TrebleStaff
+          midi={note?.midi}
+          noteName={note?.name}
+          loadRenderer={listeningState !== "idle"}
+        />
         <section className="note-display" aria-label="Detected pitch">
           <p className="note-name">{writtenPitchUnavailable ? "--" : note?.name ?? "--"}</p>
           <p className="note-kind">
