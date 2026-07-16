@@ -29,6 +29,7 @@ test("decodes every local M4A fixture and records the evaluator output", async (
   page.on("request", (request) => requestUrls.push(new URL(request.url())));
 
   await page.goto("/fixture-evaluation.html");
+  await expect(page.getByRole("heading", { name: "Piano fixture evaluation" })).toBeVisible();
   await page.getByRole("button", { name: "Evaluate fixtures" }).click();
   await expect.poll(() => page.evaluate(() => window.fixtureEvaluationReport)).toBeTruthy();
 
