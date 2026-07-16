@@ -90,6 +90,7 @@ export function App() {
   const selectedInstrument = instrumentOptions.find(
     (instrument) => instrument.id === preferences.instrumentId,
   )!;
+  const displaySettingsLocked = listeningState === "starting" || listeningState === "listening";
   const writtenPitchUnavailable = preferences.pitchDisplay === "written" && preferences.instrumentId !== "concert";
 
   return (
@@ -106,6 +107,8 @@ export function App() {
             Instrument
             <select
               value={preferences.instrumentId}
+              disabled={displaySettingsLocked}
+              aria-describedby="display-settings-guidance"
               onChange={(event) => updatePreferences({ instrumentId: event.target.value as Preferences["instrumentId"] })}
             >
               {instrumentOptions.map((instrument) => (
@@ -115,7 +118,7 @@ export function App() {
               ))}
             </select>
           </label>
-          <fieldset>
+          <fieldset disabled={displaySettingsLocked} aria-describedby="display-settings-guidance">
             <legend>Pitch display</legend>
             <label>
               <input
@@ -136,6 +139,11 @@ export function App() {
               Written pitch
             </label>
           </fieldset>
+          <p id="display-settings-guidance" className="preferences-help" role="status" aria-live="polite">
+            {displaySettingsLocked
+              ? "Instrument and pitch display changes apply before your next listening session. Stop listening to change them."
+              : "Instrument and pitch display changes apply when you start your next listening session."}
+          </p>
           <label>
             Background hum
             <select
