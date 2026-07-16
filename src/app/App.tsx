@@ -3,6 +3,7 @@ import { AudioCaptureError, MicrophoneCapture, type AudioCaptureSession } from "
 import { detectPitch } from "../audio/detectors/autocorrelation";
 import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
+import { TrebleStaff } from "../components/TrebleStaff";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
@@ -70,6 +71,7 @@ export function App() {
         <p className="lede">
           Play a note. See its concert pitch appear live.
         </p>
+        <TrebleStaff midi={note?.midi} noteName={note?.name} />
         <section className="note-display" aria-label="Detected concert pitch">
           <p className="note-name">{note?.name ?? "--"}</p>
           <p className="note-kind">Concert pitch</p>
