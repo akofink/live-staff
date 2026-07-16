@@ -11,6 +11,7 @@ export default defineConfig({
   },
   webServer: {
     command: "vite --host 127.0.0.1 --port 4173",
+    env: { VITE_BASE_PATH: "/" },
     port: 4173,
     reuseExistingServer: false,
   },
