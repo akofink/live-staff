@@ -1,12 +1,12 @@
 # Live Staff
 
-Live Staff is a free, client-side web app that will listen to a monophonic instrument or voice and display the detected pitch as notation for the selected instrument.
-It emphasizes written notation and the relationship between written and concert pitch, rather than precision tuning.
+Live Staff is a free, client-side web app that listens to a monophonic instrument or voice and displays the detected concert pitch live.
+The published demo validates local browser audio capture and pitch detection before staff notation and instrument transposition are added.
 
 ## Status
 
-Milestone 0: repository bootstrap.
-The app shell and portable pitch-domain foundation are in place; microphone capture, pitch detection, transposition, and staff rendering are the next technical spike.
+Published proof of concept: local microphone capture and concert-pitch detection.
+Staff notation, instrument-aware written pitch, and transposition are the next milestones.
 
 ## Privacy
 

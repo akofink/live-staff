@@ -84,6 +84,59 @@ h2 {
   line-height: 1.35;
 }
 
+.note-display {
+  display: grid;
+  justify-items: start;
+  gap: 0.2rem;
+  margin: 2.5rem 0;
+  padding: 1.5rem 0;
+  border-block: 1px solid #d8d0c1;
+}
+
+.note-name {
+  margin: 0;
+  color: #264d3d;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(4rem, 14vw, 7rem);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 0.9;
+}
+
+.note-kind {
+  margin: 0;
+  color: #5c5548;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.note-details {
+  display: flex;
+  gap: 2rem;
+  margin: 1.25rem 0 0;
+}
+
+.note-details div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.note-details dt {
+  color: #5c5548;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.note-details dd {
+  margin: 0;
+  font-weight: 700;
+}
+
 .status {
   color: #5c5548;
 }
