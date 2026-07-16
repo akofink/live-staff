@@ -4,6 +4,8 @@ import { detectPitch } from "../audio/detectors/autocorrelation";
 import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
 import { TrebleStaff } from "../components/TrebleStaff";
+import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
+import { instrumentOptions, type Preferences } from "../preferences/preferences";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
@@ -15,6 +17,8 @@ export function App() {
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
+  const [preferences, setPreferences] = useState<Preferences>(() => loadPreferences(getBrowserStorage()));
+  const [preferencesMessage, setPreferencesMessage] = useState("");
 
   useEffect(() => {
     return () => {
@@ -63,6 +67,21 @@ export function App() {
     }
   }
 
+  function updatePreferences(update: Partial<Preferences>) {
+    const nextPreferences = { ...preferences, ...update };
+    setPreferences(nextPreferences);
+    setPreferencesMessage(
+      savePreferences(getBrowserStorage(), nextPreferences)
+        ? "Preference saved on this device."
+        : "This browser cannot save preferences. Your choice will apply until you reload.",
+    );
+  }
+
+  const selectedInstrument = instrumentOptions.find(
+    (instrument) => instrument.id === preferences.instrumentId,
+  )!;
+  const writtenPitchUnavailable = preferences.pitchDisplay === "written" && preferences.instrumentId !== "concert";
+
   return (
     <main className="app-shell">
       <section className="hero" aria-labelledby="app-title">
@@ -71,10 +90,57 @@ export function App() {
         <p className="lede">
           Play a note. See its concert pitch appear live.
         </p>
+        <section className="preferences" aria-labelledby="preferences-heading">
+          <h2 id="preferences-heading">Display settings</h2>
+          <label>
+            Instrument
+            <select
+              value={preferences.instrumentId}
+              onChange={(event) => updatePreferences({ instrumentId: event.target.value as Preferences["instrumentId"] })}
+            >
+              {instrumentOptions.map((instrument) => (
+                <option key={instrument.id} value={instrument.id}>
+                  {instrument.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <fieldset>
+            <legend>Pitch display</legend>
+            <label>
+              <input
+                type="radio"
+                name="pitch-display"
+                checked={preferences.pitchDisplay === "concert"}
+                onChange={() => updatePreferences({ pitchDisplay: "concert" })}
+              />
+              Concert pitch
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="pitch-display"
+                checked={preferences.pitchDisplay === "written"}
+                onChange={() => updatePreferences({ pitchDisplay: "written" })}
+              />
+              Written pitch
+            </label>
+          </fieldset>
+          <p className="preferences-status" role="status" aria-live="polite">
+            {preferencesMessage}
+          </p>
+        </section>
         <TrebleStaff midi={note?.midi} noteName={note?.name} />
-        <section className="note-display" aria-label="Detected concert pitch">
-          <p className="note-name">{note?.name ?? "--"}</p>
-          <p className="note-kind">Concert pitch</p>
+        <section className="note-display" aria-label="Detected pitch">
+          <p className="note-name">{writtenPitchUnavailable ? "--" : note?.name ?? "--"}</p>
+          <p className="note-kind">
+            {preferences.pitchDisplay === "concert" ? "Concert pitch" : `Written pitch for ${selectedInstrument.label}`}
+          </p>
+          {writtenPitchUnavailable && (
+            <p className="display-notice">
+              Written pitch display will be calculated from your selected instrument when the transposition domain is available.
+            </p>
+          )}
           <dl className="note-details">
             <div>
               <dt>Frequency</dt>
