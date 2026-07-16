@@ -45,6 +45,10 @@ The initial public demo uses an in-repository normalized-autocorrelation detecto
 It is a deliberate dependency-free proof of concept, not a claim of production-grade pitch tracking across every instrument.
 The UI processes one estimate about every 80 ms and displays a note only after two consecutive matching MIDI pitches.
 The detector suppresses frames below a minimum RMS level and estimates below a correlation threshold.
+When a user hears persistent electrical hum, they can opt into a narrow local 50 Hz or 60 Hz notch filter before detection.
+The filter is off by default because no frame-only detector can reliably distinguish a power-line sinusoid from a real nearby low note.
+Its narrow band strongly attenuates the selected mains frequency while preserving a normally tuned concert B1 at 61.7 Hz, rather than imposing a broad low-frequency cutoff or rejecting notes from an assumed instrument range.
+The filter is deterministic local DSP, so it does not add a browser permission, network operation, or cross-browser processing dependency.
 `npm run evaluate:fixtures` decodes the project-owned M4A recordings in headless Chromium and reports stable-window estimates against their expected concert MIDI pitches.
 It fails for decode and browser-runtime failures, not detector mismatches or absent estimates.
 It is an evaluation aid, not evidence of production-grade accuracy.

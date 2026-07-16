@@ -17,12 +17,13 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(createStorage(null))).toEqual(defaultPreferences);
   });
 
-  it("restores valid non-audio preferences", () => {
+  it("preserves saved display preferences from before hum suppression", () => {
     const storage = createStorage('{"instrumentId":"b-flat-trumpet","pitchDisplay":"written"}');
 
     expect(loadPreferences(storage)).toEqual({
       instrumentId: "b-flat-trumpet",
       pitchDisplay: "written",
+      mainsHumFrequency: "off",
     });
   });
 
@@ -33,9 +34,13 @@ describe("browser preferences storage", () => {
     );
   });
 
-  it("stores only the selected instrument and pitch display", () => {
+  it("stores the selected instrument, display, and local hum setting", () => {
     const storage = createStorage(null);
-    const preferences = { instrumentId: "f-horn", pitchDisplay: "concert" } as const;
+    const preferences = {
+      instrumentId: "f-horn",
+      pitchDisplay: "concert",
+      mainsHumFrequency: 60,
+    } as const;
 
     expect(savePreferences(storage, preferences)).toBe(true);
     expect(storage.getItem(preferencesStorageKey)).toBe(JSON.stringify(preferences));
