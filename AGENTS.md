@@ -53,3 +53,9 @@ Run relevant checks before committing.
 
 A feature is complete only when its behavior, error and empty states, mobile layout, accessibility, tests, and relevant documentation are addressed.
 It must preserve local-only audio handling and must not introduce an unnecessary service dependency.
+
+## Issue Tracking
+
+- Create or update a GitHub issue for a newly discovered, actionable finding that is outside the current branch's scope.
+- Reference the issue from each follow-up branch and pull request.
+- Do not create issues for transient investigation notes or work already covered by an open issue or pull request.
