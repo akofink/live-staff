@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AudioCaptureError, MicrophoneCapture, type AudioCaptureSession } from "../audio/microphone";
 import { detectPitch } from "../audio/detectors/autocorrelation";
+import { MainsHumFilter } from "../audio/mainsHumFilter";
 import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
 import { TrebleStaff } from "../components/TrebleStaff";
@@ -10,14 +11,16 @@ import { instrumentOptions, type Preferences } from "../preferences/preferences"
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
 export function App() {
+  const [preferences, setPreferences] = useState<Preferences>(() => loadPreferences(getBrowserStorage()));
   const capture = useRef<MicrophoneCapture | undefined>(undefined);
   const session = useRef<AudioCaptureSession | undefined>(undefined);
   const stabilizer = useRef(new NoteStabilizer());
+  const mainsHumFilter = useRef(new MainsHumFilter());
+  const mainsHumFrequency = useRef(preferences.mainsHumFrequency);
   const lastDetection = useRef(0);
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
-  const [preferences, setPreferences] = useState<Preferences>(() => loadPreferences(getBrowserStorage()));
   const [preferencesMessage, setPreferencesMessage] = useState("");
 
   useEffect(() => {
@@ -31,6 +34,7 @@ export function App() {
       await session.current.stop();
       session.current = undefined;
       stabilizer.current.reset();
+      mainsHumFilter.current.reset();
       setNote(undefined);
       setListeningState("idle");
       setMessage("Listening stopped. Microphone resources were released.");
@@ -39,6 +43,7 @@ export function App() {
 
     setListeningState("starting");
     setMessage("Requesting microphone access...");
+    mainsHumFilter.current.reset();
 
     try {
       capture.current ??= new MicrophoneCapture();
@@ -49,7 +54,11 @@ export function App() {
         }
         lastDetection.current = timestamp;
 
-        const estimate = detectPitch(frame, session.current?.sampleRate ?? 44_100);
+        const sampleRate = session.current?.sampleRate ?? 44_100;
+        mainsHumFilter.current.setFrequency(
+          mainsHumFrequency.current === "off" ? undefined : mainsHumFrequency.current,
+        );
+        const estimate = detectPitch(mainsHumFilter.current.process(frame, sampleRate), sampleRate);
         const stableNote = stabilizer.current.update(
           estimate ? frequencyToNote(estimate.frequencyHz) : null,
         );
@@ -70,6 +79,7 @@ export function App() {
   function updatePreferences(update: Partial<Preferences>) {
     const nextPreferences = { ...preferences, ...update };
     setPreferences(nextPreferences);
+    mainsHumFrequency.current = nextPreferences.mainsHumFrequency;
     setPreferencesMessage(
       savePreferences(getBrowserStorage(), nextPreferences)
         ? "Preference saved on this device."
@@ -126,6 +136,25 @@ export function App() {
               Written pitch
             </label>
           </fieldset>
+          <label>
+            Background hum
+            <select
+              value={preferences.mainsHumFrequency}
+              onChange={(event) =>
+                updatePreferences({
+                  mainsHumFrequency:
+                    event.target.value === "off" ? "off" : (Number(event.target.value) as 50 | 60),
+                })
+              }
+            >
+              <option value="off">Off</option>
+              <option value="50">Suppress 50 Hz</option>
+              <option value="60">Suppress 60 Hz</option>
+            </select>
+          </label>
+          <p className="preferences-help">
+            Use only when electrical hum masks your note. It removes a narrow local frequency band.
+          </p>
           <p className="preferences-status" role="status" aria-live="polite">
             {preferencesMessage}
           </p>

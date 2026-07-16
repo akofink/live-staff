@@ -1,4 +1,4 @@
-import { defaultPreferences, isPreferences, type Preferences } from "./preferences";
+import { defaultPreferences, isLegacyPreferences, isPreferences, type Preferences } from "./preferences";
 
 export const preferencesStorageKey = "live-staff.preferences";
 
@@ -15,7 +15,7 @@ export function getBrowserStorage(): StorageAdapter | undefined {
   }
 }
 
-/** Reads only display choices. Audio frames and detected notes are never persisted. */
+/** Reads only local display and audio-processing choices. Audio frames and detected notes are never persisted. */
 export function loadPreferences(storage: StorageAdapter | undefined): Preferences {
   if (!storage) {
     return defaultPreferences;
@@ -28,7 +28,13 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
     }
 
     const parsedValue: unknown = JSON.parse(storedValue);
-    return isPreferences(parsedValue) ? parsedValue : defaultPreferences;
+    if (isPreferences(parsedValue)) {
+      return parsedValue;
+    }
+
+    return isLegacyPreferences(parsedValue)
+      ? { ...parsedValue, mainsHumFrequency: "off" }
+      : defaultPreferences;
   } catch {
     return defaultPreferences;
   }
