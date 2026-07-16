@@ -23,6 +23,7 @@ Audio, music-domain, notation, privacy, or UI changes also require the applicabl
 Every release records the version, commit, linked issues, automated results, and outstanding manual validation in its pull request or release notes.
 
 Required automated evidence is a clean lockfile install and the full CI gate.
+The CI gate runs `npm run verify:privacy` against the deployed artifact and fails if it contains telemetry markers.
 Changed domain logic needs focused unit coverage.
 Changed browser behavior needs browser tests for permission, start and stop, interruption, preferences, and responsive layout when that behavior is available.
 
@@ -45,6 +46,10 @@ Investigate a new bundle-size warning or material increase before publishing; do
 
 GitHub Pages deploys the `dist` artifact produced from `main` by the existing deploy workflow.
 Release only after the corresponding CI workflow succeeds, then smoke-test the published URL for load, start, stop, and the privacy copy.
+After deployment, the Pages workflow fetches its reported production URL and fails when the HTML contains a telemetry marker or loads an executable third-party script.
+This check verifies the delivered document only and cannot observe browser runtime requests, service-worker changes, or infrastructure configured outside this repository.
+If it detects a Cloudflare Insights script, the Pages or custom-domain administrator must disable Cloudflare Web Analytics or the HTML-injection rule for the Live Staff hostname, purge the relevant cache, redeploy, and confirm the workflow's production privacy check passes.
+The repository cannot remove an injector that runs after the `dist` artifact is uploaded.
 If a release is unsafe or materially broken, revert the offending commit on `main` and allow Pages to deploy the reverted build.
 For an urgent static recovery, use the existing manual Pages workflow only for a previously verified commit; follow with a revert or fix commit so `main` remains the deployed source of truth.
 

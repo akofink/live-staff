@@ -34,3 +34,4 @@ jobs:
           path: dist
       - id: deployment
         uses: actions/deploy-pages@v4
+      - run: node scripts/verify-privacy.mjs dist "${{ steps.deployment.outputs.page_url }}"

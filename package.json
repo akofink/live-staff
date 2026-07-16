@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "verify:privacy": "node scripts/verify-privacy.mjs dist",
     "evaluate:fixtures": "vite --open /fixture-evaluation.html"
   },
   "dependencies": {
