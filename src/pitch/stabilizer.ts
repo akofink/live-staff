@@ -9,11 +9,10 @@ export class NoteStabilizer {
   constructor(
     private readonly requiredFrames = 2,
     private readonly holdFrames = 4,
-    private readonly maximumCents = 35,
   ) {}
 
   update(note: DetectedNote | null): DetectedNote | null {
-    if (!note || Math.abs(note.cents) > this.maximumCents) {
+    if (!note) {
       this.#candidateMidi = undefined;
       this.#candidateFrames = 0;
       this.#missingFrames += 1;
@@ -27,7 +26,8 @@ export class NoteStabilizer {
     if (note.midi === this.#stableNote?.midi) {
       this.#candidateMidi = undefined;
       this.#candidateFrames = 0;
-      return this.#stableNote;
+      this.#stableNote = note;
+      return note;
     }
 
     if (note.midi === this.#candidateMidi) {

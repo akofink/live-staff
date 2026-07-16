@@ -46,16 +46,19 @@ describe("NoteStabilizer", () => {
     expect(stabilizer.update(a4)).toEqual(a4);
   });
 
-  it("holds the last in-tune note while rejecting severely out-of-tune estimates", () => {
+  it("keeps the staff note while refreshing an out-of-tune measurement", () => {
     const stabilizer = new NoteStabilizer(2);
 
     stabilizer.update(a4);
     stabilizer.update(a4);
-    expect(stabilizer.update(a4Sharp)).toEqual(a4);
-    expect(stabilizer.update(a4TooSharp)).toEqual(a4);
-    expect(stabilizer.update(a4TooSharp)).toEqual(a4);
-    expect(stabilizer.update(a4TooSharp)).toEqual(a4);
-    expect(stabilizer.update(a4TooSharp)).toEqual(a4);
+    expect(stabilizer.update(a4Sharp)).toEqual(a4Sharp);
+    expect(stabilizer.update(a4TooSharp)).toEqual(a4TooSharp);
+  });
+
+  it("shows a sustained out-of-tune note after it is stable", () => {
+    const stabilizer = new NoteStabilizer(2);
+
     expect(stabilizer.update(a4TooSharp)).toBeNull();
+    expect(stabilizer.update(a4TooSharp)).toEqual(a4TooSharp);
   });
 });
