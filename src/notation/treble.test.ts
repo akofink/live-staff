@@ -1,20 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { concertMidiToTrebleNote } from "./treble";
+import { midiToTrebleNote } from "./treble";
 
-describe("concertMidiToTrebleNote", () => {
+describe("midiToTrebleNote", () => {
   it("maps middle C to a treble staff key", () => {
-    expect(concertMidiToTrebleNote(60)).toEqual({ key: "c/4" });
+    expect(midiToTrebleNote(60)).toEqual({ key: "c/4" });
   });
 
   it("preserves a sharp accidental independently from the staff key", () => {
-    expect(concertMidiToTrebleNote(61)).toEqual({ key: "c/4", accidental: "#" });
+    expect(midiToTrebleNote(61)).toEqual({ key: "c/4", accidental: "#" });
+  });
+
+  it("uses flat spelling when requested", () => {
+    expect(midiToTrebleNote(61, "flat")).toEqual({ key: "d/4", accidental: "b" });
   });
 
   it("maps B4 without changing its octave", () => {
-    expect(concertMidiToTrebleNote(71)).toEqual({ key: "b/4" });
+    expect(midiToTrebleNote(71)).toEqual({ key: "b/4" });
   });
 
   it("rejects a fractional MIDI pitch", () => {
-    expect(() => concertMidiToTrebleNote(60.5)).toThrow("MIDI pitch must be an integer.");
+    expect(() => midiToTrebleNote(60.5)).toThrow("MIDI pitch must be an integer.");
   });
 });

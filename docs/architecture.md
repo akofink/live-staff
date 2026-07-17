@@ -34,7 +34,7 @@ React owns state presentation and user interactions.
 `src/preferences/` owns the serializable instrument and pitch-display choices plus a small browser storage adapter.
 Only those choices are written to `localStorage`; microphone audio, audio frames, detected frequencies, and detected notes are never persisted.
 Malformed values and unavailable browser storage safely use defaults.
-When the instrument transposition domain is available on this branch, the React UI will pass `Preferences.instrumentId` and canonical concert MIDI to its concert-to-written conversion interface.
+The React UI resolves the selected preference to an instrument definition and derives its display pitch from canonical concert MIDI.
 The preference module deliberately does not duplicate that domain calculation.
 
 ## Canonical Data Flow

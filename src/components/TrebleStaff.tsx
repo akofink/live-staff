@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { AccidentalPreference } from "../instruments/instruments";
 
 type TrebleStaffRenderer = typeof import("../notation/vexflowTrebleRenderer");
 
@@ -12,10 +13,12 @@ function loadVexflowRenderer(): Promise<TrebleStaffRenderer> {
 interface TrebleStaffProps {
   readonly midi: number | undefined;
   readonly noteName: string | undefined;
+  readonly accidentalPreference: AccidentalPreference;
+  readonly pitchLabel: string;
   readonly loadRenderer: boolean;
 }
 
-export function TrebleStaff({ midi, noteName, loadRenderer }: TrebleStaffProps) {
+export function TrebleStaff({ midi, noteName, accidentalPreference, pitchLabel, loadRenderer }: TrebleStaffProps) {
   const container = useRef<HTMLDivElement>(null);
   const [rendererLoaded, setRendererLoaded] = useState(false);
 
@@ -38,7 +41,7 @@ export function TrebleStaff({ midi, noteName, loadRenderer }: TrebleStaffProps) 
         return;
       }
 
-      const render = () => renderTrebleStaff(element, midi, element.clientWidth);
+      const render = () => renderTrebleStaff(element, midi, accidentalPreference, element.clientWidth);
       observer = new ResizeObserver(render);
       observer.observe(element);
       render();
@@ -49,12 +52,12 @@ export function TrebleStaff({ midi, noteName, loadRenderer }: TrebleStaffProps) 
       cancelled = true;
       observer?.disconnect();
     };
-  }, [loadRenderer, midi]);
+  }, [accidentalPreference, loadRenderer, midi]);
 
   return (
     <figure className="staff-display" aria-label={noteName ? `Treble staff showing ${noteName}` : "Empty treble staff"}>
       <div ref={container} className="staff-graphic" aria-busy={loadRenderer && !rendererLoaded} aria-hidden="true" />
-      <figcaption>{noteName ? `Concert pitch: ${noteName}` : "Waiting for a stable concert pitch."}</figcaption>
+      <figcaption>{noteName ? `${pitchLabel}: ${noteName}` : "Waiting for a stable concert pitch."}</figcaption>
     </figure>
   );
 }

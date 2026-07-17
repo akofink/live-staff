@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const calls = {
   formatterFormat: vi.fn(),
+  staveNote: vi.fn(),
   voiceDraw: vi.fn(),
 };
 
@@ -56,7 +57,7 @@ vi.mock("vexflow", () => {
 
   class StaveNote {
     constructor(...args: unknown[]) {
-      void args;
+      calls.staveNote(...args);
     }
 
     addModifier(...args: unknown[]): this {
@@ -98,17 +99,26 @@ import { renderTrebleStaff } from "./vexflowTrebleRenderer";
 describe("renderTrebleStaff", () => {
   beforeEach(() => {
     calls.formatterFormat.mockClear();
+    calls.staveNote.mockClear();
     calls.voiceDraw.mockClear();
   });
 
   it("formats every detected pitch before drawing repeated live renders", () => {
     const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
 
-    renderTrebleStaff(element, 60, 400);
-    renderTrebleStaff(element, 61, 400);
-    renderTrebleStaff(element, 60, 400);
+    renderTrebleStaff(element, 60, "sharp", 400);
+    renderTrebleStaff(element, 61, "flat", 400);
+    renderTrebleStaff(element, 60, "sharp", 400);
 
     expect(calls.formatterFormat).toHaveBeenCalledTimes(3);
     expect(calls.voiceDraw).toHaveBeenCalledTimes(3);
+  });
+
+  it("renders a flat-preference written pitch with the matching staff key", () => {
+    const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
+
+    renderTrebleStaff(element, 63, "flat", 400);
+
+    expect(calls.staveNote).toHaveBeenCalledWith({ clef: "treble", keys: ["e/4"], duration: "q" });
   });
 });

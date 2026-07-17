@@ -1,11 +1,17 @@
 import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflow";
-import { concertMidiToTrebleNote } from "./treble";
+import type { AccidentalPreference } from "../instruments/instruments";
+import { midiToTrebleNote } from "./treble";
 
 const staffHeight = 190;
 const staffInset = 12;
 
-/** Renders one concert-pitch note on a treble staff using the VexFlow adapter. */
-export function renderTrebleStaff(element: HTMLDivElement, midi: number | undefined, width: number): void {
+/** Renders one display-pitch note on a treble staff using the VexFlow adapter. */
+export function renderTrebleStaff(
+  element: HTMLDivElement,
+  midi: number | undefined,
+  accidentalPreference: AccidentalPreference,
+  width: number,
+): void {
   element.replaceChildren();
 
   const renderer = new Renderer(element, Renderer.Backends.SVG);
@@ -19,7 +25,7 @@ export function renderTrebleStaff(element: HTMLDivElement, midi: number | undefi
     return;
   }
 
-  const pitch = concertMidiToTrebleNote(midi);
+  const pitch = midiToTrebleNote(midi, accidentalPreference);
   const note = new StaveNote({ clef: "treble", keys: [pitch.key], duration: "q" });
 
   if (pitch.accidental) {

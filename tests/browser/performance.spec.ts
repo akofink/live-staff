@@ -78,6 +78,54 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
 });
 
+test("renders a deterministic concert C4 as written D4 for B-flat trumpet", async ({ page }) => {
+  await page.addInitScript(() => {
+    class TestAudioContext {
+      readonly sampleRate = 44_100;
+      readonly state = "running";
+
+      createMediaStreamSource() {
+        return { connect() {}, disconnect() {} };
+      }
+
+      createAnalyser() {
+        let sample = 0;
+        return {
+          fftSize: 0,
+          connect() {},
+          disconnect() {},
+          getFloatTimeDomainData(frame: Float32Array) {
+            for (let index = 0; index < frame.length; index += 1) {
+              frame[index] = Math.sin((2 * Math.PI * 261.625565 * (sample + index)) / 44_100);
+            }
+            sample += frame.length;
+          },
+        };
+      }
+
+      close() {
+        return Promise.resolve();
+      }
+    }
+
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => Promise.resolve({ getTracks: () => [] }),
+    });
+    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+  });
+
+  await page.goto("/");
+  await page.locator("summary").press("Enter");
+  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await page.getByRole("radio", { name: "Written pitch" }).check();
+  await page.getByRole("button", { name: "Start listening" }).click();
+
+  await expect(page.getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("Written pitch for B-flat trumpet", { exact: true })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Treble staff showing D4" })).toBeVisible();
+});
+
 test("keeps notation out of the initial page load and updates the listening control within budget", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   const requestUrls: string[] = [];
