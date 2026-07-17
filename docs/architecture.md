@@ -17,6 +17,7 @@ user action
   -> raw pitch estimate
   -> pitch stabilizer
   -> canonical concert MIDI pitch
+  -> bounded in-memory stable-note event history
   -> instrument transposer and spelling policy
   -> replaceable notation renderer
   -> React UI
@@ -36,6 +37,9 @@ Only those choices are written to `localStorage`; microphone audio, audio frames
 Malformed values and unavailable browser storage safely use defaults.
 The React UI resolves the selected preference to an instrument definition and derives its display pitch from canonical concert MIDI.
 The preference module deliberately does not duplicate that domain calculation.
+
+Recent-note history consumes only committed stabilizer output and stores canonical concert MIDI, onset, and end timestamps in memory.
+It retains at most 10 seconds and 32 events, is cleared by a page reload, and derives its displayed spelling and transposition from current preferences.
 
 ## Canonical Data Flow
 

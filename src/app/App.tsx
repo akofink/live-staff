@@ -9,6 +9,8 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
+import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../pitch/pitchHistory";
+import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
@@ -20,16 +22,42 @@ export function App() {
   const mainsHumFilter = useRef(new MainsHumFilter());
   const mainsHumFrequency = useRef(preferences.mainsHumFrequency);
   const lastDetection = useRef(0);
+  const pitchHistory = useRef(new PitchHistory());
+  const historyExpiry = useRef<number | undefined>(undefined);
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
   const [preferencesMessage, setPreferencesMessage] = useState("");
+  const [historyEvents, setHistoryEvents] = useState<ReturnType<PitchHistory["snapshot"]>>([]);
 
   useEffect(() => {
     return () => {
+      window.clearTimeout(historyExpiry.current);
       void session.current?.stop();
     };
   }, []);
+
+  function scheduleHistoryExpiry(events: readonly PitchHistoryEvent[], timestamp: number) {
+    const nextEnd = events.reduce<number | undefined>(
+      (earliest, event) => event.endMs !== undefined && (earliest === undefined || event.endMs < earliest)
+        ? event.endMs
+        : earliest,
+      undefined,
+    );
+    if (nextEnd === undefined) {
+      return;
+    }
+
+    historyExpiry.current = window.setTimeout(() => {
+      const now = performance.now();
+      const expiredHistory = pitchHistory.current.update(undefined, now);
+      const remainingHistory = expiredHistory ?? pitchHistory.current.snapshot();
+      if (expiredHistory) {
+        setHistoryEvents(expiredHistory);
+      }
+      scheduleHistoryExpiry(remainingHistory, now);
+    }, Math.max(0, nextEnd + pitchHistoryWindowMs - timestamp + 1));
+  }
 
   async function toggleListening() {
     if (session.current) {
@@ -37,6 +65,12 @@ export function App() {
       session.current = undefined;
       stabilizer.current.reset();
       mainsHumFilter.current.reset();
+      const timestamp = performance.now();
+      const nextHistory = pitchHistory.current.update(undefined, timestamp);
+      if (nextHistory) {
+        setHistoryEvents(nextHistory);
+      }
+      scheduleHistoryExpiry(nextHistory ?? pitchHistory.current.snapshot(), timestamp);
       setNote(undefined);
       setListeningState("idle");
       setMessage("Listening stopped. Microphone resources were released.");
@@ -64,8 +98,13 @@ export function App() {
         const stableNote = stabilizer.current.update(
           estimate ? frequencyToNote(estimate.frequencyHz) : null,
         );
+        const nextHistory = pitchHistory.current.update(stableNote?.midi, timestamp);
+        if (nextHistory) {
+          setHistoryEvents(nextHistory);
+        }
         setNote(stableNote ?? undefined);
       });
+      window.clearTimeout(historyExpiry.current);
       setListeningState("listening");
       setMessage(`Listening locally at ${session.current.sampleRate} Hz.`);
     } catch (error) {
@@ -164,6 +203,11 @@ export function App() {
             )}
           </section>
         </div>
+        <PitchHistoryStrip
+          events={historyEvents}
+          instrument={selectedInstrument}
+          pitchDisplay={primaryPitchDisplay}
+        />
         <details className="preferences">
           <summary>
             <span>
