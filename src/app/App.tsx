@@ -69,8 +69,8 @@ export function App() {
       const nextHistory = pitchHistory.current.update(undefined, timestamp);
       if (nextHistory) {
         setHistoryEvents(nextHistory);
-        scheduleHistoryExpiry(nextHistory, timestamp);
       }
+      scheduleHistoryExpiry(nextHistory ?? pitchHistory.current.snapshot(), timestamp);
       setNote(undefined);
       setListeningState("idle");
       setMessage("Listening stopped. Microphone resources were released.");
