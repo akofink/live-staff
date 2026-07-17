@@ -187,7 +187,7 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
 });
 
-test("keeps notation out of the initial page load and updates the listening control within budget", async ({ page }) => {
+test("renders idle notation and updates the listening control within budget", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   const requestUrls: string[] = [];
   page.on("request", (request) => requestUrls.push(request.url()));
@@ -197,7 +197,8 @@ test("keeps notation out of the initial page load and updates the listening cont
   await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
   await page.waitForTimeout(250);
 
-  expect(requestUrls.some((url) => url.includes("vexflowGrandStaffRenderer"))).toBe(false);
+  await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
+  expect(requestUrls.some((url) => url.includes("vexflowGrandStaffRenderer"))).toBe(true);
 
   const interactionDuration = await page.evaluate(async () => {
     const status = document.querySelector("#listening-status")!;
@@ -219,5 +220,33 @@ test("keeps notation out of the initial page load and updates the listening cont
   });
 
   expect(interactionDuration).toBeLessThan(100);
-  await expect.poll(() => requestUrls.some((url) => url.includes("vexflowGrandStaffRenderer"))).toBe(true);
 });
+
+for (const viewport of [
+  { name: "desktop", width: 1440, height: 900 },
+  { name: "mobile", width: 390, height: 844 },
+]) {
+  test(`keeps the idle core experience in the ${viewport.name} first viewport`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
+
+    const core = [
+      page.getByRole("heading", { name: "Live Staff" }),
+      page.getByRole("button", { name: "Start listening" }),
+      page.getByRole("figure", { name: "Empty grand staff with treble and bass staves" }),
+      page.getByRole("region", { name: "Detected pitch" }),
+      page.locator(".preferences > summary"),
+    ];
+    for (const element of core) {
+      await expect(element).toBeInViewport({ ratio: 1 });
+    }
+
+    const dimensions = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
+    await page.screenshot({ path: testInfo.outputPath(`idle-${viewport.name}.png`), fullPage: true });
+  });
+}

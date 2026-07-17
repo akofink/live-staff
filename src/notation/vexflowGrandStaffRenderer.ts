@@ -3,10 +3,10 @@ import type { AccidentalPreference } from "../instruments/instruments";
 import type { ActiveStaff } from "./staffRouter";
 import { midiToStaffNote } from "./staffNote";
 
-const staffHeight = 250;
+const staffHeight = 190;
 const staffInset = 28;
-const trebleStaffY = 28;
-const bassStaffY = 145;
+const trebleStaffY = 10;
+const bassStaffY = 92;
 
 /** Renders one display-pitch note on a persistent piano-style grand staff. */
 export function renderGrandStaff(
