@@ -28,13 +28,14 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
     }
 
     const parsedValue: unknown = JSON.parse(storedValue);
-    if (isPreferences(parsedValue)) {
-      return parsedValue;
+    if (isLegacyPreferences(parsedValue)) {
+      return {
+        instrumentId: parsedValue.instrumentId,
+        mainsHumFrequency: parsedValue.mainsHumFrequency ?? "off",
+      };
     }
 
-    return isLegacyPreferences(parsedValue)
-      ? { ...parsedValue, mainsHumFrequency: "off" }
-      : defaultPreferences;
+    return isPreferences(parsedValue) ? parsedValue : defaultPreferences;
   } catch {
     return defaultPreferences;
   }

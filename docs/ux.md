@@ -3,14 +3,16 @@
 ## First Run
 
 The first screen explains the value in one sentence and provides a prominent Start listening action beside the listening state.
-Instrument, pitch-display, and background-hum controls are available in a collapsed Settings disclosure.
+Instrument and background-hum controls are available in a collapsed Settings disclosure.
+Instrument selection determines the primary notation: concert instruments use concert notation and transposing instruments use their written notation.
+It remains available while listening so the current text and staff update immediately without restarting capture.
 It states clearly that audio remains on the device.
 
 ## Listening States
 
 - Before permission: instrument selection and an explicit Start listening action.
 - Active without a stable note: a calm waiting state that does not flicker through guesses.
-- Active with a stable note: a persistent grand staff with one readable note on its treble or bass staff plus written and optional concert labels.
+- Active with a stable note: a persistent grand staff with one readable note on its treble or bass staff and an optional compact concert-pitch reference for transposing instruments.
 - Failure: a concise explanation with a recovery action for denied permission, unavailable input, or unsupported browser behavior.
 
 ## Main Screen
@@ -41,7 +43,7 @@ Live Staff
        [ persistent grand staff ]
 
 Written: C5
-Concert: B-flat4
+[ Pitch reference: Concert B-flat4 ]
 Listening: Stable
 
 [ Settings: Concert pitch ]
