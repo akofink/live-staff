@@ -8,7 +8,7 @@ Validate this path end to end:
 microphone input -> pitch detection -> stable concert pitch -> instrument transposition -> staff rendering
 ```
 
-The proof of concept includes microphone permission, local live capture, monophonic pitch detection, detected frequency, concert and written note calculation, one staff, an optional note label, a signal state, and a silence state.
+The proof of concept includes microphone permission, local live capture, monophonic pitch detection, detected frequency, concert and written note calculation, a persistent treble-and-bass grand staff with one routed note, an optional note label, a signal state, and a silence state.
 
 It excludes accounts, storage, analytics, lessons, MIDI, polyphonic recognition, sheet import, payment, social features, and any backend.
 
