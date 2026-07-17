@@ -9,7 +9,7 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
-import { PitchHistory, pitchHistoryWindowMs } from "../pitch/pitchHistory";
+import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../pitch/pitchHistory";
 import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
@@ -37,6 +37,28 @@ export function App() {
     };
   }, []);
 
+  function scheduleHistoryExpiry(events: readonly PitchHistoryEvent[], timestamp: number) {
+    const nextEnd = events.reduce<number | undefined>(
+      (earliest, event) => event.endMs !== undefined && (earliest === undefined || event.endMs < earliest)
+        ? event.endMs
+        : earliest,
+      undefined,
+    );
+    if (nextEnd === undefined) {
+      return;
+    }
+
+    historyExpiry.current = window.setTimeout(() => {
+      const now = performance.now();
+      const expiredHistory = pitchHistory.current.update(undefined, now);
+      const remainingHistory = expiredHistory ?? pitchHistory.current.snapshot();
+      if (expiredHistory) {
+        setHistoryEvents(expiredHistory);
+      }
+      scheduleHistoryExpiry(remainingHistory, now);
+    }, Math.max(0, nextEnd + pitchHistoryWindowMs - timestamp + 1));
+  }
+
   async function toggleListening() {
     if (session.current) {
       await session.current.stop();
@@ -47,13 +69,8 @@ export function App() {
       const nextHistory = pitchHistory.current.update(undefined, timestamp);
       if (nextHistory) {
         setHistoryEvents(nextHistory);
+        scheduleHistoryExpiry(nextHistory, timestamp);
       }
-      historyExpiry.current = window.setTimeout(() => {
-        const expiredHistory = pitchHistory.current.update(undefined, performance.now());
-        if (expiredHistory) {
-          setHistoryEvents(expiredHistory);
-        }
-      }, pitchHistoryWindowMs);
       setNote(undefined);
       setListeningState("idle");
       setMessage("Listening stopped. Microphone resources were released.");
