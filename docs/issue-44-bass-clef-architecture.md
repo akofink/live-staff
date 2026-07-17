@@ -38,7 +38,7 @@ Generalize the adapter rather than adding a separate bass renderer.
 Create two equal-width `Stave` instances in one VexFlow SVG renderer, add `"treble"` to the upper stave and `"bass"` to the lower stave, and join them with the standard grand-staff left brace and vertical connector.
 Use the same horizontal start and end coordinates for both staves so the active note has one shared visual beat position.
 
-Increase the renderer height from the current 190 px (`src/notation/vexflowTrebleRenderer.ts:4`) to approximately 250 px.
+Use a 250 px renderer height in `src/notation/vexflowGrandStaffRenderer.ts`.
 Place the upper stave near 28 px and the lower stave near 145 px, retaining at least 70 px between the upper staff's bottom line and lower staff's top line.
 This leaves room for the brace, both clefs, and C4 ledger lines without crowding the system.
 Continue to use the current 280 px minimum render width and responsive SVG scaling (`src/styles/global.css:222-232`).
@@ -49,12 +49,12 @@ Use the same formatter width for either stave so an A3 and C4 occupy the same ho
 Do not duplicate the note, use cross-staff notation, or animate routing in this issue.
 
 VexFlow 5 provides the required APIs through `stave.addClef("treble" | "bass")`, `new StaveNote({ clef, ... })`, and `StaveConnector`.
-The existing `concertMidiToTrebleNote()` conversion only creates VexFlow `letter/octave` keys and accidentals, so it can serve both staves after being renamed to remove its inaccurate treble-specific contract.
+`midiToStaffNote()` creates only VexFlow `letter/octave` keys and accidentals, so it serves both staves without clef-specific spelling logic.
 
 ## Accessibility
 
 Keep the generated SVG `aria-hidden="true"` because the complete musical state is represented as stable text.
-Name the figure and caption with the full layout, pitch, and active staff, for example `Grand staff showing concert A3 on the bass staff` and `Concert pitch: A3. Bass staff.`.
+Name the figure and caption with the full layout, pitch, and active staff, for example `Grand staff with treble and bass staves showing concert pitch A3 on the bass staff` and `Concert pitch: A3. Bass staff in a persistent treble-and-bass grand staff.`.
 The persistent presence of both clefs must be communicated in text, not inferred from their glyphs.
 Do not put the rapidly changing pitch or active staff in a live region.
 The existing textual note display remains the equivalent non-graphic presentation required by `docs/ux.md:27-32`.
