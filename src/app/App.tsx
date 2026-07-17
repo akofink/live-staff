@@ -62,7 +62,6 @@ export function App() {
 
     setListeningState("starting");
     setMessage("Requesting microphone access...");
-    window.clearTimeout(historyExpiry.current);
     mainsHumFilter.current.reset();
 
     try {
@@ -88,6 +87,7 @@ export function App() {
         }
         setNote(stableNote ?? undefined);
       });
+      window.clearTimeout(historyExpiry.current);
       setListeningState("listening");
       setMessage(`Listening locally at ${session.current.sampleRate} Hz.`);
     } catch (error) {
