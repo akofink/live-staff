@@ -203,6 +203,69 @@ h2 {
   border-left: 1px solid #d8d0c1;
 }
 
+.pitch-history {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #d8d0c1;
+}
+
+.history-heading {
+  min-width: 6.5rem;
+}
+
+.history-heading h2,
+.history-heading span,
+.history-empty {
+  margin: 0;
+}
+
+.history-heading h2 {
+  font-size: 0.85rem;
+}
+
+.history-heading span,
+.history-empty,
+.history-events span {
+  color: #5c5548;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.65rem;
+}
+
+.history-events {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  min-width: 0;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+.history-events li {
+  display: flex;
+  flex-basis: 0;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 2.8rem;
+  padding: 0.2rem 0.4rem;
+  overflow: hidden;
+  border-left: 0.2rem solid #9faf91;
+  background: #f0ecdf;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
+}
+
+.history-events li.is-current {
+  border-left-color: #b15a23;
+  background: #e4eadc;
+}
+
 .staff-display {
   min-width: 0;
   margin: 0;
@@ -449,6 +512,15 @@ h2 {
   .note-kind,
   .note-details {
     grid-column: 2;
+  }
+
+  .pitch-history {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+
+  .history-heading {
+    min-width: 0;
   }
 
   .note-name {

@@ -17,13 +17,15 @@ It states clearly that audio remains on the device.
 
 ## Main Screen
 
-The primary visual hierarchy is compact header, listening control, large staff, current note, secondary details, and compact settings.
+The primary visual hierarchy is compact header, listening control, large staff, current note, a secondary 10-second recent-note strip, and compact settings.
 Frequency, cents, and confidence are secondary to notation.
+Recent notes represent committed stable-note onsets and durations rather than raw detector updates, and the active note is identified as now.
 
 ## Responsive Behavior
 
 The persistent grand staff and primary control must remain prominent on a 320 px wide phone.
 Secondary detail may stack beneath the staff rather than compete with it.
+The recent-note strip clips to the available width without horizontal page scrolling.
 Desktop and tablet layouts may place settings or privacy details beside the main notation.
 
 ## Accessibility

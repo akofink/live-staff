@@ -9,6 +9,8 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
+import { PitchHistory } from "../pitch/pitchHistory";
+import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
@@ -20,10 +22,12 @@ export function App() {
   const mainsHumFilter = useRef(new MainsHumFilter());
   const mainsHumFrequency = useRef(preferences.mainsHumFrequency);
   const lastDetection = useRef(0);
+  const pitchHistory = useRef(new PitchHistory());
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
   const [preferencesMessage, setPreferencesMessage] = useState("");
+  const [historyEvents, setHistoryEvents] = useState<ReturnType<PitchHistory["snapshot"]>>([]);
 
   useEffect(() => {
     return () => {
@@ -37,6 +41,11 @@ export function App() {
       session.current = undefined;
       stabilizer.current.reset();
       mainsHumFilter.current.reset();
+      const timestamp = performance.now();
+      const nextHistory = pitchHistory.current.update(undefined, timestamp);
+      if (nextHistory) {
+        setHistoryEvents(nextHistory);
+      }
       setNote(undefined);
       setListeningState("idle");
       setMessage("Listening stopped. Microphone resources were released.");
@@ -64,6 +73,10 @@ export function App() {
         const stableNote = stabilizer.current.update(
           estimate ? frequencyToNote(estimate.frequencyHz) : null,
         );
+        const nextHistory = pitchHistory.current.update(stableNote?.midi, timestamp);
+        if (nextHistory) {
+          setHistoryEvents(nextHistory);
+        }
         setNote(stableNote ?? undefined);
       });
       setListeningState("listening");
@@ -164,6 +177,11 @@ export function App() {
             )}
           </section>
         </div>
+        <PitchHistoryStrip
+          events={historyEvents}
+          instrument={selectedInstrument}
+          pitchDisplay={primaryPitchDisplay}
+        />
         <details className="preferences">
           <summary>
             <span>
