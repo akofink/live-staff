@@ -123,9 +123,9 @@ test("renders a deterministic concert C4 as written D4 for B-flat trumpet", asyn
 
   await expect(page.getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Written pitch for B-flat trumpet", { exact: true })).toBeVisible();
-  await expect(page.getByRole("figure", { name: "Grand staff showing written pitch for B-flat trumpet D4 on the treble staff" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing written pitch for B-flat trumpet D4 on the treble staff" })).toBeVisible();
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
-  await expect(page.getByText("Written pitch for B-flat trumpet: D4. Treble staff.")).toBeVisible();
+  await expect(page.getByText("Written pitch for B-flat trumpet: D4. Treble staff in a persistent treble-and-bass grand staff.")).toBeVisible();
 });
 
 test("routes a deterministic low concert pitch to the bass staff in the persistent grand staff", async ({ page }) => {
@@ -170,8 +170,8 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByText("A3", { exact: true })).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByRole("figure", { name: "Grand staff showing concert pitch A3 on the bass staff" })).toBeVisible();
-  await expect(page.getByText("Concert pitch: A3. Bass staff.")).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing concert pitch A3 on the bass staff" })).toBeVisible();
+  await expect(page.getByText("Concert pitch: A3. Bass staff in a persistent treble-and-bass grand staff.")).toBeVisible();
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
 });
 
@@ -181,7 +181,7 @@ test("keeps notation out of the initial page load and updates the listening cont
   page.on("request", (request) => requestUrls.push(request.url()));
 
   await page.goto("/");
-  await expect(page.getByRole("figure", { name: "Empty grand staff" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Empty grand staff with treble and bass staves" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
   await page.waitForTimeout(250);
 

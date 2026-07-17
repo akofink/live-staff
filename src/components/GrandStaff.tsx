@@ -66,13 +66,13 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
     ? undefined
     : selectActiveStaff(activeStaff, midi);
   const description = noteName && activeStaffName
-    ? `Grand staff showing ${pitchLabel.toLowerCase()} ${noteName} on the ${activeStaffName} staff`
-    : "Empty grand staff";
+    ? `Grand staff with treble and bass staves showing ${pitchLabel.toLowerCase()} ${noteName} on the ${activeStaffName} staff`
+    : "Empty grand staff with treble and bass staves";
 
   return (
     <figure className="staff-display" aria-label={description}>
       <div ref={container} className="staff-graphic" aria-busy={loadRenderer && !rendererLoaded} aria-hidden="true" />
-      <figcaption>{noteName && activeStaffName ? `${pitchLabel}: ${noteName}. ${activeStaffName === "bass" ? "Bass" : "Treble"} staff.` : "Waiting for a stable concert pitch."}</figcaption>
+      <figcaption>{noteName && activeStaffName ? `${pitchLabel}: ${noteName}. ${activeStaffName === "bass" ? "Bass" : "Treble"} staff in a persistent treble-and-bass grand staff.` : "Waiting for a stable concert pitch in a treble-and-bass grand staff."}</figcaption>
     </figure>
   );
 }

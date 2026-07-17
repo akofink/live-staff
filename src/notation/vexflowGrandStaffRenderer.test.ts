@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const calls = {
   addClef: vi.fn(),
+  connector: vi.fn(),
   connectorType: vi.fn(),
   formatterFormat: vi.fn(),
   stave: vi.fn(),
+  staveInstance: vi.fn(),
   staveNote: vi.fn(),
   voiceDraw: vi.fn(),
 };
@@ -35,6 +37,7 @@ vi.mock("vexflow", () => {
   class Stave {
     constructor(...args: unknown[]) {
       calls.stave(...args);
+      calls.staveInstance(this);
     }
 
     addClef(...args: unknown[]): this {
@@ -62,7 +65,7 @@ vi.mock("vexflow", () => {
     static type = { BRACE: "brace", SINGLE_LEFT: "singleLeft" };
 
     constructor(...args: unknown[]) {
-      void args;
+      calls.connector(...args);
     }
 
     setType(...args: unknown[]): this {
@@ -96,8 +99,7 @@ vi.mock("vexflow", () => {
     }
 
     draw(...args: unknown[]): void {
-      void args;
-      calls.voiceDraw();
+      calls.voiceDraw(...args);
     }
   }
 
@@ -122,9 +124,11 @@ import { renderGrandStaff } from "./vexflowGrandStaffRenderer";
 describe("renderGrandStaff", () => {
   beforeEach(() => {
     calls.addClef.mockClear();
+    calls.connector.mockClear();
     calls.connectorType.mockClear();
     calls.formatterFormat.mockClear();
     calls.stave.mockClear();
+    calls.staveInstance.mockClear();
     calls.staveNote.mockClear();
     calls.voiceDraw.mockClear();
   });
@@ -147,7 +151,14 @@ describe("renderGrandStaff", () => {
 
     renderGrandStaff(element, 59, "bass", "flat", 400);
 
+    const [trebleStave, bassStave] = calls.staveInstance.mock.calls.map(([stave]) => stave);
+
+    expect(calls.stave).toHaveBeenNthCalledWith(1, 28, 28, 360);
+    expect(calls.stave).toHaveBeenNthCalledWith(2, 28, 145, 360);
+    expect(calls.connector).toHaveBeenNthCalledWith(1, trebleStave, bassStave);
+    expect(calls.connector).toHaveBeenNthCalledWith(2, trebleStave, bassStave);
     expect(calls.staveNote).toHaveBeenCalledWith({ clef: "bass", keys: ["b/3"], duration: "q" });
+    expect(calls.voiceDraw).toHaveBeenCalledWith(expect.anything(), bassStave);
   });
 
   it("draws the empty persistent grand staff without creating a note", () => {
