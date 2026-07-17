@@ -1,9 +1,9 @@
 export const instrumentOptions = [
-  { id: "concert", label: "Concert pitch" },
-  { id: "b-flat-clarinet", label: "B-flat clarinet" },
-  { id: "b-flat-trumpet", label: "B-flat trumpet" },
-  { id: "e-flat-alto-saxophone", label: "E-flat alto saxophone" },
-  { id: "f-horn", label: "F horn" },
+  { id: "concert", label: "Concert pitch", definitionId: "concert-pitch" },
+  { id: "b-flat-clarinet", label: "B-flat clarinet", definitionId: "bb-clarinet" },
+  { id: "b-flat-trumpet", label: "B-flat trumpet", definitionId: "bb-trumpet" },
+  { id: "e-flat-alto-saxophone", label: "E-flat alto saxophone", definitionId: "eb-alto-saxophone" },
+  { id: "f-horn", label: "F horn", definitionId: "f-horn" },
 ] as const;
 
 export type InstrumentId = (typeof instrumentOptions)[number]["id"];

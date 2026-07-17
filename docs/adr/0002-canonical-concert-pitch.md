@@ -12,6 +12,7 @@ Transposing instruments can create incorrect results when conversions are chaine
 
 Convert detected frequency to concert MIDI immediately after stabilization.
 Calculate every written or target-instrument pitch independently from that concert MIDI value.
+Apply that conversion only at display boundaries, before text spelling and notation rendering.
 
 ## Consequences
 

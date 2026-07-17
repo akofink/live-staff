@@ -5,6 +5,8 @@ import { MainsHumFilter } from "../audio/mainsHumFilter";
 import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
 import { TrebleStaff } from "../components/TrebleStaff";
+import { toDisplayPitch } from "../instruments/displayPitch";
+import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
 
@@ -87,11 +89,17 @@ export function App() {
     );
   }
 
-  const selectedInstrument = instrumentOptions.find(
+  const selectedInstrumentOption = instrumentOptions.find(
     (instrument) => instrument.id === preferences.instrumentId,
   )!;
+  const selectedInstrument = instruments.find(
+    (instrument) => instrument.id === selectedInstrumentOption.definitionId,
+  )!;
   const displaySettingsLocked = listeningState === "starting" || listeningState === "listening";
-  const writtenPitchUnavailable = preferences.pitchDisplay === "written" && preferences.instrumentId !== "concert";
+  const displayPitch = note && toDisplayPitch(note.midi, preferences.pitchDisplay, selectedInstrument);
+  const pitchLabel = preferences.pitchDisplay === "concert"
+    ? "Concert pitch"
+    : `Written pitch for ${selectedInstrument.name}`;
 
   return (
     <main className="app-shell">
@@ -99,7 +107,7 @@ export function App() {
         <p className="eyebrow">Live notation, not another tuner</p>
         <h1 id="app-title">Live Staff</h1>
         <p className="lede">
-          Play a note. See its concert pitch appear live.
+          Play a note. See it appear on the staff.
         </p>
         <section className="listening-control" aria-label="Listening control">
           <p className="signal-label">Input</p>
@@ -123,20 +131,17 @@ export function App() {
           </p>
         </section>
         <TrebleStaff
-          midi={note?.midi}
-          noteName={note?.name}
+          midi={displayPitch?.midi}
+          noteName={displayPitch?.name}
+          accidentalPreference={preferences.pitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
+          pitchLabel={pitchLabel}
           loadRenderer={listeningState !== "idle"}
         />
         <section className="note-display" aria-label="Detected pitch">
-          <p className="note-name">{writtenPitchUnavailable ? "--" : note?.name ?? "--"}</p>
+          <p className="note-name">{displayPitch?.name ?? "--"}</p>
           <p className="note-kind">
-            {preferences.pitchDisplay === "concert" ? "Concert pitch" : `Written pitch for ${selectedInstrument.label}`}
+            {pitchLabel}
           </p>
-          {writtenPitchUnavailable && (
-            <p className="display-notice">
-              Written pitch display will be calculated from your selected instrument when the transposition domain is available.
-            </p>
-          )}
           <dl className="note-details">
             <div>
               <dt>Frequency</dt>
@@ -154,7 +159,7 @@ export function App() {
               <span className="signal-label">Setup</span>
               <span className="settings-title">Display and input settings</span>
             </span>
-            <span className="settings-summary">{selectedInstrument.label}</span>
+            <span className="settings-summary">{selectedInstrumentOption.label}</span>
           </summary>
           <div className="preferences-panel">
             <label>
