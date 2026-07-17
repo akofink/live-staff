@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("progressively reveals settings and locks display controls for the microphone lifecycle", async ({ page }) => {
+test("progressively reveals settings and keeps instrument controls available during capture", async ({ page }) => {
   await page.addInitScript(() => {
     const sourceContext = new AudioContext();
     const destination = sourceContext.createMediaStreamDestination();
@@ -21,33 +21,29 @@ test("progressively reveals settings and locks display controls for the micropho
 
   await page.goto("/");
   const settings = page.locator("summary");
-  await expect(settings).toContainText("Display and input settings");
+  await expect(settings).toContainText("Instrument and input settings");
   await expect(page.getByLabel("Instrument")).not.toBeVisible();
   await settings.press("Enter");
   await expect(page.getByLabel("Instrument")).toBeVisible();
   const instrument = page.getByLabel("Instrument");
-  const concertPitch = page.getByRole("radio", { name: "Concert pitch" });
   const backgroundHum = page.getByLabel("Background hum");
 
   await page.getByRole("button", { name: "Start listening" }).click();
-  await expect(instrument).toBeDisabled();
-  await expect(concertPitch).toBeDisabled();
+  await expect(instrument).toBeEnabled();
   await expect(backgroundHum).toBeEnabled();
-  await expect(page.getByRole("status").filter({ hasText: "Stop listening to change them." })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Changes apply immediately." })).toBeVisible();
 
   await page.evaluate(() => (window as typeof window & { resolveMicrophoneAccess(): void }).resolveMicrophoneAccess());
   await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
-  await expect(instrument).toBeDisabled();
-  await expect(concertPitch).toBeDisabled();
+  await expect(instrument).toBeEnabled();
   await expect(backgroundHum).toBeEnabled();
 
   await page.getByRole("button", { name: "Stop listening" }).click();
   await expect(instrument).toBeEnabled();
-  await expect(concertPitch).toBeEnabled();
-  await expect(page.getByText("Instrument and pitch display changes apply when you start your next listening session.")).toBeVisible();
+  await expect(page.getByText("Concert instruments show concert notation. Transposing instruments show their written notation. Changes apply immediately.")).toBeVisible();
 });
 
-test("restores display settings after microphone startup fails", async ({ page }) => {
+test("keeps instrument settings available after microphone startup fails", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
       configurable: true,
@@ -61,7 +57,6 @@ test("restores display settings after microphone startup fails", async ({ page }
 
   await expect(page.getByText("Microphone access was denied. Allow access and try again.")).toBeVisible();
   await expect(page.getByLabel("Instrument")).toBeEnabled();
-  await expect(page.getByRole("radio", { name: "Concert pitch" })).toBeEnabled();
   await expect(page.getByLabel("Background hum")).toBeEnabled();
 });
 
@@ -71,6 +66,9 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await page.locator("summary").press("Enter");
   await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
   await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("live-staff.preferences"))).toBe(
+    '{"instrumentId":"b-flat-trumpet","mainsHumFrequency":"off"}',
+  );
 
   await page.reload();
   await expect(page.locator("summary")).toContainText("B-flat trumpet");
@@ -78,8 +76,13 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
 });
 
-test("renders a deterministic concert C4 as written D4 for B-flat trumpet", async ({ page }) => {
+test("migrates a legacy concert-display preference and renders the B-flat trumpet's written staff", async ({ page }) => {
   await page.addInitScript(() => {
+    localStorage.setItem(
+      "live-staff.preferences",
+      JSON.stringify({ instrumentId: "b-flat-trumpet", pitchDisplay: "concert", mainsHumFrequency: "off" }),
+    );
+
     class TestAudioContext {
       readonly sampleRate = 44_100;
       readonly state = "running";
@@ -117,8 +120,8 @@ test("renders a deterministic concert C4 as written D4 for B-flat trumpet", asyn
 
   await page.goto("/");
   await page.locator("summary").press("Enter");
-  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
-  await page.getByRole("radio", { name: "Written pitch" }).check();
+  await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
+  await expect(page.getByRole("radio")).toHaveCount(0);
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
@@ -126,6 +129,15 @@ test("renders a deterministic concert C4 as written D4 for B-flat trumpet", asyn
   await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing written pitch for B-flat trumpet D4 on the treble staff" })).toBeVisible();
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
   await expect(page.getByText("Written pitch for B-flat trumpet: D4. Treble staff in a persistent treble-and-bass grand staff.")).toBeVisible();
+  await expect(page.getByText("Pitch reference")).toBeVisible();
+  await page.getByText("Pitch reference").click();
+  await expect(page.getByText("Sounding concert pitch: C4")).toBeVisible();
+
+  await page.getByLabel("Instrument").selectOption("concert");
+  await expect(page.getByText("C4", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Detected pitch").getByText("Concert pitch", { exact: true })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing concert pitch C4 on the treble staff" })).toBeVisible();
+  await expect(page.getByText("Pitch reference")).toHaveCount(0);
 });
 
 test("routes a deterministic low concert pitch to the bass staff in the persistent grand staff", async ({ page }) => {

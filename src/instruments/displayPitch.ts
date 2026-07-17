@@ -1,7 +1,8 @@
 import { midiToNoteName } from "../pitch/note";
-import type { PitchDisplay } from "../preferences/preferences";
 import type { InstrumentDefinition } from "./instruments";
 import { concertToWrittenMidi } from "./transposition";
+
+export type PitchRepresentation = "concert" | "written";
 
 export interface DisplayPitch {
   readonly midi: number;
@@ -11,7 +12,7 @@ export interface DisplayPitch {
 /** Derives one rendered pitch from canonical concert MIDI without changing detector data. */
 export function toDisplayPitch(
   concertMidi: number,
-  pitchDisplay: PitchDisplay,
+  pitchDisplay: PitchRepresentation,
   instrument: InstrumentDefinition,
 ): DisplayPitch {
   const midi = pitchDisplay === "written"

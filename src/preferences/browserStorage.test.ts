@@ -17,13 +17,21 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(createStorage(null))).toEqual(defaultPreferences);
   });
 
-  it("preserves saved display preferences from before hum suppression", () => {
+  it("migrates saved pitch-display preferences to instrument-led notation", () => {
     const storage = createStorage('{"instrumentId":"b-flat-trumpet","pitchDisplay":"written"}');
 
     expect(loadPreferences(storage)).toEqual({
       instrumentId: "b-flat-trumpet",
-      pitchDisplay: "written",
       mainsHumFrequency: "off",
+    });
+  });
+
+  it("preserves local hum suppression while removing the retired pitch display preference", () => {
+    const storage = createStorage('{"instrumentId":"f-horn","pitchDisplay":"concert","mainsHumFrequency":60}');
+
+    expect(loadPreferences(storage)).toEqual({
+      instrumentId: "f-horn",
+      mainsHumFrequency: 60,
     });
   });
 
@@ -34,16 +42,16 @@ describe("browser preferences storage", () => {
     );
   });
 
-  it("stores the selected instrument, display, and local hum setting", () => {
+  it("stores the selected instrument and local hum setting", () => {
     const storage = createStorage(null);
     const preferences = {
       instrumentId: "f-horn",
-      pitchDisplay: "concert",
       mainsHumFrequency: 60,
     } as const;
 
     expect(savePreferences(storage, preferences)).toBe(true);
     expect(storage.getItem(preferencesStorageKey)).toBe(JSON.stringify(preferences));
+    expect(loadPreferences(storage)).toEqual(preferences);
   });
 
   it("does not fail the app when browser storage is unavailable", () => {

@@ -162,8 +162,7 @@ h2 {
   padding: 1.25rem;
 }
 
-.preferences label,
-.preferences fieldset {
+.preferences label {
   display: grid;
   gap: 0.45rem;
   font-weight: 700;
@@ -178,24 +177,6 @@ h2 {
   background: #fffdf7;
   color: inherit;
   font: inherit;
-}
-
-.preferences fieldset {
-  margin: 0;
-  padding: 0.75rem;
-  border: 1px solid #c9c1b0;
-}
-
-.preferences fieldset label {
-  display: flex;
-  align-items: center;
-  font-weight: 400;
-}
-
-.preferences input {
-  width: 1.15rem;
-  height: 1.15rem;
-  margin: 0 0.5rem 0 0;
 }
 
 .preferences-status {
@@ -289,6 +270,30 @@ h2 {
 
 .note-details dd {
   margin: 0;
+  font-weight: 700;
+}
+
+.pitch-reference {
+  margin-top: 1rem;
+  color: #5c5548;
+}
+
+.pitch-reference summary {
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pitch-reference summary:focus-visible {
+  outline: 3px solid #b15a23;
+  outline-offset: 3px;
+}
+
+.pitch-reference p {
+  margin: 0.5rem 0 0;
   font-weight: 700;
 }
 

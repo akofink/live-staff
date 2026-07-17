@@ -95,9 +95,10 @@ export function App() {
   const selectedInstrument = instruments.find(
     (instrument) => instrument.id === selectedInstrumentOption.definitionId,
   )!;
-  const displaySettingsLocked = listeningState === "starting" || listeningState === "listening";
-  const displayPitch = note && toDisplayPitch(note.midi, preferences.pitchDisplay, selectedInstrument);
-  const pitchLabel = preferences.pitchDisplay === "concert"
+  const primaryPitchDisplay = selectedInstrument.writtenToConcertSemitones === 0 ? "concert" : "written";
+  const displayPitch = note && toDisplayPitch(note.midi, primaryPitchDisplay, selectedInstrument);
+  const concertPitch = note && toDisplayPitch(note.midi, "concert", selectedInstrument);
+  const pitchLabel = primaryPitchDisplay === "concert"
     ? "Concert pitch"
     : `Written pitch for ${selectedInstrument.name}`;
 
@@ -134,7 +135,7 @@ export function App() {
           key={listeningState === "idle" ? "inactive" : "active"}
           midi={displayPitch?.midi}
           noteName={displayPitch?.name}
-          accidentalPreference={preferences.pitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
+          accidentalPreference={primaryPitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
           pitchLabel={pitchLabel}
           loadRenderer={listeningState !== "idle"}
         />
@@ -153,12 +154,18 @@ export function App() {
               <dd>{note ? `${note.cents >= 0 ? "+" : ""}${note.cents} cents` : "--"}</dd>
             </div>
           </dl>
+          {primaryPitchDisplay === "written" && concertPitch && (
+            <details className="pitch-reference">
+              <summary>Pitch reference</summary>
+              <p>Sounding concert pitch: {concertPitch.name}</p>
+            </details>
+          )}
         </section>
         <details className="preferences">
           <summary>
             <span>
               <span className="signal-label">Setup</span>
-              <span className="settings-title">Display and input settings</span>
+              <span className="settings-title">Instrument and input settings</span>
             </span>
             <span className="settings-summary">{selectedInstrumentOption.label}</span>
           </summary>
@@ -167,8 +174,7 @@ export function App() {
               Instrument
               <select
                 value={preferences.instrumentId}
-                disabled={displaySettingsLocked}
-                aria-describedby="display-settings-guidance"
+                aria-describedby="instrument-guidance"
                 onChange={(event) => updatePreferences({ instrumentId: event.target.value as Preferences["instrumentId"] })}
               >
                 {instrumentOptions.map((instrument) => (
@@ -178,31 +184,8 @@ export function App() {
                 ))}
               </select>
             </label>
-            <fieldset disabled={displaySettingsLocked} aria-describedby="display-settings-guidance">
-              <legend>Pitch display</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="pitch-display"
-                  checked={preferences.pitchDisplay === "concert"}
-                  onChange={() => updatePreferences({ pitchDisplay: "concert" })}
-                />
-                Concert pitch
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="pitch-display"
-                  checked={preferences.pitchDisplay === "written"}
-                  onChange={() => updatePreferences({ pitchDisplay: "written" })}
-                />
-                Written pitch
-              </label>
-            </fieldset>
-            <p id="display-settings-guidance" className="preferences-help" role="status" aria-live="polite">
-              {displaySettingsLocked
-                ? "Instrument and pitch display changes apply before your next listening session. Stop listening to change them."
-                : "Instrument and pitch display changes apply when you start your next listening session."}
+            <p id="instrument-guidance" className="preferences-help" role="status" aria-live="polite">
+              Concert instruments show concert notation. Transposing instruments show their written notation. Changes apply immediately.
             </p>
             <label>
               Background hum
