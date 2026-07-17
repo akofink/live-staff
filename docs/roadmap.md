@@ -41,3 +41,4 @@ The milestone exits through the 1.0 hardening gate in the [release policy](relea
 ## Deferred Work
 
 MIDI, polyphonic input, automatic instrument recognition, history, lessons, teacher tools, accounts, analytics, and native applications remain deferred until users validate the core experience.
+The [multi-pitch feasibility report](multi-pitch-feasibility.md) defers product polyphony, source separation, and timbre/source association while allowing only a bounded offline two-pitch benchmark.
