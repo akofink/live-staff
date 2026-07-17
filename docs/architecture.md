@@ -30,10 +30,15 @@ Browser adapters own microphone lifecycle, audio frames, and AudioWorklet integr
 Notation adapters own rendering-library details.
 React owns state presentation and user interactions.
 
+The advanced signal monitor is an optional observer on the active browser audio adapter.
+It reuses the capture analyser without changing the pitch path, reads spectrum data only while explicitly enabled, and sends ephemeral snapshots to a project-owned canvas renderer.
+Disabling the monitor or stopping capture removes the observer immediately.
+
 ## Local Preferences
 
 `src/preferences/` owns the serializable instrument and pitch-display choices plus a small browser storage adapter.
 Only those choices are written to `localStorage`; microphone audio, audio frames, detected frequencies, and detected notes are never persisted.
+Signal-monitor state and samples are also never persisted.
 Malformed values and unavailable browser storage safely use defaults.
 The React UI resolves the selected preference to an instrument definition and derives its display pitch from canonical concert MIDI.
 The preference module deliberately does not duplicate that domain calculation.

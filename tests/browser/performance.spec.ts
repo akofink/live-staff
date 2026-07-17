@@ -20,7 +20,7 @@ test("progressively reveals settings and keeps instrument controls available dur
   });
 
   await page.goto("/");
-  const settings = page.locator("summary");
+  const settings = page.locator(".preferences > summary");
   await expect(settings).toContainText("Instrument and input settings");
   await expect(page.getByLabel("Instrument")).not.toBeVisible();
   await settings.press("Enter");
@@ -52,7 +52,7 @@ test("keeps instrument settings available after microphone startup fails", async
   });
 
   await page.goto("/");
-  await page.locator("summary").press("Enter");
+  await page.locator(".preferences > summary").press("Enter");
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByText("Microphone access was denied. Allow access and try again.")).toBeVisible();
@@ -63,7 +63,7 @@ test("keeps instrument settings available after microphone startup fails", async
 test("keeps settings usable on a small screen and restores saved preferences", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/");
-  await page.locator("summary").press("Enter");
+  await page.locator(".preferences > summary").press("Enter");
   await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
   await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("live-staff.preferences"))).toBe(
@@ -71,8 +71,8 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   );
 
   await page.reload();
-  await expect(page.locator("summary")).toContainText("B-flat trumpet");
-  await page.locator("summary").press("Enter");
+  await expect(page.locator(".preferences > summary")).toContainText("B-flat trumpet");
+  await page.locator(".preferences > summary").press("Enter");
   await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
 });
 
@@ -119,7 +119,7 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   });
 
   await page.goto("/");
-  await page.locator("summary").press("Enter");
+  await page.locator(".preferences > summary").press("Enter");
   await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
   await expect(page.getByRole("radio")).toHaveCount(0);
   await page.getByRole("button", { name: "Start listening" }).click();
@@ -224,6 +224,85 @@ test("renders idle notation and updates the listening control within budget", as
   });
 
   expect(interactionDuration).toBeLessThan(100);
+});
+
+test("keeps signal monitoring opt-in, bounded, accessible, and immediately stoppable", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.addInitScript(() => {
+    const counters = { microphoneRequests: 0, spectrumReads: 0 };
+    class TestAudioContext {
+      readonly sampleRate = 48_000;
+      readonly state = "running";
+      createMediaStreamSource() { return { connect() {}, disconnect() {} }; }
+      createAnalyser() {
+        return {
+          fftSize: 4_096,
+          frequencyBinCount: 2_048,
+          minDecibels: -100,
+          maxDecibels: -30,
+          disconnect() {},
+          getFloatTimeDomainData(frame: Float32Array) {
+            for (let index = 0; index < frame.length; index += 1) frame[index] = Math.sin(index / 12) * 0.2;
+          },
+          getFloatFrequencyData(frame: Float32Array) {
+            counters.spectrumReads += 1;
+            frame.fill(-90);
+            frame[5] = -42;
+            frame[6] = -45;
+          },
+        };
+      }
+      close() { return Promise.resolve(); }
+    }
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => {
+        counters.microphoneRequests += 1;
+        return Promise.resolve({ getTracks: () => [{ stop() {} }] });
+      },
+    });
+    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+    Object.defineProperty(window, "signalMonitorCounters", { configurable: true, value: counters });
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Signal monitor" })).toHaveCount(0);
+  await page.locator(".preferences > summary").press("Enter");
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => (window as typeof window & { signalMonitorCounters: { spectrumReads: number } }).signalMonitorCounters.spectrumReads)).toBe(0);
+
+  await page.getByText("Advanced diagnostics").click();
+  const toggle = page.getByLabel("Show waveform and spectrum");
+  await toggle.check();
+  await expect(page.getByRole("heading", { name: "Signal monitor" })).toBeVisible();
+  await expect(page.getByText(/50 Hz and 60 Hz markers/)).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-describedby", "signal-monitor-guidance");
+  const measurementStart = await page.evaluate(() => ({
+    timestamp: performance.now(),
+    reads: (window as typeof window & { signalMonitorCounters: { spectrumReads: number } }).signalMonitorCounters.spectrumReads,
+  }));
+  await page.waitForTimeout(1_050);
+  const measurementEnd = await page.evaluate(() => ({
+    timestamp: performance.now(),
+    reads: (window as typeof window & { signalMonitorCounters: { spectrumReads: number } }).signalMonitorCounters.spectrumReads,
+  }));
+  const measuredReads = measurementEnd.reads - measurementStart.reads;
+  expect(measuredReads).toBeGreaterThan(0);
+  expect(measuredReads).toBeLessThanOrEqual(Math.ceil((measurementEnd.timestamp - measurementStart.timestamp) / 100));
+  expect(await page.evaluate(() => (window as typeof window & { signalMonitorCounters: { microphoneRequests: number } }).signalMonitorCounters.microphoneRequests)).toBe(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  const canvasHeight = await page.locator(".signal-monitor canvas").first().evaluate((canvas) => ({
+    actual: canvas.height,
+    expected: Math.round(canvas.clientHeight * Math.min(devicePixelRatio, 2)),
+  }));
+  expect(canvasHeight.actual).toBe(canvasHeight.expected);
+
+  await toggle.uncheck();
+  const readsAtDisable = await page.evaluate(() => (window as typeof window & { signalMonitorCounters: { spectrumReads: number } }).signalMonitorCounters.spectrumReads);
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => (window as typeof window & { signalMonitorCounters: { spectrumReads: number } }).signalMonitorCounters.spectrumReads)).toBe(readsAtDisable);
+  await expect(page.getByRole("heading", { name: "Signal monitor" })).toHaveCount(0);
 });
 
 for (const viewport of [

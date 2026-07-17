@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { AudioCaptureError, MicrophoneCapture, type AudioCaptureSession } from "../audio/microphone";
 import { detectPitch } from "../audio/detectors/autocorrelation";
 import { MainsHumFilter } from "../audio/mainsHumFilter";
@@ -11,8 +11,15 @@ import { getBrowserStorage, loadPreferences, savePreferences } from "../preferen
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
 import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../pitch/pitchHistory";
 import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
+import type { SignalMonitorHandle } from "../components/SignalMonitor";
+import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
+
+const SignalMonitor = lazy(async () => {
+  const module = await import("../components/SignalMonitor");
+  return { default: module.SignalMonitor };
+});
 
 export function App() {
   const [preferences, setPreferences] = useState<Preferences>(() => loadPreferences(getBrowserStorage()));
@@ -24,15 +31,19 @@ export function App() {
   const lastDetection = useRef(0);
   const pitchHistory = useRef(new PitchHistory());
   const historyExpiry = useRef<number | undefined>(undefined);
+  const signalMonitor = useRef<SignalMonitorHandle>(null);
+  const signalMonitorEnabledRef = useRef(false);
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
   const [preferencesMessage, setPreferencesMessage] = useState("");
   const [historyEvents, setHistoryEvents] = useState<ReturnType<PitchHistory["snapshot"]>>([]);
+  const [signalMonitorEnabled, setSignalMonitorEnabled] = useState(false);
 
   useEffect(() => {
     return () => {
       window.clearTimeout(historyExpiry.current);
+      session.current?.setSignalMonitor(undefined);
       void session.current?.stop();
     };
   }, []);
@@ -104,6 +115,12 @@ export function App() {
         }
         setNote(stableNote ?? undefined);
       });
+      if (signalMonitorEnabledRef.current) {
+        session.current.setSignalMonitor(
+          (frame) => signalMonitor.current?.draw(frame),
+          isLowPowerSignalMonitor(),
+        );
+      }
       window.clearTimeout(historyExpiry.current);
       setListeningState("listening");
       setMessage(`Listening locally at ${session.current.sampleRate} Hz.`);
@@ -115,6 +132,19 @@ export function App() {
           : "Live Staff could not start listening.",
       );
     }
+  }
+
+  function toggleSignalMonitor(enabled: boolean) {
+    signalMonitorEnabledRef.current = enabled;
+    if (enabled) {
+      session.current?.setSignalMonitor(
+        (frame) => signalMonitor.current?.draw(frame),
+        isLowPowerSignalMonitor(),
+      );
+    } else {
+      session.current?.setSignalMonitor(undefined);
+    }
+    setSignalMonitorEnabled(enabled);
   }
 
   function updatePreferences(update: Partial<Preferences>) {
@@ -253,6 +283,32 @@ export function App() {
             <p className="preferences-help">
               Use only when electrical hum masks your note. It removes a narrow local frequency band.
             </p>
+            <details className="advanced-settings">
+              <summary>Advanced diagnostics</summary>
+              <div className="advanced-settings-panel">
+                <label className="signal-monitor-toggle">
+                  <input
+                    type="checkbox"
+                    checked={signalMonitorEnabled}
+                    aria-describedby="signal-monitor-guidance"
+                    onChange={(event) => toggleSignalMonitor(event.target.checked)}
+                  />
+                  Show waveform and spectrum
+                </label>
+                <p id="signal-monitor-guidance" className="preferences-help">
+                  Runs locally only while enabled and listening. Turn it off to stop diagnostic analysis immediately.
+                </p>
+                {signalMonitorEnabled && (
+                  listeningState === "listening"
+                    ? (
+                        <Suspense fallback={<p className="signal-monitor-empty">Preparing local diagnostics...</p>}>
+                          <SignalMonitor ref={signalMonitor} />
+                        </Suspense>
+                      )
+                    : <p className="signal-monitor-empty" role="status">Start listening to inspect the microphone signal.</p>
+                )}
+              </div>
+            </details>
             <p className="preferences-status" role="status" aria-live="polite">
               {preferencesMessage}
             </p>

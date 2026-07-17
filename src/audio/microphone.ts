@@ -1,3 +1,9 @@
+import {
+  lowPowerSignalMonitorFps,
+  signalMonitorFps,
+  type SignalMonitorFrame,
+} from "./signalMonitor";
+
 export type AudioCaptureErrorCode =
   | "not-supported"
   | "permission-denied"
@@ -16,10 +22,12 @@ export class AudioCaptureError extends Error {
 
 export interface AudioCaptureSession {
   readonly sampleRate: number;
+  setSignalMonitor(handler: SignalMonitorFrameHandler | undefined, lowPower?: boolean): void;
   stop(): Promise<void>;
 }
 
 export type AudioFrameHandler = (frame: Float32Array) => void;
+export type SignalMonitorFrameHandler = (frame: SignalMonitorFrame) => void;
 
 export interface AudioCaptureDependencies {
   readonly getUserMedia: (constraints: MediaStreamConstraints) => Promise<MediaStream>;
@@ -71,26 +79,48 @@ export class MicrophoneCapture {
 
       let frameHandle: number | undefined;
       let stopped = false;
+      let monitorHandler: SignalMonitorFrameHandler | undefined;
+      let monitorIntervalMs = 1_000 / signalMonitorFps;
+      let lastMonitorTimestamp = -Infinity;
       const frame = new Float32Array(analyser.fftSize);
-      const readFrame = () => {
+      let spectrum: Float32Array<ArrayBuffer> | undefined;
+      const readFrame = (timestamp: number) => {
         if (stopped) {
           return;
         }
 
         analyser.getFloatTimeDomainData(frame);
         onFrame(frame.slice());
+        if (monitorHandler && timestamp - lastMonitorTimestamp >= monitorIntervalMs) {
+          lastMonitorTimestamp = timestamp;
+          analyser.getFloatFrequencyData(spectrum!);
+          monitorHandler({
+            waveform: frame.slice(),
+            spectrum: spectrum!.slice(),
+            sampleRate: activeAudioContext.sampleRate,
+            minDecibels: analyser.minDecibels,
+            maxDecibels: analyser.maxDecibels,
+          });
+        }
         frameHandle = this.dependencies.requestFrame(readFrame);
       };
       frameHandle = this.dependencies.requestFrame(readFrame);
 
       const session: AudioCaptureSession = {
         sampleRate: activeAudioContext.sampleRate,
+        setSignalMonitor: (handler, lowPower = false) => {
+          monitorHandler = handler;
+          spectrum = handler ? new Float32Array(analyser.frequencyBinCount) : undefined;
+          monitorIntervalMs = 1_000 / (lowPower ? lowPowerSignalMonitorFps : signalMonitorFps);
+          lastMonitorTimestamp = -Infinity;
+        },
         stop: async () => {
           if (stopped) {
             return;
           }
 
           stopped = true;
+          monitorHandler = undefined;
           if (frameHandle !== undefined) {
             this.dependencies.cancelFrame(frameHandle);
           }

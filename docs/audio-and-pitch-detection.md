@@ -54,6 +54,14 @@ It fails for decode and browser-runtime failures, not detector mismatches or abs
 It is an evaluation aid, not evidence of production-grade accuracy.
 YIN and McLeod Pitch Method remain candidates for the next benchmark-driven detector decision.
 
+## Advanced Signal Monitor
+
+The collapsed advanced diagnostics disclosure can opt into a waveform and logarithmic 20 Hz to 20 kHz spectrum with labeled 50 Hz and 60 Hz references.
+The monitor uses the existing local `AnalyserNode`; it requests no additional permission and creates no recording, persistence, dependency, or network path.
+The default and merely disclosed states perform zero spectrum reads and render no monitor canvas.
+Active reads and canvas updates are capped at 10 frames per second, or 5 frames per second when the browser reports data saving or at most four logical processors.
+Disabling the checkbox, stopping listening, or unmounting the app removes the callback synchronously, and background-tab animation-frame suspension naturally pauses it.
+
 ## Open Technical Decisions
 
 - Select and benchmark a maintained detector.

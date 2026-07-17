@@ -187,6 +187,90 @@ h2 {
   font: inherit;
 }
 
+.advanced-settings {
+  min-width: 0;
+  border-top: 1px solid #d8d0c1;
+  padding-top: 0.75rem;
+}
+
+.advanced-settings > summary {
+  min-height: 2.75rem;
+  padding: 0;
+  font-weight: 700;
+}
+
+.advanced-settings[open] > summary {
+  border: 0;
+}
+
+.advanced-settings-panel {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.preferences .signal-monitor-toggle {
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.signal-monitor-toggle input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+.preferences-help,
+.signal-monitor-empty {
+  margin: 0;
+  color: #5c5548;
+  line-height: 1.4;
+}
+
+.signal-monitor {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #c9c1b0;
+  border-radius: 0.4rem;
+  background: #fffdf7;
+}
+
+.signal-monitor-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.signal-monitor-heading h2,
+.signal-monitor-heading p,
+.signal-monitor figure {
+  margin: 0;
+}
+
+.signal-monitor output,
+.signal-monitor figcaption {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.signal-monitor-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.signal-monitor canvas {
+  display: block;
+  width: 100%;
+  height: 9.375rem;
+  border: 1px solid #d8d0c1;
+  background: #f8f4ea;
+}
+
 .preferences-status {
   min-height: 1.25rem;
   margin: 0;
@@ -542,6 +626,12 @@ h2 {
 
   .note-details {
     gap: 1rem;
+  }
+
+  .signal-monitor-heading,
+  .signal-monitor-charts {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }
 
