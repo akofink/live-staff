@@ -161,6 +161,17 @@ describe("renderGrandStaff", () => {
     expect(calls.voiceDraw).toHaveBeenCalledWith(expect.anything(), bassStave);
   });
 
+  it("routes a treble pitch to the treble staff", () => {
+    const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
+
+    renderGrandStaff(element, 60, "treble", "sharp", 400);
+
+    const [trebleStave] = calls.staveInstance.mock.calls.map(([stave]) => stave);
+
+    expect(calls.staveNote).toHaveBeenCalledWith({ clef: "treble", keys: ["c/4"], duration: "q" });
+    expect(calls.voiceDraw).toHaveBeenCalledWith(expect.anything(), trebleStave);
+  });
+
   it("draws the empty persistent grand staff without creating a note", () => {
     const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
 

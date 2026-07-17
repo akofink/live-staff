@@ -85,13 +85,13 @@ No clef preference, instrument exception table, second note, or cross-staff nota
 ## UX Sketch
 
 ```text
-Grand staff showing concert A3 on the bass staff
+Grand staff with treble and bass staves showing concert pitch A3 on the bass staff
 
 treble clef  [ empty upper staff ]
      brace
 bass clef    [ A3 on the bass staff ]
 
-Concert pitch: A3. Bass staff.
+Concert pitch: A3. Bass staff in a persistent treble-and-bass grand staff.
 
 A3
 CONCERT PITCH
