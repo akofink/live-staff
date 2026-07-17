@@ -26,6 +26,8 @@ Introduce Git LFS only when a future fixture corpus materially increases clone s
 
 When microphone behavior exists, cover permission accepted and denied, absent input devices, suspended contexts, start and stop, instrument switching, persistent grand-staff routing, local preference persistence, and responsive layout.
 Browser tests must mock audio where reliable device access is unavailable in CI.
+Signal-monitor browser coverage proves zero spectrum work before opt-in, one microphone request, bounded update cadence, immediate cleanup, accessible native controls, and no overflow at 320 CSS pixels.
+Pure tests cover logarithmic frequency placement, deterministic RMS level, monitor cadence, and disable semantics without wall-clock timing.
 The M4A fixture harness runs in CI to catch decode, browser-runtime, and local-serving regressions.
 It is not a CI accuracy claim: mismatches and absent estimates remain reported data until a reviewed accuracy threshold exists.
 
