@@ -105,11 +105,13 @@ export function App() {
   return (
     <main className="app-shell">
       <section className="hero" aria-labelledby="app-title">
-        <p className="eyebrow">Live notation, not another tuner</p>
-        <h1 id="app-title">Live Staff</h1>
-        <p className="lede">
-          Play a note. See it appear on the staff.
-        </p>
+        <header className="app-header">
+          <div>
+            <p className="eyebrow">Live notation, not another tuner</p>
+            <h1 id="app-title">Live Staff</h1>
+          </div>
+          <p className="lede">Play a note. See it appear on the staff.</p>
+        </header>
         <section className="listening-control" aria-label="Listening control">
           <p className="signal-label">Input</p>
           <button
@@ -131,36 +133,37 @@ export function App() {
             {message}
           </p>
         </section>
-        <GrandStaff
-          key={listeningState === "idle" ? "inactive" : "active"}
-          midi={displayPitch?.midi}
-          noteName={displayPitch?.name}
-          accidentalPreference={primaryPitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
-          pitchLabel={pitchLabel}
-          loadRenderer={listeningState !== "idle"}
-        />
-        <section className="note-display" aria-label="Detected pitch">
-          <p className="note-name">{displayPitch?.name ?? "--"}</p>
-          <p className="note-kind">
-            {pitchLabel}
-          </p>
-          <dl className="note-details">
-            <div>
-              <dt>Frequency</dt>
-              <dd>{note ? `${note.frequencyHz.toFixed(1)} Hz` : "Waiting"}</dd>
-            </div>
-            <div>
-              <dt>Pitch center</dt>
-              <dd>{note ? `${note.cents >= 0 ? "+" : ""}${note.cents} cents` : "--"}</dd>
-            </div>
-          </dl>
-          {primaryPitchDisplay === "written" && concertPitch && (
-            <details className="pitch-reference">
-              <summary>Pitch reference</summary>
-              <p>Sounding concert pitch: {concertPitch.name}</p>
-            </details>
-          )}
-        </section>
+        <div className="live-workspace">
+          <GrandStaff
+            midi={displayPitch?.midi}
+            noteName={displayPitch?.name}
+            accidentalPreference={primaryPitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
+            pitchLabel={pitchLabel}
+            loadRenderer
+          />
+          <section className="note-display" aria-label="Detected pitch">
+            <p className="note-name">{displayPitch?.name ?? "--"}</p>
+            <p className="note-kind">
+              {pitchLabel}
+            </p>
+            <dl className="note-details">
+              <div>
+                <dt>Frequency</dt>
+                <dd>{note ? `${note.frequencyHz.toFixed(1)} Hz` : "Waiting"}</dd>
+              </div>
+              <div>
+                <dt>Pitch center</dt>
+                <dd>{note ? `${note.cents >= 0 ? "+" : ""}${note.cents} cents` : "--"}</dd>
+              </div>
+            </dl>
+            {primaryPitchDisplay === "written" && concertPitch && (
+              <details className="pitch-reference">
+                <summary>Pitch reference</summary>
+                <p>Sounding concert pitch: {concertPitch.name}</p>
+              </details>
+            )}
+          </section>
+        </div>
         <details className="preferences">
           <summary>
             <span>

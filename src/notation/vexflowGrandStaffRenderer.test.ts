@@ -153,8 +153,8 @@ describe("renderGrandStaff", () => {
 
     const [trebleStave, bassStave] = calls.staveInstance.mock.calls.map(([stave]) => stave);
 
-    expect(calls.stave).toHaveBeenNthCalledWith(1, 28, 28, 360);
-    expect(calls.stave).toHaveBeenNthCalledWith(2, 28, 145, 360);
+    expect(calls.stave).toHaveBeenNthCalledWith(1, 28, 10, 360);
+    expect(calls.stave).toHaveBeenNthCalledWith(2, 28, 92, 360);
     expect(calls.connector).toHaveBeenNthCalledWith(1, trebleStave, bassStave);
     expect(calls.connector).toHaveBeenNthCalledWith(2, trebleStave, bassStave);
     expect(calls.staveNote).toHaveBeenCalledWith({ clef: "bass", keys: ["b/3"], duration: "q" });
