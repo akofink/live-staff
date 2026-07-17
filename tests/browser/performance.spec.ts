@@ -132,12 +132,12 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   await expect(page.getByText("Pitch reference")).toBeVisible();
   await page.getByText("Pitch reference").click();
   await expect(page.getByText("Sounding concert pitch: C4")).toBeVisible();
-  await expect(page.getByRole("list", { name: "Recent written pitch history" })).toContainText("D4");
+  await expect(page.getByRole("list", { name: "Recent written pitch history, newest first" })).toContainText("D4");
 
   await page.getByLabel("Instrument").selectOption("concert");
   await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Recent concert pitch history" })).toContainText("C4");
-  await expect(page.getByRole("list", { name: "Recent concert pitch history" })).not.toContainText("D4");
+  await expect(page.getByRole("list", { name: "Recent concert pitch history, newest first" })).toContainText("C4");
+  await expect(page.getByRole("list", { name: "Recent concert pitch history, newest first" })).not.toContainText("D4");
   await expect(page.getByLabel("Detected pitch").getByText("Concert pitch", { exact: true })).toBeVisible();
   await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing concert pitch C4 on the treble staff" })).toBeVisible();
   await expect(page.getByText("Pitch reference")).toHaveCount(0);

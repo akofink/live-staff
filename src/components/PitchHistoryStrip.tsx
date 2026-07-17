@@ -18,8 +18,8 @@ export function PitchHistoryStrip({ events, instrument, pitchDisplay }: PitchHis
       {events.length === 0 ? (
         <p className="history-empty">Stable notes will collect here while listening.</p>
       ) : (
-        <ol className="history-events" aria-label={`Recent ${pitchDisplay} pitch history`}>
-          {events.map((event) => {
+        <ol className="history-events" aria-label={`Recent ${pitchDisplay} pitch history, newest first`}>
+          {[...events].reverse().map((event) => {
             const pitch = toDisplayPitch(event.concertMidi, pitchDisplay, instrument);
             const durationMs = event.endMs === undefined ? undefined : event.endMs - event.onsetMs;
             const width = durationMs === undefined

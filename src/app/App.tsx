@@ -9,7 +9,7 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
-import { PitchHistory } from "../pitch/pitchHistory";
+import { PitchHistory, pitchHistoryWindowMs } from "../pitch/pitchHistory";
 import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
@@ -23,6 +23,7 @@ export function App() {
   const mainsHumFrequency = useRef(preferences.mainsHumFrequency);
   const lastDetection = useRef(0);
   const pitchHistory = useRef(new PitchHistory());
+  const historyExpiry = useRef<number | undefined>(undefined);
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
@@ -31,6 +32,7 @@ export function App() {
 
   useEffect(() => {
     return () => {
+      window.clearTimeout(historyExpiry.current);
       void session.current?.stop();
     };
   }, []);
@@ -46,6 +48,12 @@ export function App() {
       if (nextHistory) {
         setHistoryEvents(nextHistory);
       }
+      historyExpiry.current = window.setTimeout(() => {
+        const expiredHistory = pitchHistory.current.update(undefined, performance.now());
+        if (expiredHistory) {
+          setHistoryEvents(expiredHistory);
+        }
+      }, pitchHistoryWindowMs);
       setNote(undefined);
       setListeningState("idle");
       setMessage("Listening stopped. Microphone resources were released.");
@@ -54,6 +62,7 @@ export function App() {
 
     setListeningState("starting");
     setMessage("Requesting microphone access...");
+    window.clearTimeout(historyExpiry.current);
     mainsHumFilter.current.reset();
 
     try {
