@@ -52,6 +52,6 @@ sounding frequency -> concert MIDI -> player written MIDI
 - `PitchDetector`: produces raw estimates from audio frames.
 - `PitchStabilizer`: turns uncertain estimates into a stable-note state.
 - `InstrumentTransposer`: maps concert MIDI to written MIDI.
-- `NotationRenderer`: renders or clears a spelled pitch for a clef.
+- `NotationRenderer`: renders a persistent grand staff and routes or clears one spelled display pitch on its active clef.
 
 The exact interfaces can evolve, but domain code must not know which detector, renderer, or UI framework is in use.

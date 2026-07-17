@@ -35,13 +35,13 @@ const flatPitchClasses: readonly PitchClass[] = [
   { letter: "b" },
 ] as const;
 
-export interface TrebleNote {
+export interface StaffNote {
   readonly key: string;
   readonly accidental?: "#" | "b";
 }
 
-/** Converts display MIDI into the pitch representation used by a treble staff renderer. */
-export function midiToTrebleNote(midi: number, accidentalPreference: AccidentalPreference = "sharp"): TrebleNote {
+/** Converts display MIDI into the pitch representation used by either grand-staff clef. */
+export function midiToStaffNote(midi: number, accidentalPreference: AccidentalPreference = "sharp"): StaffNote {
   if (!Number.isInteger(midi)) {
     throw new RangeError("MIDI pitch must be an integer.");
   }

@@ -2,7 +2,7 @@
 
 ## Unit Tests
 
-Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, clef selection, accidental preference, ranges, and stabilizer sequences.
+Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, and stabilizer sequences.
 
 ## Synthetic Signals
 
@@ -24,7 +24,7 @@ Introduce Git LFS only when a future fixture corpus materially increases clone s
 
 ## Browser Tests
 
-When microphone behavior exists, cover permission accepted and denied, absent input devices, suspended contexts, start and stop, instrument switching, local preference persistence, and responsive layout.
+When microphone behavior exists, cover permission accepted and denied, absent input devices, suspended contexts, start and stop, instrument switching, persistent grand-staff routing, local preference persistence, and responsive layout.
 Browser tests must mock audio where reliable device access is unavailable in CI.
 The M4A fixture harness runs in CI to catch decode, browser-runtime, and local-serving regressions.
 It is not a CI accuracy claim: mismatches and absent estimates remain reported data until a reviewed accuracy threshold exists.

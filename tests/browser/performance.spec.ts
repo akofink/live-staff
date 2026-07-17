@@ -123,7 +123,56 @@ test("renders a deterministic concert C4 as written D4 for B-flat trumpet", asyn
 
   await expect(page.getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Written pitch for B-flat trumpet", { exact: true })).toBeVisible();
-  await expect(page.getByRole("figure", { name: "Treble staff showing D4" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff showing written pitch for B-flat trumpet D4 on the treble staff" })).toBeVisible();
+  await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
+  await expect(page.getByText("Written pitch for B-flat trumpet: D4. Treble staff.")).toBeVisible();
+});
+
+test("routes a deterministic low concert pitch to the bass staff in the persistent grand staff", async ({ page }) => {
+  await page.addInitScript(() => {
+    class TestAudioContext {
+      readonly sampleRate = 44_100;
+      readonly state = "running";
+
+      createMediaStreamSource() {
+        return { connect() {}, disconnect() {} };
+      }
+
+      createAnalyser() {
+        let sample = 0;
+        return {
+          fftSize: 0,
+          connect() {},
+          disconnect() {},
+          getFloatTimeDomainData(frame: Float32Array) {
+            for (let index = 0; index < frame.length; index += 1) {
+              frame[index] = Math.sin((2 * Math.PI * 220 * (sample + index)) / 44_100);
+            }
+            sample += frame.length;
+          },
+        };
+      }
+
+      close() {
+        return Promise.resolve();
+      }
+    }
+
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => Promise.resolve({ getTracks: () => [] }),
+    });
+    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+  });
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start listening" }).click();
+
+  await expect(page.getByText("A3", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("figure", { name: "Grand staff showing concert pitch A3 on the bass staff" })).toBeVisible();
+  await expect(page.getByText("Concert pitch: A3. Bass staff.")).toBeVisible();
+  await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
 });
 
 test("keeps notation out of the initial page load and updates the listening control within budget", async ({ page }) => {
@@ -132,11 +181,11 @@ test("keeps notation out of the initial page load and updates the listening cont
   page.on("request", (request) => requestUrls.push(request.url()));
 
   await page.goto("/");
-  await expect(page.getByRole("figure", { name: "Empty treble staff" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Empty grand staff" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
   await page.waitForTimeout(250);
 
-  expect(requestUrls.some((url) => url.includes("vexflowTrebleRenderer"))).toBe(false);
+  expect(requestUrls.some((url) => url.includes("vexflowGrandStaffRenderer"))).toBe(false);
 
   const interactionDuration = await page.evaluate(async () => {
     const status = document.querySelector("#listening-status")!;
@@ -158,5 +207,5 @@ test("keeps notation out of the initial page load and updates the listening cont
   });
 
   expect(interactionDuration).toBeLessThan(100);
-  await expect.poll(() => requestUrls.some((url) => url.includes("vexflowTrebleRenderer"))).toBe(true);
+  await expect.poll(() => requestUrls.some((url) => url.includes("vexflowGrandStaffRenderer"))).toBe(true);
 });

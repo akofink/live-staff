@@ -4,7 +4,7 @@ import { detectPitch } from "../audio/detectors/autocorrelation";
 import { MainsHumFilter } from "../audio/mainsHumFilter";
 import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
-import { TrebleStaff } from "../components/TrebleStaff";
+import { GrandStaff } from "../components/GrandStaff";
 import { toDisplayPitch } from "../instruments/displayPitch";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
@@ -130,7 +130,8 @@ export function App() {
             {message}
           </p>
         </section>
-        <TrebleStaff
+        <GrandStaff
+          key={listeningState === "idle" ? "inactive" : "active"}
           midi={displayPitch?.midi}
           noteName={displayPitch?.name}
           accidentalPreference={preferences.pitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
