@@ -11,11 +11,13 @@
     "lint": "eslint .",
     "test": "vitest run --exclude 'tests/browser/**' --exclude 'scripts/**/*.test.mjs'",
     "test:privacy": "node --test scripts/verify-privacy.test.mjs",
+    "test:fixture-manifest": "node --test scripts/validate-fixture-manifest.test.mjs",
     "test:watch": "vitest --exclude 'tests/browser/**' --exclude 'scripts/**/*.test.mjs'",
     "verify:privacy": "node scripts/verify-privacy.mjs dist",
     "verify:production-privacy": "node scripts/verify-production-privacy.mjs",
     "evaluate:fixtures": "playwright install chromium && playwright test --config=playwright.fixture-evaluation.config.ts",
     "benchmark:detectors": "vite build --config vite.detector-bundles.config.ts && node scripts/measure-detector-bundles.mjs && playwright install chromium && playwright test --config=playwright.detector-benchmark.config.ts",
+    "fixtures:validate": "node scripts/validate-fixture-manifest.mjs",
     "evaluate:performance": "playwright install chromium && playwright test --config=playwright.performance.config.ts"
   },
   "dependencies": {

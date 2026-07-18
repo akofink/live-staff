@@ -53,3 +53,6 @@ C1 and F1 are retained as visible out-of-range observations but excluded from th
 These floors describe the existing immutable single-piano corpus and prevent aggregate regressions in matches, emitted estimates, or octave errors.
 They do not establish detector accuracy, cross-instrument support, or production readiness.
 Strict supported-range, false-positive, uncertainty, octave, and modeled stable-display gates use deterministic synthetic signals in the detector unit suite.
+
+New physical fixture sets must follow the [fixture capture protocol](fixture-capture-protocol.md) and pass its manifest validator before evaluator integration.
+The existing catalog remains unchanged and is not evidence that the new capture matrix has been performed.
