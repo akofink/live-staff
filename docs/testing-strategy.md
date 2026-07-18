@@ -55,3 +55,4 @@ Validate with voice, piano or generated tone, and at least one transposing instr
 Maintain a supported-browser and device matrix as real devices are tested.
 [Issue #71](https://github.com/akofink/live-staff/issues/71) owns durable real-device evidence for iOS Safari and Android backgrounding, screen lock, phone or OS audio interruption, permission revocation, wired and Bluetooth route changes, external microphone loss, sustained thermal behavior, keyboard use, screen readers, and browser-specific permission UI.
 Those cases cannot be represented faithfully by replacing Chromium browser objects in automation and must not be inferred from the controlled lifecycle tests.
+Use the [attended release evidence harness](attended-release-evidence.md) to record these human observations locally and export reviewable JSON and Markdown without capturing audio or uploading evidence.

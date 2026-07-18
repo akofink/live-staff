@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Live Staff attended release evidence</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Developer-only attended harness</p>
+        <h1>Live Staff release evidence</h1>
+        <p>This page records human observations locally. It does not test automatically, capture audio, or upload data.</p>
+      </header>
+      <section aria-labelledby="session-heading">
+        <h2 id="session-heading">Test session</h2>
+        <div id="session-fields" class="fields"></div>
+        <div class="actions">
+          <button id="open-app" type="button">Open app in a new tab</button>
+          <button id="export-json" type="button">Export JSON</button>
+          <button id="export-markdown" type="button">Export Markdown</button>
+          <button id="clear" type="button">Clear local report</button>
+        </div>
+        <p id="save-status">Not yet saved.</p>
+      </section>
+      <section aria-labelledby="checks-heading">
+        <h2 id="checks-heading">Attended checks</h2>
+        <p>Choose a result only after performing the instruction on the named device. Record limitations and private-data-safe observations.</p>
+        <div id="checks"></div>
+      </section>
+      <aside>
+        <h2>Release guardrails</h2>
+        <p>Do not close #71 until all required physical-device, accessibility, sustained-performance, and privacy reports exist. Do not make detector accuracy claims until #77 is resolved and the deployed commit is retested.</p>
+      </aside>
+    </main>
+    <script type="module" src="/src/release-evidence/main.ts"></script>
+  </body>
+</html>
