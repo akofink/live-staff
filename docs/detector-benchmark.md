@@ -4,7 +4,7 @@
 
 `npm run benchmark:detectors` runs a deterministic offline Chromium comparison at the injected detector boundary.
 The production autocorrelation implementation is the control.
-Multi-period autocorrelation scoring, comb projection, and landmark histograms remain research-only candidates and are absent from the production application entry graph.
+Fundamental-aware peak selection, multi-period autocorrelation scoring, comb projection, and landmark histograms remain research-only candidates and are absent from the production application entry graph.
 Results are research evidence, not production-readiness claims.
 
 ## Synthetic Gates
@@ -64,3 +64,27 @@ CPU measurements cover desktop Chromium on this host, not mobile thermal, batter
 The complete report is written to `test-results/detector-benchmark.json`.
 CI uploads that report and `test-results/detector-bundle-cost.json` with the existing detector evidence artifact.
 The harness makes only loopback requests, does not request microphone permission, and does not transmit audio.
+
+## Fundamental-Aware Follow-Up
+
+The bounded follow-up retained the first acceptable autocorrelation peak unless its octave-period peak had at least 0.08 stronger normalized correlation, at least 0.90 confidence, and repeated-period support within 0.04 when that lag was available.
+Allowing third-period selection or accepting a lower-confidence first peak reproduced the rejected regressions: the 146.83 Hz calibrated-room mixture became 73.39 Hz, and the mains-hum-filter result moved from MIDI 57 to MIDI 38.
+Those forms were rejected before recorded evidence was inspected.
+
+The gate-safe form passed all 100 supported-range windows, all 10 harmonic-dominant and missing-fundamental windows, all three absences, fan rejection and all four calibrated-room mixtures, both hum-filter paths, and the 160 ms modeled stable-display latency gate.
+Only after those gates passed was recorded evidence inspected.
+
+The gate-safe selector produced exactly the control result on every recorded contract.
+The baseline-compatible policy result remained 3 matching fixture groups, 31 emissions, and 20 octave errors across 77 windows.
+Dense-onset results remained 30/110/79 matches/emissions/octave errors at 2,048 samples and 31/113/82 at 4,096 samples.
+Live-overlap results remained 24/90/66 and 23/90/67.
+Stable-sustain results remained 15/56/41 at both frame sizes.
+Confidence filtering did not separate correctness: baseline median confidence was 0.988 for correct estimates and 0.985 for incorrect estimates.
+
+Control CPU timing was 5.2 ms median, 5.4 ms p95, and 5.6 ms maximum in this run.
+The selector measured 5.3/5.7/5.8 ms.
+It allocates one `Float64Array(maximumLag - minimumLag + 1)`, one correlation wrapper, and zero or one result object per call, retaining no references.
+The aggregate research-candidate entry increased from 2,305/927 to 2,891/1,101 minified/gzip bytes, a 586/174-byte research bundle increase; production import delta remains structurally zero.
+
+No production change is justified, and issue #77 remains open.
+The next bounded experiment should test cross-frame octave-hypothesis persistence through the replaceable detector adapter, requiring fixture-independent evidence across consecutive frames and measuring the added latency against the same mandatory gates before recorded contracts are inspected.
