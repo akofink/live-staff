@@ -99,6 +99,6 @@ Supported browsers and devices are only those with current recorded manual valid
 
 ## Currently Unmet 1.0 Gates
 
-- [Issue #67](https://github.com/akofink/live-staff/issues/67) must complete interruption and lifecycle recovery.
-- [Issue #71](https://github.com/akofink/live-staff/issues/71) must record current real-device, accessibility, privacy, and sustained-performance evidence.
+- [Issue #77](https://github.com/akofink/live-staff/issues/77) must improve recorded detector accuracy before credible real-device accuracy claims.
+- [Issue #71](https://github.com/akofink/live-staff/issues/71) must complete the physical-device, accessibility, privacy, and sustained-performance rows in the [1.0 candidate evidence record](release-evidence/1.0-candidate.md).
 - [Issue #72](https://github.com/akofink/live-staff/issues/72) owns the final versioned release review after these gates close.
