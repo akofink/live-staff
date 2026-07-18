@@ -14,6 +14,7 @@
     "verify:privacy": "node scripts/verify-privacy.mjs dist",
     "verify:production-privacy": "node scripts/verify-production-privacy.mjs",
     "evaluate:fixtures": "playwright install chromium && playwright test --config=playwright.fixture-evaluation.config.ts",
+    "benchmark:detectors": "vite build --config vite.detector-bundles.config.ts && node scripts/measure-detector-bundles.mjs && playwright install chromium && playwright test --config=playwright.detector-benchmark.config.ts",
     "evaluate:performance": "playwright install chromium && playwright test --config=playwright.performance.config.ts"
   },
   "dependencies": {
