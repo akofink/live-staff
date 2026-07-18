@@ -55,6 +55,7 @@ Add target-instrument selection and a dual display derived independently from ca
 
 Complete browser and device coverage, accessibility review, the offline-contract decision, detector evidence, lifecycle recovery, privacy evidence, performance review, and deployment documentation.
 The milestone exits through the 1.0 hardening gate in the [release policy](release-policy.md).
+The offline decision is complete: 1.0 continues working after an online load loses connectivity, but new visits and reloads require the network; no service worker or persistent application cache is used.
 
 Recommended execution order:
 

@@ -61,6 +61,17 @@ Release only after the corresponding CI workflow succeeds, then smoke-test the p
 If a release is unsafe or materially broken, revert the offending commit on `main` and allow Pages to deploy the reverted build.
 For an urgent static recovery, use the existing manual Pages workflow only for a previously verified commit; follow with a revert or fix commit so `main` remains the deployed source of truth.
 
+## Offline And Update Contract
+
+Version 1.0 supports continued use after a successful online load loses its network connection.
+It does not support a new visit or reload while offline and is not an installable PWA.
+This bounded contract avoids persistent application caches while preserving the utility during an interrupted connection.
+
+The production build must not register a service worker or populate Cache Storage.
+Automated browser coverage takes a loaded page offline, exercises listening and preferences without requests, verifies Cache Storage remains empty, then restores the network and proves that reload uses normal requests for the document and content-hashed assets rather than service-worker responses.
+Ordinary updates and rollback deployments therefore use the host's standard HTTP cache validation; there is no install, activate, stale-cache cleanup, or client migration phase that can indefinitely pin a release.
+If a future requirement adds reloadable offline support, it requires a separate architecture decision covering versioned first-party resources, atomic activation, stale-cache removal, rollback compatibility, failure recovery, and equivalent privacy checks before release.
+
 ## Dependencies And Security
 
 Review Dependabot updates weekly and before a release.
@@ -88,6 +99,5 @@ Supported browsers and devices are only those with current recorded manual valid
 
 - [Issue #69](https://github.com/akofink/live-staff/issues/69) must establish enforceable detector evidence and limitations.
 - [Issue #67](https://github.com/akofink/live-staff/issues/67) must complete interruption and lifecycle recovery.
-- [Issue #68](https://github.com/akofink/live-staff/issues/68) must define and implement or explicitly remove the offline requirement.
 - [Issue #71](https://github.com/akofink/live-staff/issues/71) must record current real-device, accessibility, privacy, and sustained-performance evidence.
 - [Issue #72](https://github.com/akofink/live-staff/issues/72) owns the final versioned release review after these gates close.

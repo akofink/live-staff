@@ -22,10 +22,15 @@ It excludes accounts, cloud storage, persisted audio or detection history, analy
 - Responsive phone, tablet, and desktop layouts.
 - Clear permission, listening, silence, and failure states.
 - Static deployment without an account or payment requirement.
+- Continued listening and interaction if the network is lost after the application has loaded.
 
 These instrument-first presentation requirements shipped in PR #53 and intentionally replaced separate pitch-display controls.
 The alternate-instrument comparison mode remains the separate Transposition Coach milestone rather than a 1.0 requirement.
 Reference pitch remains fixed at A4 = 440 Hz because no independently justified configurable-reference requirement has been established.
+
+Version 1.0 does not promise that a new visit or reload works offline.
+Users must load the application while online before a session, after which the loaded client can continue without a network connection.
+Installable PWA behavior and reloadable offline use remain out of scope until there is a requirement that justifies persistent application caching and its update lifecycle.
 
 ## Nonfunctional Requirements
 

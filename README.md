@@ -9,13 +9,16 @@ The published app includes local microphone capture, written-pitch transposition
 
 The monophonic microphone-to-staff experience is shipped through the interactive filter chain in PR #65.
 The in-repository autocorrelation detector remains a proof of concept over a 55 to 1,000 Hz range, not a production-grade guarantee for every instrument, room, or browser.
-Current 1.0 work is detector evidence, lifecycle recovery, the offline contract, and real-device and accessibility validation; polyphony and source association remain deferred.
+Current 1.0 work is detector evidence and real-device and accessibility validation; polyphony and source association remain deferred.
 
 ## Privacy
 
 Microphone audio is analyzed locally in the browser.
 It is not uploaded, recorded, or sent to a server.
 No account or backend is planned for the core product.
+
+After the application loads online, it continues working if the connection is lost.
+A new visit or reload requires a connection; version 1.0 does not install a service worker or persist an offline application cache.
 
 ## Requirements
 

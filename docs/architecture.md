@@ -6,6 +6,15 @@ Live Staff is a static client-side web app.
 It has no backend in the initial architecture.
 Microphone audio is processed locally and is never uploaded.
 
+The 1.0 offline contract is resilience after initial load, not reloadable offline use.
+Once the document and its first-party assets have loaded, listening and application interactions require no network connection.
+A new visit or reload requires the static deployment to be reachable.
+
+The application does not register a service worker or write application resources to Cache Storage.
+Each navigation uses normal browser requests for the document and its content-hashed assets, so updates and rollbacks follow the deployment's standard HTTP cache validation rather than a separate application-cache lifecycle.
+Browser HTTP caching remains governed by the deployment; without a service worker, no application cache can indefinitely pin or combine releases.
+Only preferences use persistent application storage; audio, detections, calibration, monitor data, and history remain ephemeral under the existing local-preference boundary.
+
 ## Processing Pipeline
 
 ```text
