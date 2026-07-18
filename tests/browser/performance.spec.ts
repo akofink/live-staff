@@ -1,5 +1,51 @@
 import { expect, test } from "@playwright/test";
 
+test("continues working after network loss and leaves reloads to the deployment", async ({ page }) => {
+  await page.addInitScript(() => {
+    const sourceContext = new AudioContext();
+    const destination = sourceContext.createMediaStreamDestination();
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => Promise.resolve(destination.stream),
+    });
+  });
+
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
+  expect(await page.evaluate(async () => ({
+    cacheKeys: await caches.keys(),
+    registrations: await navigator.serviceWorker.getRegistrations(),
+    controlled: navigator.serviceWorker.controller !== null,
+  }))).toEqual({ cacheKeys: [], registrations: [], controlled: false });
+
+  let offlineRequests = 0;
+  page.on("request", () => { offlineRequests += 1; });
+  await page.context().setOffline(true);
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+  await page.locator(".preferences > summary").press("Enter");
+  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
+  expect(offlineRequests).toBe(0);
+
+  await page.getByRole("button", { name: "Stop listening" }).click();
+  expect(await page.evaluate(async () => ({
+    cacheKeys: await caches.keys(),
+    registrations: await navigator.serviceWorker.getRegistrations(),
+  }))).toEqual({ cacheKeys: [], registrations: [] });
+  await page.context().setOffline(false);
+  const reloadRequests: string[] = [];
+  const serviceWorkerResponses: boolean[] = [];
+  page.on("request", (request) => { reloadRequests.push(request.url()); });
+  page.on("response", (response) => { serviceWorkerResponses.push(response.fromServiceWorker()); });
+  await page.reload();
+  await expect(page.locator(".preferences > summary")).toContainText("B-flat trumpet");
+  expect(reloadRequests.some((url) => url === `${new URL(page.url()).origin}/`)).toBe(true);
+  expect(reloadRequests.some((url) => /\/assets\/[^/]+\.[a-z0-9]+$/.test(new URL(url).pathname))).toBe(true);
+  expect(serviceWorkerResponses).not.toContain(true);
+  expect(await page.evaluate(() => navigator.serviceWorker.controller)).toBeNull();
+});
+
 test("progressively reveals settings and keeps instrument controls available during capture", async ({ page }) => {
   await page.addInitScript(() => {
     const sourceContext = new AudioContext();
