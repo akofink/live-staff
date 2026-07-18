@@ -65,6 +65,7 @@ Set `VITE_BASE_PATH` only when building for a non-root deployment path.
 - [Testing strategy](docs/testing-strategy.md)
 - [Browser fixture evaluation](docs/browser-fixture-evaluation.md)
 - [Release policy](docs/release-policy.md)
+- [1.0 candidate support and evidence](docs/release-evidence/1.0-candidate.md)
 - [Roadmap](docs/roadmap.md)
 - [Working flow](docs/working-flow.md)
 
