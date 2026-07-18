@@ -30,9 +30,13 @@ The magical moment is: the musician plays a note, and the correct note appears o
 npm run build
 npm run lint
 npm test
+npm run test:privacy
+npm run evaluate:fixtures
+npm run evaluate:performance
 ```
 
-Run relevant checks before committing.
+Run the checks relevant to the change before committing.
+Browser-facing, audio, notation, responsive-layout, or performance changes normally require both evaluation commands.
 
 ## Testing Expectations
 
@@ -40,6 +44,13 @@ Run relevant checks before committing.
 - Use deterministic synthetic signals and small project-owned audio fixtures for detector tests.
 - Add browser tests for permission, start/stop, interruption, preference persistence, and responsive behavior when those features exist.
 - Manually validate sustained voice or generated tones, then real instruments when available.
+
+## Runtime And Performance
+
+- Keep the default idle and listening paths efficient on low-power mobile devices.
+- Advanced diagnostics and visualizations must be opt-in, bounded, and perform no continuous work while hidden or disabled.
+- Bound retained signal and pitch history by both time and item count.
+- Preserve the production entry-JavaScript budget enforced by `npm run build`.
 
 ## Style and Documentation
 
@@ -59,3 +70,11 @@ It must preserve local-only audio handling and must not introduce an unnecessary
 - Create or update a GitHub issue for a newly discovered, actionable finding that is outside the current branch's scope.
 - Reference the issue from each follow-up branch and pull request.
 - Do not create issues for transient investigation notes or work already covered by an open issue or pull request.
+
+## Delivery And Cleanup
+
+- Before reporting that completed work lacks a pull request, inspect open and closed pull requests, `origin/main`, and recent workflow runs.
+- Keep the worktree and agent available through pull-request checks, merge, Pages deployment, and production verification.
+- For deployed UI or audio changes, verify `https://live-staff.akofink.com/` in a real browser, including console, network, relevant desktop/mobile layouts, and the changed interaction when permissions allow.
+- Treat a successful Pages workflow as necessary but not sufficient production evidence.
+- Remove the feature worktree, local branch, remote branch, browser session, shell pane, and agent window only after merge and required production verification.
