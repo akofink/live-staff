@@ -32,7 +32,22 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
       return {
         instrumentId: parsedValue.instrumentId,
         mainsHumFrequency: parsedValue.mainsHumFrequency ?? "off",
+        inputFilters: parsedValue.mainsHumFrequency === 50 || parsedValue.mainsHumFrequency === 60
+          ? [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: parsedValue.mainsHumFrequency, q: 30, attenuationDb: 24 }]
+          : [],
       };
+    }
+
+    if (typeof parsedValue === "object" && parsedValue !== null && !("inputFilters" in parsedValue)) {
+      const previous = parsedValue as { instrumentId?: unknown; mainsHumFrequency?: unknown };
+      if (typeof previous.instrumentId === "string" && (previous.mainsHumFrequency === "off" || previous.mainsHumFrequency === 50 || previous.mainsHumFrequency === 60)) {
+        const migrated = {
+          instrumentId: previous.instrumentId,
+          mainsHumFrequency: previous.mainsHumFrequency,
+          inputFilters: previous.mainsHumFrequency === "off" ? [] : [{ id: "migrated-hum", type: "notch" as const, enabled: true, frequencyHz: previous.mainsHumFrequency, q: 30, attenuationDb: 24 }],
+        };
+        return isPreferences(migrated) ? migrated : defaultPreferences;
+      }
     }
 
     return isPreferences(parsedValue) ? parsedValue : defaultPreferences;

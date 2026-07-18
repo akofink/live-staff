@@ -26,19 +26,16 @@ test("progressively reveals settings and keeps instrument controls available dur
   await settings.press("Enter");
   await expect(page.getByLabel("Instrument")).toBeVisible();
   const instrument = page.getByLabel("Instrument");
-  const backgroundHum = page.getByLabel("Background hum");
   const roomCalibration = page.getByRole("button", { name: "Calibrate room noise" });
   await expect(roomCalibration).toBeDisabled();
 
   await page.getByRole("button", { name: "Start listening" }).click();
   await expect(instrument).toBeEnabled();
-  await expect(backgroundHum).toBeEnabled();
   await expect(page.getByRole("status").filter({ hasText: "Changes apply immediately." })).toBeVisible();
 
   await page.evaluate(() => (window as typeof window & { resolveMicrophoneAccess(): void }).resolveMicrophoneAccess());
   await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
   await expect(instrument).toBeEnabled();
-  await expect(backgroundHum).toBeEnabled();
   await expect(roomCalibration).toBeEnabled();
   await roomCalibration.click();
   await expect(page.getByText("The room is already below the detector noise threshold. Calibration is not needed.")).toBeVisible({ timeout: 3_000 });
@@ -63,7 +60,7 @@ test("keeps instrument settings available after microphone startup fails", async
 
   await expect(page.getByText("Microphone access was denied. Allow access and try again.")).toBeVisible();
   await expect(page.getByLabel("Instrument")).toBeEnabled();
-  await expect(page.getByLabel("Background hum")).toBeEnabled();
+  await expect(page.getByRole("group", { name: "Input filters" })).toBeVisible();
 });
 
 test("keeps settings usable on a small screen and restores saved preferences", async ({ page }) => {
@@ -73,7 +70,7 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
   await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("live-staff.preferences"))).toBe(
-    '{"instrumentId":"b-flat-trumpet","mainsHumFrequency":"off"}',
+    '{"instrumentId":"b-flat-trumpet","mainsHumFrequency":"off","inputFilters":[]}',
   );
 
   await page.reload();
@@ -289,7 +286,8 @@ test("keeps signal monitoring opt-in, bounded, accessible, and immediately stopp
   const toggle = page.getByLabel("Show waveform and spectrum");
   await toggle.check();
   await expect(page.getByRole("heading", { name: "Signal monitor" })).toBeVisible();
-  await expect(page.getByText(/50 Hz and 60 Hz markers/)).toBeVisible();
+  await expect(page.getByText(/raw microphone input/)).toBeVisible();
+  await expect(page.getByText(/Raw spectrum and filter response/)).toBeVisible();
   await expect(toggle).toHaveAttribute("aria-describedby", "signal-monitor-guidance");
   const measurementStart = await page.evaluate(() => ({
     timestamp: performance.now(),
@@ -346,3 +344,30 @@ for (const viewport of [
     await page.screenshot({ path: testInfo.outputPath(`idle-${viewport.name}.png`), fullPage: true });
   });
 }
+
+test("edits four bounded filters without pointer input and keeps mobile controls accessible", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  await page.locator(".preferences > summary").press("Enter");
+  const add = page.getByRole("button", { name: "Add band-stop filter" });
+  await add.press("Enter");
+  const frequency = page.getByRole("slider", { name: "Band-stop 1 frequency" });
+  await expect(frequency).toHaveAttribute("aria-valuetext", "60 hertz");
+  await frequency.press("ArrowRight");
+  await expect(frequency).toHaveValue("61");
+  await page.getByLabel("Band-stop 1 width").selectOption("30");
+  await page.getByRole("slider", { name: "Band-stop 1 reduction" }).press("ArrowRight");
+  await expect(page.getByText("21 dB", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Bypass all filters")).toBeEnabled();
+
+  await add.click();
+  await add.click();
+  await add.click();
+  await expect(add).toBeDisabled();
+  await expect(page.getByRole("group", { name: /Band-stop/ })).toHaveCount(4);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  const touchHeight = await page.getByRole("button", { name: "Remove filter" }).first().evaluate((element) => element.getBoundingClientRect().height);
+  expect(touchHeight).toBeGreaterThanOrEqual(44);
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  await expect(page.getByRole("group", { name: /Band-stop/ })).toHaveCount(0);
+});

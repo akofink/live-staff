@@ -1,4 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { filterResponseDb, type InputFilterBand } from "../audio/inputFilterChain";
 import {
   frequencyToLogPosition,
   waveformLevelDb,
@@ -9,15 +10,17 @@ export interface SignalMonitorHandle {
   draw(frame: SignalMonitorFrame): void;
 }
 
-export const SignalMonitor = forwardRef<SignalMonitorHandle>(function SignalMonitor(_, ref) {
+export const SignalMonitor = forwardRef<SignalMonitorHandle, { readonly bands: readonly InputFilterBand[]; readonly bypassed: boolean }>(function SignalMonitor({ bands, bypassed }, ref) {
   const waveformCanvas = useRef<HTMLCanvasElement>(null);
   const spectrumCanvas = useRef<HTMLCanvasElement>(null);
   const level = useRef<HTMLOutputElement>(null);
+  const response = useRef({ bands, bypassed });
+  response.current = { bands, bypassed };
 
   useImperativeHandle(ref, () => ({
     draw(frame) {
       drawWaveform(waveformCanvas.current, frame.waveform);
-      drawSpectrum(spectrumCanvas.current, frame);
+      drawSpectrum(spectrumCanvas.current, frame, response.current.bands, response.current.bypassed);
       if (level.current) {
         const decibels = waveformLevelDb(frame.waveform);
         level.current.textContent = Number.isFinite(decibels) ? `${decibels.toFixed(1)} dBFS` : "No signal";
@@ -34,7 +37,8 @@ export const SignalMonitor = forwardRef<SignalMonitorHandle>(function SignalMoni
         </div>
         <p>Level <output ref={level}>Waiting for signal</output></p>
       </div>
-      <p className="preferences-help">Waveform shows microphone level. The logarithmic spectrum marks common 50 Hz and 60 Hz electrical hum.</p>
+      <p className="preferences-help">The spectrum is the raw microphone input. The amber response line shows what the filters pass to pitch detection.</p>
+      <p className="visually-hidden">{bypassed ? "All filters bypassed; pitch detection receives the raw microphone signal." : bands.filter((band) => band.enabled).length === 0 ? "No filters enabled." : `${bands.filter((band) => band.enabled).length} filters compose before pitch detection.`}</p>
       <div className="signal-monitor-charts">
         <figure>
           <canvas ref={waveformCanvas} width="640" height="150" aria-hidden="true" />
@@ -42,7 +46,7 @@ export const SignalMonitor = forwardRef<SignalMonitorHandle>(function SignalMoni
         </figure>
         <figure>
           <canvas ref={spectrumCanvas} width="640" height="150" aria-hidden="true" />
-          <figcaption>Spectrum: 20 Hz to 20 kHz, with 50 Hz and 60 Hz markers</figcaption>
+          <figcaption>Raw spectrum and filter response: 20 Hz to 20 kHz; level -100 to -30 dBFS</figcaption>
         </figure>
       </div>
     </section>
@@ -75,10 +79,20 @@ function drawWaveform(canvas: HTMLCanvasElement | null, waveform: Float32Array) 
   context.stroke();
 }
 
-function drawSpectrum(canvas: HTMLCanvasElement | null, frame: SignalMonitorFrame) {
+function drawSpectrum(canvas: HTMLCanvasElement | null, frame: SignalMonitorFrame, bands: readonly InputFilterBand[], bypassed: boolean) {
   const context = canvasContext(canvas);
   if (!canvas || !context) return;
   context.clearRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#5c5548";
+  context.font = `${11 * Math.min(devicePixelRatio, 2)}px ui-monospace`;
+  for (const frequency of [20, 50, 100, 1_000, 10_000, 20_000]) {
+    const x = frequencyToLogPosition(frequency) * canvas.width;
+    context.fillText(frequency >= 1_000 ? `${frequency / 1_000}k` : `${frequency}`, Math.min(x + 2, canvas.width - 28), canvas.height - 4);
+  }
+  for (const decibels of [-90, -60, -30]) {
+    const y = (1 - (decibels - frame.minDecibels) / (frame.maxDecibels - frame.minDecibels)) * canvas.height;
+    context.fillText(`${decibels}`, 3, Math.max(12, y - 2));
+  }
   context.strokeStyle = "#264d3d";
   context.lineWidth = 2;
   context.beginPath();
@@ -105,4 +119,14 @@ function drawSpectrum(canvas: HTMLCanvasElement | null, frame: SignalMonitorFram
     context.fillText(`${frequency} Hz`, x + 4, 14 * Math.min(devicePixelRatio, 2));
   }
   context.setLineDash([]);
+  context.strokeStyle = "#d07820";
+  context.lineWidth = 3;
+  context.beginPath();
+  for (let x = 0; x < canvas.width; x += 1) {
+    const frequency = 20 * (1_000 ** (x / canvas.width));
+    const responseDb = filterResponseDb(bands, frequency, frame.sampleRate, bypassed);
+    const y = Math.min(canvas.height, Math.max(0, (-responseDb / 30) * canvas.height));
+    if (x === 0) context.moveTo(x, y); else context.lineTo(x, y);
+  }
+  context.stroke();
 }
