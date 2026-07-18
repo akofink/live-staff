@@ -10,7 +10,7 @@ export interface DetectorOptions {
   readonly minimumConfidence?: number;
 }
 
-const defaults: Required<DetectorOptions> = {
+export const detectorDefaults: Required<DetectorOptions> = {
   minimumFrequencyHz: 55,
   maximumFrequencyHz: 1_000,
   minimumRms: 0.01,
@@ -23,7 +23,7 @@ export function detectPitch(
   sampleRate: number,
   options: DetectorOptions = {},
 ): PitchEstimate | null {
-  const settings = { ...defaults, ...options };
+  const settings = { ...detectorDefaults, ...options };
   const rms = Math.sqrt(frame.reduce((sum, sample) => sum + sample * sample, 0) / frame.length);
   if (rms < settings.minimumRms) {
     return null;

@@ -16,12 +16,14 @@ Read the actual `AudioContext.sampleRate`; never assume one.
 ## Stabilization
 
 Raw frequency estimates are not rendered as staff notes directly.
-The detector rejects weak RMS and confidence values, then the stabilizer requires two matching quantized MIDI estimates, holds through four missing frames, and clears after sustained silence.
+The detector rejects frames below `0.01` RMS and estimates below `0.72` confidence, then the stabilizer requires two matching quantized MIDI estimates, holds through four missing frames, and clears after sustained silence.
 These thresholds are centralized and tunable; fractional-MIDI smoothing and pitch-boundary hysteresis are not shipped.
 
 ## Latency
 
-Target a stable note display roughly 100 to 250 ms after a pitch settles.
+The reviewed deterministic upper bound is a stable note display no later than 250 ms after a pitch settles.
+With a pitch settling immediately after an analysis opportunity, the shipped 80 ms cadence and two accepted frames produce a worst-aligned modeled 160 ms stable display.
+This is deterministic pipeline evidence, not a wall-clock guarantee for every browser or device.
 Favor readable stability over artificially low latency.
 
 ## Browser Constraints
@@ -61,9 +63,11 @@ The detector suppresses frames below a minimum RMS level and estimates below a c
 Users can add up to four off-by-default high-pass, low-pass, or narrow band-stop sections before detection, or bypass all configured sections for the session.
 The exact bounds, persistence, response overlay, and safety rationale are documented in the [input filter chain](input-filter-chain-design.md).
 Optional [room-noise calibration](room-noise-calibration.md) suppresses likely steady-noise detector results before stabilization without changing PCM.
-`npm run evaluate:fixtures` decodes the project-owned M4A recordings in headless Chromium and reports stable-window estimates against their expected concert MIDI pitches.
-It fails for decode and browser-runtime failures, not detector mismatches or absent estimates.
-It is an evaluation aid, not evidence of production-grade accuracy.
+`npm run evaluate:fixtures` decodes the project-owned M4A recordings in headless Chromium and reports every stable-window estimate or absence against its expected concert MIDI pitch.
+It enforces the observed regression floor for this single piano corpus: at least 3 of 10 in-range fixtures must have one matching window, at least 31 estimates must be emitted, and no more than 20 may be octave errors.
+Those floors prevent further regression; they are not supported-range accuracy claims.
+Strict deterministic evidence requires 100% of sine and harmonic-rich signals at every chromatic pitch from Bb1 at 58.27 Hz through B5 at 987.77 Hz to be within 20 cents, with zero octave errors, zero false positives, and 100% absence for reviewed silence, sub-threshold tones, and above-threshold seeded noise.
+The configured autocorrelation search remains 55 to 1,000 Hz, but exact endpoint tones are not claimed: a 4,096-sample frame does not provide reviewed endpoint peak evidence.
 YIN and McLeod Pitch Method remain candidates for the next benchmark-driven detector decision.
 
 ## Advanced Signal Monitor
@@ -78,5 +82,5 @@ Disabling the checkbox, stopping listening, or unmounting the app removes the ca
 
 - Select and benchmark a maintained detector.
 - Choose detector frame sizes for low-note resolution versus latency.
-- Establish reviewed detector thresholds over the existing recorded-fixture and synthetic-signal suite in [issue #69](https://github.com/akofink/live-staff/issues/69).
+- Expand project-owned recordings beyond one piano, room, codec, and capture route.
 - Confirm mobile Safari behavior in a real-device spike.

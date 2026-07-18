@@ -6,8 +6,8 @@ Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-n
 
 ## Synthetic Signals
 
-Generate deterministic tones for A4 at 440 Hz, concert B-flat4, middle C, low and high notes, small detuning, silence, and harmonic-rich signals where useful.
-Use them to test detector accuracy and confidence behavior without device variability.
+Generate deterministic sine and harmonic-rich tones at every chromatic pitch from Bb1 at 58.27 Hz through B5 at 987.77 Hz, alternating 44.1 and 48 kHz sample rates, plus silence, sub-threshold tones, and above-threshold seeded noise.
+The reviewed gate requires every pitched case to be within 20 cents with no octave errors, every silence or uncertain case to return absence, and the worst-aligned two-frame stabilizer model to display at 160 ms within the 250 ms upper bound.
 
 ## Recorded Fixtures
 
@@ -31,8 +31,8 @@ Signal-monitor browser coverage proves zero spectrum work before opt-in, one mic
 Pure tests cover logarithmic frequency placement, deterministic RMS level, monitor cadence, and disable semantics without wall-clock timing.
 Controlled Chromium tests cover pending-start cancellation, request deduplication, context suspension and resume, simulated track end, repeated recovery, and resource-release counts.
 These tests establish application state transitions and cleanup invariants, not operating-system audio-route behavior.
-The M4A fixture harness runs in CI to catch decode, browser-runtime, and local-serving regressions.
-It is not a CI accuracy claim: mismatches and absent estimates remain reported data until a reviewed accuracy threshold exists.
+The M4A fixture harness runs in CI to catch decode, browser-runtime, local-serving, and reviewed corpus regressions.
+Its floors of 3 matching fixtures, 31 emitted estimates, and at most 20 octave errors are a baseline for one piano corpus, not a general accuracy claim.
 
 ## Automated Gate
 

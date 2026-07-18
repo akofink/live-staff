@@ -1,5 +1,6 @@
 import { evaluateFixturePcm, type FixtureEvaluation } from "./evaluation";
 import { pianoFixtures, type PianoFixture } from "./fixtures";
+import { detectorEvidencePolicy } from "./evidencePolicy";
 import "./styles.css";
 
 const evaluateButton = document.querySelector<HTMLButtonElement>("#evaluate")!;
@@ -16,6 +17,7 @@ interface FixtureResult {
 interface FixtureEvaluationReport {
   readonly status: "complete" | "failed";
   readonly fixtures: readonly FixtureResult[];
+  readonly policy: typeof detectorEvidencePolicy;
   readonly error?: string;
 }
 
@@ -30,10 +32,11 @@ function fixtureUrl(fileName: string): string {
 
 function renderResult(fixture: PianoFixture, evaluation: FixtureEvaluation): void {
   const item = document.createElement("article");
-  const estimates = evaluation.estimates
+  const estimates = evaluation.windows
+    .filter((window) => window.estimate !== null)
     .map(
-      (estimate) =>
-        `${estimate.detectedPitch} (${estimate.frequencyHz.toFixed(1)} Hz, ${estimate.confidence.toFixed(2)}, ${estimate.cents >= 0 ? "+" : ""}${estimate.cents} cents)`,
+      ({ estimate }) => estimate &&
+        `${estimate.detectedPitch} (${estimate.frequencyHz.toFixed(1)} Hz, ${estimate.confidence.toFixed(2)}, ${estimate.centsError >= 0 ? "+" : ""}${estimate.centsError} cents from expected)`,
     )
     .join("; ");
 
@@ -78,11 +81,11 @@ evaluateButton.addEventListener("click", async () => {
       fixtureResults.push(await evaluateFixture(context, fixture));
     }
     status.textContent = "Evaluation complete. Review all observed estimates, including mismatches and missing estimates.";
-    publishReport({ status: "complete", fixtures: fixtureResults });
+    publishReport({ status: "complete", fixtures: fixtureResults, policy: detectorEvidencePolicy });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     status.textContent = `Evaluation failed: ${message}`;
-    publishReport({ status: "failed", fixtures: fixtureResults, error: message });
+    publishReport({ status: "failed", fixtures: fixtureResults, policy: detectorEvidencePolicy, error: message });
   } finally {
     await context?.close();
     evaluateButton.disabled = false;

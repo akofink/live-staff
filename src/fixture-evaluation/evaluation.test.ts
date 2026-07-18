@@ -43,9 +43,11 @@ describe("fixture evaluation", () => {
 
     expect(evaluation.evaluatedWindows).toBe(8);
     expect(evaluation.matchingWindows).toBe(1);
-    expect(evaluation.estimates).toMatchObject([
-      { detectedPitch: "A4", matchesExpectedPitch: true },
-      { detectedPitch: "A#4", matchesExpectedPitch: false },
+    expect(evaluation.windows).toHaveLength(8);
+    expect(evaluation.windows.slice(0, 3)).toMatchObject([
+      { estimate: { detectedPitch: "A4", matchesExpectedPitch: true } },
+      { estimate: { detectedPitch: "A#4", matchesExpectedPitch: false } },
+      { estimate: null },
     ]);
   });
 });
