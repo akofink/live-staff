@@ -49,7 +49,7 @@ The isolated entries quantify potential code cost without claiming the exact del
 The control passed supported range, harmonic recovery, absences, calibrated room gating, both hum-filter paths, and latency.
 Multi-period and comb candidates failed supported range, harmonic recovery, and calibrated room gating.
 The landmark candidate failed supported range, harmonic recovery, calibrated room gating, and hum filtering.
-All candidates therefore failed mandatory gates.
+Those initial candidates therefore failed mandatory gates.
 
 Baseline-compatible policy results were 3 matching fixtures, 31 emissions, and 20 octave errors for control; 2, 25, and 19 for multi-period; 3, 26, and 19 for comb projection; and 0, 0, and 0 for landmarks.
 Control CPU timing was 6.3 ms median, 6.8 ms p95, and 7.3 ms maximum in this run.
@@ -57,8 +57,7 @@ Multi-period was 6.3/6.8/9.3 ms, comb was 6.2/6.6/6.9 ms, and landmarks was 0/0.
 The isolated minified/gzip control entry measured 988/526 bytes; all candidates together measured 2,305/927 bytes.
 
 No production change is justified.
-The narrow next experiment is a fundamental-aware peak-selection rule that is first required to pass supported-range, missing-fundamental, and calibrated-room gates before recorded fixtures are considered.
-Do not tune that experiment against fixture names or individual recording outcomes.
+The fundamental-aware follow-up below supersedes the next-experiment note from this run.
 
 CPU measurements cover desktop Chromium on this host, not mobile thermal, battery, or sustained-heap behavior.
 The complete report is written to `test-results/detector-benchmark.json`.
