@@ -51,6 +51,18 @@ describe("detector benchmark logic", () => {
     expect(scenarios.latency.pass).toBe(true);
   });
 
+  it("requires the fundamental-aware selector to clear every mandatory gate", () => {
+    const scenarios = establishedScenarioResults(benchmarkDetectors.fundamentalAware);
+    expect(Object.fromEntries(Object.entries(scenarios).map(([name, result]) => [name, result.pass])), JSON.stringify(scenarios)).toEqual({
+      supportedRange: true,
+      harmonicRecovery: true,
+      absences: true,
+      calibratedRoomGate: true,
+      humFilters: true,
+      latency: true,
+    });
+  });
+
   it("does not express dynamic JavaScript allocations as exact bytes", () => {
     expect(detectorAllocationInventory("control")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });
     expect(detectorAllocationInventory("landmarkHistogram")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });

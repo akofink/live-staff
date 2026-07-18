@@ -21,6 +21,8 @@ test("records deterministic offline detector evidence", async ({ page }, testInf
   const results = (report as { results: Record<string, { recorded: { baselineCompatible: { policyInRange: { matchingGroups: string[]; emitted: number; octaveErrors: number } } } }> }).results;
   expect(results.control.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 31, octaveErrors: 20 });
   expect(results.control.recorded.baselineCompatible.policyInRange.matchingGroups).toHaveLength(3);
+  expect(results.fundamentalAware.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 31, octaveErrors: 20 });
+  expect(results.fundamentalAware.recorded.baselineCompatible.policyInRange.matchingGroups).toHaveLength(3);
   expect(results.multiPeriod.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 25, octaveErrors: 19 });
   expect(results.combProjection.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 26, octaveErrors: 19 });
   expect(results.landmarkHistogram.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 0, octaveErrors: 0 });

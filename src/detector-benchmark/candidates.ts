@@ -55,6 +55,35 @@ export const detectMultiPeriod: BenchmarkDetector = (frame, sampleRate) => {
     ? interpolate(values, best, minimumLag, sampleRate, Math.min(1, bestScore)) : null;
 };
 
+/** Selects a longer fundamental period only when octave and repeated-period evidence is stronger. */
+export const detectFundamentalAware: BenchmarkDetector = (frame, sampleRate) => {
+  const result = correlations(frame, sampleRate);
+  if (!result) return null;
+  const { values, minimumLag } = result;
+  const first = values.findIndex((value, index) => index > 0 && index < values.length - 1
+    && value >= 0.72 && value > values[index - 1] && value >= values[index + 1]);
+  if (first < 0) return null;
+
+  let selected = first;
+  const firstLag = minimumLag + first;
+  const expected = 2 * firstLag - minimumLag;
+  if (expected < values.length - 1) {
+    let candidate = expected;
+    for (let index = Math.max(1, expected - 2); index <= Math.min(values.length - 2, expected + 2); index += 1) {
+      if (values[index] > values[candidate]) candidate = index;
+    }
+    const candidateLag = minimumLag + candidate;
+    const repeated = 2 * candidateLag - minimumLag;
+    if (values[first] >= 0.9
+      && values[candidate] >= values[first] + 0.08
+      && values[candidate] >= 0.9
+      && (repeated >= values.length || values[repeated] >= values[candidate] - 0.04)) {
+      selected = candidate;
+    }
+  }
+  return interpolate(values, selected, minimumLag, sampleRate, values[selected]);
+};
+
 /** A low-cost time-domain comb projection rewards repeated structure while penalizing half-period ambiguity. */
 export const detectCombProjection: BenchmarkDetector = (frame, sampleRate) => {
   const result = correlations(frame, sampleRate);

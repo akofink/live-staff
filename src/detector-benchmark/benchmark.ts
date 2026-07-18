@@ -4,10 +4,11 @@ import { NoteStabilizer } from "../pitch/stabilizer";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
 import { InputFilterChain, defaultNotch } from "../audio/inputFilterChain";
 import { MainsHumFilter } from "../audio/mainsHumFilter";
-import { detectCombProjection, detectLandmarkHistogram, detectMultiPeriod, type BenchmarkDetector } from "./candidates";
+import { detectCombProjection, detectFundamentalAware, detectLandmarkHistogram, detectMultiPeriod, type BenchmarkDetector } from "./candidates";
 
 export const benchmarkDetectors: Readonly<Record<string, BenchmarkDetector>> = {
   control: detectPitch,
+  fundamentalAware: detectFundamentalAware,
   multiPeriod: detectMultiPeriod,
   combProjection: detectCombProjection,
   landmarkHistogram: detectLandmarkHistogram,
