@@ -63,6 +63,104 @@ test("keeps instrument settings available after microphone startup fails", async
   await expect(page.getByRole("group", { name: "Input filters" })).toBeVisible();
 });
 
+test("cancels pending microphone startup and releases the late stream without a duplicate request", async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = { requests: 0, stops: 0 };
+    let resolveRequest: ((stream: MediaStream) => void) | undefined;
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => {
+        state.requests += 1;
+        return new Promise<MediaStream>((resolve) => { resolveRequest = resolve; });
+      },
+    });
+    Object.assign(window, {
+      lifecycleState: state,
+      resolveCanceledRequest: () => resolveRequest?.({
+        getTracks: () => [{ stop: () => { state.stops += 1; } }],
+      } as MediaStream),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await expect(page.getByRole("button", { name: "Cancel starting" })).toBeVisible();
+  await page.getByRole("button", { name: "Cancel starting" }).click();
+  await expect(page.getByText("Microphone startup canceled. No audio session is active.")).toBeVisible();
+  await page.evaluate(() => (window as typeof window & { resolveCanceledRequest(): void }).resolveCanceledRequest());
+  await expect.poll(() => page.evaluate(() => (window as typeof window & { lifecycleState: { stops: number } }).lifecycleState.stops)).toBe(1);
+  expect(await page.evaluate(() => (window as typeof window & { lifecycleState: { requests: number } }).lifecycleState.requests)).toBe(1);
+});
+
+test("resumes a suspended context and recovers repeatedly from simulated device loss", async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = { requests: 0, stops: 0, closes: 0, resumes: 0 };
+    let currentTrack: (EventTarget & { readyState: MediaStreamTrackState; stop(): void }) | undefined;
+    class TestTrack extends EventTarget {
+      readyState: MediaStreamTrackState = "live";
+      stop() { state.stops += 1; this.readyState = "ended"; }
+      end() { this.readyState = "ended"; this.dispatchEvent(new Event("ended")); }
+    }
+    class TestAudioContext extends EventTarget {
+      static current: TestAudioContext | undefined;
+      readonly sampleRate = 48_000;
+      state: AudioContextState = "running";
+      constructor() { super(); TestAudioContext.current = this; }
+      createMediaStreamSource() { return { connect() {}, disconnect() {} }; }
+      createAnalyser() {
+        return {
+          fftSize: 4_096,
+          frequencyBinCount: 2_048,
+          minDecibels: -100,
+          maxDecibels: -30,
+          disconnect() {},
+          getFloatTimeDomainData(frame: Float32Array) { frame.fill(0); },
+          getFloatFrequencyData(frame: Float32Array) { frame.fill(-100); },
+        };
+      }
+      resume() { state.resumes += 1; this.state = "running"; this.dispatchEvent(new Event("statechange")); return Promise.resolve(); }
+      close() { state.closes += 1; this.state = "closed"; return Promise.resolve(); }
+      suspendForTest() { this.state = "suspended"; this.dispatchEvent(new Event("statechange")); }
+    }
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => {
+        state.requests += 1;
+        currentTrack = new TestTrack();
+        return Promise.resolve({ getTracks: () => [currentTrack] } as unknown as MediaStream);
+      },
+    });
+    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+    Object.assign(window, {
+      lifecycleState: state,
+      suspendAudio: () => TestAudioContext.current?.suspendForTest(),
+      endTrack: () => (currentTrack as TestTrack | undefined)?.end(),
+    });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+  await page.evaluate(() => (window as typeof window & { suspendAudio(): void }).suspendAudio());
+  await expect(page.getByRole("button", { name: "Resume listening" })).toBeVisible();
+  await page.getByRole("button", { name: "Resume listening" }).click();
+  await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+
+  for (const expectedRequests of [2, 3]) {
+    await page.evaluate(() => (window as typeof window & { endTrack(): void }).endTrack());
+    await expect(page.getByText("The microphone disconnected. Connect it and try again.")).toBeVisible();
+    await page.getByRole("button", { name: "Start listening" }).click();
+    await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => (window as typeof window & { lifecycleState: { requests: number } }).lifecycleState.requests)).toBe(expectedRequests);
+  }
+
+  await page.getByRole("button", { name: "Stop listening" }).click();
+  const counts = await page.evaluate(() => (window as typeof window & {
+    lifecycleState: { requests: number; stops: number; closes: number; resumes: number };
+  }).lifecycleState);
+  expect(counts).toEqual({ requests: 3, stops: 3, closes: 3, resumes: 1 });
+});
+
 test("keeps settings usable on a small screen and restores saved preferences", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/");

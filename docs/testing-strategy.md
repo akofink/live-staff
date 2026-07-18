@@ -29,6 +29,8 @@ Issue [#67](https://github.com/akofink/live-staff/issues/67) adds comprehensive 
 Browser tests must mock audio where reliable device access is unavailable in CI.
 Signal-monitor browser coverage proves zero spectrum work before opt-in, one microphone request, bounded update cadence, immediate cleanup, accessible native controls, and no overflow at 320 CSS pixels.
 Pure tests cover logarithmic frequency placement, deterministic RMS level, monitor cadence, and disable semantics without wall-clock timing.
+Controlled Chromium tests cover pending-start cancellation, request deduplication, context suspension and resume, simulated track end, repeated recovery, and resource-release counts.
+These tests establish application state transitions and cleanup invariants, not operating-system audio-route behavior.
 The M4A fixture harness runs in CI to catch decode, browser-runtime, and local-serving regressions.
 It is not a CI accuracy claim: mismatches and absent estimates remain reported data until a reviewed accuracy threshold exists.
 
@@ -51,4 +53,5 @@ npm run evaluate:performance
 
 Validate with voice, piano or generated tone, and at least one transposing instrument when available.
 Maintain a supported-browser and device matrix as real devices are tested.
-Current iOS Safari, representative Android, sustained mobile, keyboard, and screen-reader evidence remains tracked by [issue #71](https://github.com/akofink/live-staff/issues/71).
+[Issue #71](https://github.com/akofink/live-staff/issues/71) owns durable real-device evidence for iOS Safari and Android backgrounding, screen lock, phone or OS audio interruption, permission revocation, wired and Bluetooth route changes, external microphone loss, sustained thermal behavior, keyboard use, screen readers, and browser-specific permission UI.
+Those cases cannot be represented faithfully by replacing Chromium browser objects in automation and must not be inferred from the controlled lifecycle tests.
