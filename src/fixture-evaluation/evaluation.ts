@@ -8,18 +8,26 @@ const windowSpacingSeconds = 0.35;
 const maximumWindows = 8;
 
 export interface WindowResult {
-  readonly frequencyHz: number;
-  readonly confidence: number;
-  readonly detectedMidi: number;
-  readonly detectedPitch: string;
-  readonly cents: number;
-  readonly matchesExpectedPitch: boolean;
+  readonly startSample: number;
+  readonly startMs: number;
+  readonly expectedFrequencyHz: number;
+  readonly estimate: {
+    readonly frequencyHz: number;
+    readonly confidence: number;
+    readonly detectedMidi: number;
+    readonly detectedPitch: string;
+    readonly centsError: number;
+    readonly midiError: number;
+    readonly matchesExpectedPitch: boolean;
+    readonly octaveError: boolean;
+  } | null;
 }
 
 export interface FixtureEvaluation {
   readonly evaluatedWindows: number;
-  readonly estimates: readonly WindowResult[];
+  readonly windows: readonly WindowResult[];
   readonly matchingWindows: number;
+  readonly octaveErrors: number;
 }
 
 type Detector = (frame: Float32Array, sampleRate: number) => PitchEstimate | null;
@@ -45,29 +53,45 @@ export function evaluateFixturePcm(
   expectedMidi: number,
   detector: Detector = detectPitch,
 ): FixtureEvaluation {
-  const estimates: WindowResult[] = [];
+  const windows: WindowResult[] = [];
   const starts = analysisFrameStarts(samples.length, sampleRate);
+  const expectedFrequencyHz = 440 * 2 ** ((expectedMidi - 69) / 12);
 
   for (const start of starts) {
     const estimate = detector(samples.slice(start, start + frameLength), sampleRate);
     if (estimate === null) {
+      windows.push({
+        startSample: start,
+        startMs: (start / sampleRate) * 1_000,
+        expectedFrequencyHz,
+        estimate: null,
+      });
       continue;
     }
 
     const note = frequencyToNote(estimate.frequencyHz);
-    estimates.push({
-      frequencyHz: estimate.frequencyHz,
-      confidence: estimate.confidence,
-      detectedMidi: note.midi,
-      detectedPitch: note.name,
-      cents: note.cents,
-      matchesExpectedPitch: note.midi === expectedMidi,
+    const midiError = note.midi - expectedMidi;
+    windows.push({
+      startSample: start,
+      startMs: (start / sampleRate) * 1_000,
+      expectedFrequencyHz,
+      estimate: {
+        frequencyHz: estimate.frequencyHz,
+        confidence: estimate.confidence,
+        detectedMidi: note.midi,
+        detectedPitch: note.name,
+        centsError: Math.round(1_200 * Math.log2(estimate.frequencyHz / expectedFrequencyHz)),
+        midiError,
+        matchesExpectedPitch: midiError === 0,
+        octaveError: Math.abs(midiError) >= 12 && midiError % 12 === 0,
+      },
     });
   }
 
   return {
     evaluatedWindows: starts.length,
-    estimates,
-    matchingWindows: estimates.filter((estimate) => estimate.matchesExpectedPitch).length,
+    windows,
+    matchingWindows: windows.filter((window) => window.estimate?.matchesExpectedPitch).length,
+    octaveErrors: windows.filter((window) => window.estimate?.octaveError).length,
   };
 }

@@ -13,7 +13,7 @@ Audio, music-domain, notation, privacy, or UI changes also require the applicabl
 
 | Milestone | Exit gate |
 | --- | --- |
-| Audio and stable detection | Synthetic-signal and fixture results cover claimed ranges, silence, uncertainty, and stabilization under reviewed thresholds; a sustained tone normally reaches a stable display in 100 to 250 ms. |
+| Audio and stable detection | Synthetic evidence covers every chromatic pitch from Bb1 at 58.27 Hz through B5 at 987.77 Hz within 20 cents with zero octave errors or reviewed false positives; the worst-aligned modeled two-frame stable display reaches 160 ms. Recorded fixtures remain a corpus regression gate, not a general accuracy claim. |
 | Notation and instruments | Known concert-to-written examples, clef placement, accidentals, ranges, and labels have automated coverage. |
 | Public proof of concept | Permission, listening, silence, failure, and stop states are understandable; at least one current desktop and one current mobile browser have manual evidence. |
 | 1.0 hardening | All 1.0 requirements in the product specification are implemented, supported-browser/device evidence is current, accessibility and performance gates pass, and known limitations are published. |
@@ -24,7 +24,9 @@ Every release records the version, commit, linked issues, automated results, and
 
 Required automated evidence is a clean lockfile install and the full CI gate.
 The CI gate verifies the built `dist` artifact contains no known telemetry endpoint or third-party executable script.
-The fixture evaluator proves its browser decode and runtime harness, but its detector match data is not a release accuracy gate until a reviewed threshold exists.
+The fixture evaluator enforces the reviewed single-piano regression floor and publishes every estimate or absence.
+CI retains its machine-readable JSON as the `detector-evidence` workflow artifact.
+Supported-range accuracy comes only from deterministic synthetic evidence until representative project-owned instrument and device recordings exist.
 Changed domain logic needs focused unit coverage.
 Changed browser behavior needs browser tests for permission, start and stop, interruption, preferences, and responsive layout when that behavior is available.
 
@@ -97,7 +99,6 @@ Supported browsers and devices are only those with current recorded manual valid
 
 ## Currently Unmet 1.0 Gates
 
-- [Issue #69](https://github.com/akofink/live-staff/issues/69) must establish enforceable detector evidence and limitations.
 - [Issue #67](https://github.com/akofink/live-staff/issues/67) must complete interruption and lifecycle recovery.
 - [Issue #71](https://github.com/akofink/live-staff/issues/71) must record current real-device, accessibility, privacy, and sustained-performance evidence.
 - [Issue #72](https://github.com/akofink/live-staff/issues/72) owns the final versioned release review after these gates close.
