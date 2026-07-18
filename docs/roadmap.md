@@ -64,6 +64,9 @@ Recommended execution order:
 3. [#71 record real-device, accessibility, privacy, and sustained-performance evidence](https://github.com/akofink/live-staff/issues/71) after lifecycle and detector claims settle.
 4. [#72 run the dedicated 1.0 release review](https://github.com/akofink/live-staff/issues/72) after all preceding requirements and evidence close.
 
+The reusable [fixture capture protocol](fixture-capture-protocol.md) defines validated manifests, immutable same-take lossless/AAC assets, decoder comparison records, and the remaining physical capture matrix for [#82](https://github.com/akofink/live-staff/issues/82).
+Its local validation tooling can land independently, but #82 remains open until the operator-assisted recordings exist and are reviewed; those recordings complement detector work in #77 and attended device evidence in #71.
+
 ## Deferred Work
 
 MIDI, polyphonic input, automatic instrument recognition, persisted session history or practice logs, lessons, teacher tools, accounts, analytics, and native applications remain deferred until users validate the core experience.

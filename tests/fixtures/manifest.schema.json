@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://live-staff.akofink.com/schemas/fixture-manifest-v1.json",
+  "title": "Live Staff fixture capture manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "setId", "capturedAt", "instrument", "performer", "capture", "room", "consent", "takes", "decoderConsistency"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "setId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "instrument": {
+      "type": "object", "additionalProperties": false,
+      "required": ["family", "makeModel", "identifier"],
+      "properties": {
+        "family": { "enum": ["piano", "voice", "woodwind", "brass", "bowed-string", "plucked-string"] },
+        "makeModel": { "type": "string", "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1, "description": "Non-personal set-local identifier, not a serial number." }
+      }
+    },
+    "performer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["anonymousId", "confirmedPerformedNotes"],
+      "properties": { "anonymousId": { "type": "string", "minLength": 1 }, "confirmedPerformedNotes": { "const": true } }
+    },
+    "capture": {
+      "type": "object", "additionalProperties": false,
+      "required": ["device", "microphone", "path", "distanceMeters", "sampleRateHz"],
+      "properties": {
+        "device": { "type": "string", "minLength": 1 }, "microphone": { "type": "string", "minLength": 1 },
+        "path": { "enum": ["phone-built-in", "laptop-built-in", "wired-external", "bluetooth"] },
+        "distanceMeters": { "type": "number", "exclusiveMinimum": 0 }, "sampleRateHz": { "enum": [44100, 48000] }
+      }
+    },
+    "room": {
+      "type": "object", "additionalProperties": false,
+      "required": ["description", "condition"],
+      "properties": { "description": { "type": "string", "minLength": 1 }, "condition": { "enum": ["quiet", "hvac-or-fan"] } }
+    },
+    "consent": {
+      "type": "object", "additionalProperties": false,
+      "required": ["projectUseGranted", "publicRepositoryGranted", "confirmedAt", "confirmedByAnonymousId"],
+      "properties": {
+        "projectUseGranted": { "const": true }, "publicRepositoryGranted": { "const": true },
+        "confirmedAt": { "type": "string", "format": "date-time" }, "confirmedByAnonymousId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "takes": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["takeId", "expected", "dynamic", "provenance", "files"],
+        "properties": {
+          "takeId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "expected": {
+            "type": "object", "additionalProperties": false,
+            "required": ["concertPitch", "concertMidi", "referenceFrequencyHz", "verificationMethod", "verifiedAt", "verifiedByAnonymousId"],
+            "properties": {
+              "concertPitch": { "type": "string", "pattern": "^[A-G](?:#|b)?-?[0-9]+$" }, "concertMidi": { "type": "integer", "minimum": 0, "maximum": 127 },
+              "referenceFrequencyHz": { "type": "number", "exclusiveMinimum": 0 },
+              "verificationMethod": { "enum": ["hardware-tuner", "strobe-tuner", "calibrated-reference-instrument"] },
+              "verifiedAt": { "type": "string", "format": "date-time" }, "verifiedByAnonymousId": { "type": "string", "minLength": 1 }
+            }
+          },
+          "dynamic": { "enum": ["quiet", "medium", "loud"] },
+          "provenance": {
+            "type": "object", "additionalProperties": false,
+            "required": ["originalCapture", "pairingMethod", "processing"],
+            "properties": { "originalCapture": { "type": "string", "minLength": 1 }, "pairingMethod": { "enum": ["simultaneous-recorders", "aac-from-lossless-master"] }, "processing": { "enum": ["none", "aac-encoded-from-lossless-master"] } }
+          },
+          "files": {
+            "type": "array", "minItems": 2, "maxItems": 2,
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["role", "path", "container", "codec", "sampleRateHz", "channels", "bytes", "sha256"],
+              "properties": {
+                "role": { "enum": ["lossless", "aac"] }, "path": { "type": "string", "minLength": 1 },
+                "container": { "enum": ["wav", "caf", "m4a"] }, "codec": { "enum": ["pcm-s16le", "pcm-s24le", "alac", "aac-lc"] },
+                "sampleRateHz": { "enum": [44100, 48000] }, "channels": { "type": "integer", "minimum": 1, "maximum": 2 },
+                "bytes": { "type": "integer", "minimum": 1 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "decoderConsistency": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["takeId", "decoder", "decoderVersion", "losslessSourceSha256", "aacSourceSha256", "pcmFormat", "channels", "losslessDecodedSha256", "aacDecodedSha256", "sampleRateHz", "losslessDecodedFrames", "aacDecodedFrames", "comparisonStartFrame", "comparedFrames", "aacOffsetFromLosslessFrames", "alignmentMethod", "peakAbsoluteDifference", "rmsDifference", "notes"],
+        "properties": {
+          "takeId": { "type": "string", "minLength": 1 }, "decoder": { "type": "string", "minLength": 1 }, "decoderVersion": { "type": "string", "minLength": 1 },
+          "losslessSourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "aacSourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "pcmFormat": { "const": "f32le-interleaved-normalized" }, "channels": { "type": "integer", "minimum": 1, "maximum": 2 },
+          "losslessDecodedSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "aacDecodedSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "sampleRateHz": { "enum": [44100, 48000] }, "losslessDecodedFrames": { "type": "integer", "minimum": 1 }, "aacDecodedFrames": { "type": "integer", "minimum": 1 }, "comparisonStartFrame": { "type": "integer", "minimum": 0 }, "comparedFrames": { "type": "integer", "minimum": 1 }, "aacOffsetFromLosslessFrames": { "type": "integer" }, "alignmentMethod": { "const": "whole-frame-cross-correlation" },
+          "peakAbsoluteDifference": { "type": "number", "minimum": 0 }, "rmsDifference": { "type": "number", "minimum": 0 }, "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}
