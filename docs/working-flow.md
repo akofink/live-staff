@@ -16,9 +16,9 @@ It becomes stale and creates conflicting sources of truth.
 2. Read `AGENTS.md`, the relevant documentation, and the issue acceptance criteria.
 3. Create a dedicated branch and worktree named for the focused outcome.
 4. Make the smallest coherent change that satisfies the issue.
-5. Run targeted tests during development and the full `lint`, `test`, and `build` gates before publishing.
+5. Run targeted tests during development and the full automated gate documented in the [testing strategy](testing-strategy.md) before publishing.
 6. Update durable documentation or an ADR only when a decision or contract changes.
-7. Commit with a conventional subject that references the issue.
+7. Commit with a conventional subject and link the issue from the pull request.
 8. Push the branch and open a draft pull request that links the issue, summarizes intent, and records verification.
 9. Keep the PR draft while work is incomplete; mark it ready only when it meets the definition of done.
 10. Squash merge after review, then let GitHub delete the branch and close the issue.
@@ -33,7 +33,7 @@ Use GitHub Discussions for open-ended product or design exploration rather than 
 ## Required PR Evidence
 
 Every pull request states the linked issue, behavior change, verification performed, and any manual browser or device validation still required.
-For audio and notation changes, include the relevant manual test environment and known limits.
+For audio and notation changes, include privacy, performance, fixture, and relevant manual test evidence plus known real-device gaps.
 
 ## Agent Boundaries
 

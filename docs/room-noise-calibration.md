@@ -23,7 +23,7 @@ The calibration itself adds about 960 ms of explicit setup time and intentionall
 Normal stabilization still requires two accepted detector frames, about 160 ms at the current cadence.
 Calibration skips pitch detection and performs only one 4,096-sample RMS pass per frame.
 The active gate performs the same single pass and allocates no arrays or retained per-frame objects.
-Its retained state is five numbers and one boolean, well below the 2 MiB mobile budget.
+Its retained state is four numbers and one boolean, well below the 2 MiB mobile budget.
 The existing detector remains the dominant CPU cost because it evaluates normalized autocorrelation across hundreds of lags.
 
 The synthetic tests exercise the same sample count and 48 kHz rate commonly reported by MacBook microphones.

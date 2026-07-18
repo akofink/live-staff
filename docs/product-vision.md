@@ -34,3 +34,4 @@ It is instrument-aware, private, free, immediate, and does not require an accoun
 
 Potential future directions include clef learning, transposition exercises, MIDI input, teacher tools, context-aware spelling, and native packaging.
 They do not justify expanding the initial scope before the core microphone-to-staff experience is reliable.
+The [multi-pitch feasibility decision](multi-pitch-feasibility.md) separately defers polyphony, source separation, and timbre/source association.

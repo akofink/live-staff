@@ -8,12 +8,12 @@ Microphone audio, frames, and detections remain in the browser and are never per
 
 ## Milestone Exit Gates
 
-Each roadmap milestone is complete only when its scoped behavior has tests and the full automated gate passes: `npm run lint`, `npm test`, `npm run build`, `npm run evaluate:fixtures`, and `npm run evaluate:performance`.
+Each roadmap milestone is complete only when its scoped behavior has tests and the full automated gate passes after `npm ci`: `npm run lint`, `npm test`, `npm run build`, `npm run test:privacy`, `npm run verify:privacy`, `npm run evaluate:fixtures`, and `npm run evaluate:performance`.
 Audio, music-domain, notation, privacy, or UI changes also require the applicable evidence below before release.
 
 | Milestone | Exit gate |
 | --- | --- |
-| Audio and stable detection | Synthetic-signal and fixture results cover supported ranges, silence, uncertainty, and stabilization; a sustained tone normally reaches a stable display in 100 to 250 ms. |
+| Audio and stable detection | Synthetic-signal and fixture results cover claimed ranges, silence, uncertainty, and stabilization under reviewed thresholds; a sustained tone normally reaches a stable display in 100 to 250 ms. |
 | Notation and instruments | Known concert-to-written examples, clef placement, accidentals, ranges, and labels have automated coverage. |
 | Public proof of concept | Permission, listening, silence, failure, and stop states are understandable; at least one current desktop and one current mobile browser have manual evidence. |
 | 1.0 hardening | All 1.0 requirements in the product specification are implemented, supported-browser/device evidence is current, accessibility and performance gates pass, and known limitations are published. |
@@ -39,12 +39,12 @@ Required manual evidence for an audio or UI release is:
 ## Performance And Accessibility
 
 The production entry JavaScript, measured from the files referenced by `dist/index.html` after `gzip`, must not exceed 100 KB.
-The notation renderer is a separately loaded chunk so it does not consume the initial-load budget.
+The notation renderer is a separate chunk, but the current idle page requests it to draw the persistent empty staff.
 `npm run build` enforces this budget and reports its measured size.
 The release target is a responsive start or stop control within 100 ms of input and a stable displayed note about 100 to 250 ms after a pitch settles on the tested devices.
 The staff may finish drawing after the text alternative updates, but it must remain labeled and render without a layout shift that obscures controls.
 Reject a release that blocks interaction during analysis, makes the primary staff or listening control unusable at 320 px, relies on color alone, loses keyboard access, or disregards reduced-motion preferences.
-The production browser check at a 320 px viewport records that notation is absent from the initial request path, the empty staff has an accessible label, and the listening-control status update completes within the 100 ms interaction budget.
+The production browser check at a 320 px viewport records the idle staff request and render, accessible staff label, and listening-control status update within the 100 ms interaction budget.
 Record the build budget report and browser evidence for the initial app render, accessible staff label, and start or stop responsiveness in release evidence.
 Investigate a new bundle-size warning, budget failure, or material increase before publishing; document an accepted exception and its reason in release evidence.
 
@@ -71,7 +71,7 @@ Address security fixes on the latest `main` version under `SECURITY.md`.
 ## Versioning And Cadence
 
 The current `0.0.0` package version is development-only and is not a public compatibility promise.
-The first published proof of concept is `0.1.0`.
+No semantic release has been cut yet; the deployed site remains an unversioned preview while `package.json` is `0.0.0`.
 Before `1.0.0`, use semantic versioning with `0.MINOR.0` for additive, user-visible milestones and `0.MINOR.PATCH` for compatible fixes, documentation, and dependency-only releases.
 Treat a breaking change during `0.x` as a new minor version and document the migration or behavior change.
 Release when a milestone gate is met, not on a fixed calendar; group low-risk fixes into a regular cadence when practical and publish urgent privacy, security, or correctness fixes promptly.
@@ -83,3 +83,11 @@ Public release notes and the app documentation must state that Live Staff is for
 It is not polyphonic recognition, automatic instrument recognition, score following, or a substitute for a tuner, teacher, or professional transcription workflow.
 The in-repository autocorrelation detector is a proof-of-concept implementation and is not a production-grade guarantee across every instrument, range, room, or mobile browser.
 Supported browsers and devices are only those with current recorded manual validation.
+
+## Currently Unmet 1.0 Gates
+
+- [Issue #69](https://github.com/akofink/live-staff/issues/69) must establish enforceable detector evidence and limitations.
+- [Issue #67](https://github.com/akofink/live-staff/issues/67) must complete interruption and lifecycle recovery.
+- [Issue #68](https://github.com/akofink/live-staff/issues/68) must define and implement or explicitly remove the offline requirement.
+- [Issue #71](https://github.com/akofink/live-staff/issues/71) must record current real-device, accessibility, privacy, and sustained-performance evidence.
+- [Issue #72](https://github.com/akofink/live-staff/issues/72) owns the final versioned release review after these gates close.

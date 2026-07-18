@@ -8,21 +8,24 @@ Validate this path end to end:
 microphone input -> pitch detection -> stable concert pitch -> instrument transposition -> staff rendering
 ```
 
-The proof of concept includes microphone permission, local live capture, monophonic pitch detection, detected frequency, concert and written note calculation, a persistent treble-and-bass grand staff with one routed note, an optional note label, a signal state, and a silence state.
+The proof of concept includes microphone permission, local live capture, monophonic pitch detection, detected frequency, concert and written note calculation, a persistent treble-and-bass grand staff with an active note and a bounded 10-second a-rhythmic history, an optional note label, a signal state, and a silence state.
 
-It excludes accounts, storage, analytics, lessons, MIDI, polyphonic recognition, sheet import, payment, social features, and any backend.
+It excludes accounts, cloud storage, persisted audio or detection history, analytics, lessons, MIDI, polyphonic recognition, sheet import, payment, social features, and any backend.
 
 ## Version 1.0 Requirements
 
-- A data-driven selection of common concert and transposing instruments.
+- A compact, data-driven selection of common concert and transposing instruments.
 - Correct treble and bass staff display.
-- Written-only, concert-only, and combined pitch views.
-- An alternate-instrument comparison mode.
-- Configurable A4 reference, defaulting to 440 Hz.
-- Locally persisted preferences.
+- Instrument-first notation that defaults concert instruments to concert pitch and transposing instruments to written pitch.
+- A compact sounding or concert-pitch reference for transposing instruments.
+- Locally persisted instrument and filter preferences.
 - Responsive phone, tablet, and desktop layouts.
 - Clear permission, listening, silence, and failure states.
 - Static deployment without an account or payment requirement.
+
+These instrument-first presentation requirements shipped in PR #53 and intentionally replaced separate pitch-display controls.
+The alternate-instrument comparison mode remains the separate Transposition Coach milestone rather than a 1.0 requirement.
+Reference pitch remains fixed at A4 = 440 Hz because no independently justified configurable-reference requirement has been established.
 
 ## Nonfunctional Requirements
 
@@ -43,4 +46,6 @@ It excludes accounts, storage, analytics, lessons, MIDI, polyphonic recognition,
 - It suppresses silence and uncertain detections and renders a stable staff note.
 - It supports at least one concert-pitch and one transposing instrument with correct written pitch.
 - Core conversion and transposition behavior has automated coverage.
-- It works in at least one current desktop and mobile browser.
+- Automated Chromium coverage passes, and current desktop plus real-mobile evidence is required by [issue #71](https://github.com/akofink/live-staff/issues/71) before 1.0.
+
+See the [release policy](release-policy.md), [testing strategy](testing-strategy.md), [input filter chain](input-filter-chain-design.md), [room-noise calibration](room-noise-calibration.md), and [multi-pitch decision](multi-pitch-feasibility.md) for the corresponding gates and boundaries.
