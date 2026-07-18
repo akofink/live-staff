@@ -23,6 +23,7 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(storage)).toEqual({
       instrumentId: "b-flat-trumpet",
       mainsHumFrequency: "off",
+      inputFilters: [],
     });
   });
 
@@ -32,6 +33,7 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(storage)).toEqual({
       instrumentId: "f-horn",
       mainsHumFrequency: 60,
+      inputFilters: [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: 60, q: 30, attenuationDb: 24 }],
     });
   });
 
@@ -47,6 +49,7 @@ describe("browser preferences storage", () => {
     const preferences = {
       instrumentId: "f-horn",
       mainsHumFrequency: 60,
+      inputFilters: [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: 60, q: 30, attenuationDb: 24 }] as const,
     } as const;
 
     expect(savePreferences(storage, preferences)).toBe(true);

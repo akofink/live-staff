@@ -1,3 +1,5 @@
+import { isInputFilterBand, maximumFilterBands, type InputFilterBand } from "../audio/inputFilterChain";
+
 export const instrumentOptions = [
   { id: "concert", label: "Concert pitch", definitionId: "concert-pitch" },
   { id: "b-flat-clarinet", label: "B-flat clarinet", definitionId: "bb-clarinet" },
@@ -12,11 +14,13 @@ export type MainsHumFrequency = "off" | 50 | 60;
 export interface Preferences {
   readonly instrumentId: InstrumentId;
   readonly mainsHumFrequency: MainsHumFrequency;
+  readonly inputFilters: readonly InputFilterBand[];
 }
 
 export const defaultPreferences: Preferences = {
   instrumentId: "concert",
   mainsHumFrequency: "off",
+  inputFilters: [],
 };
 
 export function isInstrumentId(value: unknown): value is InstrumentId {
@@ -55,6 +59,9 @@ export function isPreferences(value: unknown): value is Preferences {
     isInstrumentId(candidate.instrumentId) &&
     (candidate.mainsHumFrequency === "off" ||
       candidate.mainsHumFrequency === 50 ||
-      candidate.mainsHumFrequency === 60)
+      candidate.mainsHumFrequency === 60) &&
+    Array.isArray(candidate.inputFilters) &&
+    candidate.inputFilters.length <= maximumFilterBands &&
+    candidate.inputFilters.every(isInputFilterBand)
   );
 }

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { AudioCaptureError, MicrophoneCapture, type AudioCaptureSession } from "../audio/microphone";
 import { detectPitch } from "../audio/detectors/autocorrelation";
-import { MainsHumFilter } from "../audio/mainsHumFilter";
+import { InputFilterChain, type InputFilterBand } from "../audio/inputFilterChain";
 import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
 import { GrandStaff } from "../components/GrandStaff";
@@ -13,6 +13,7 @@ import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../p
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
+import { InputFilters } from "../components/InputFilters";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
@@ -26,9 +27,10 @@ export function App() {
   const capture = useRef<MicrophoneCapture | undefined>(undefined);
   const session = useRef<AudioCaptureSession | undefined>(undefined);
   const stabilizer = useRef(new NoteStabilizer());
-  const mainsHumFilter = useRef(new MainsHumFilter());
+  const inputFilterChain = useRef(new InputFilterChain());
   const roomNoiseGate = useRef(new RoomNoiseGate());
-  const mainsHumFrequency = useRef(preferences.mainsHumFrequency);
+  const inputFilters = useRef(preferences.inputFilters);
+  const filtersBypassed = useRef(false);
   const lastDetection = useRef(0);
   const pitchHistory = useRef(new PitchHistory());
   const historyExpiry = useRef<number | undefined>(undefined);
@@ -43,6 +45,7 @@ export function App() {
   const [historyNowMs, setHistoryNowMs] = useState(0);
   const [signalMonitorEnabled, setSignalMonitorEnabled] = useState(false);
   const [roomCalibrationState, setRoomCalibrationState] = useState<"idle" | "calibrating" | "active">("idle");
+  const [filterBypass, setFilterBypass] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -88,7 +91,7 @@ export function App() {
       await session.current.stop();
       session.current = undefined;
       stabilizer.current.reset();
-      mainsHumFilter.current.reset();
+      inputFilterChain.current.reset();
       roomNoiseGate.current.reset();
       roomCalibrationStateRef.current = "idle";
       setRoomCalibrationState("idle");
@@ -107,7 +110,8 @@ export function App() {
 
     setListeningState("starting");
     setMessage("Requesting microphone access...");
-    mainsHumFilter.current.reset();
+    inputFilterChain.current.reset();
+    inputFilterChain.current.configure(inputFilters.current, filtersBypassed.current);
 
     try {
       capture.current ??= new MicrophoneCapture();
@@ -119,10 +123,7 @@ export function App() {
         lastDetection.current = timestamp;
 
         const sampleRate = session.current?.sampleRate ?? 44_100;
-        mainsHumFilter.current.setFrequency(
-          mainsHumFrequency.current === "off" ? undefined : mainsHumFrequency.current,
-        );
-        const filteredFrame = mainsHumFilter.current.process(frame, sampleRate);
+        const filteredFrame = inputFilterChain.current.process(frame, sampleRate);
         const estimate = roomNoiseGate.current.process(
           filteredFrame,
           roomNoiseGate.current.state === "calibrating" ? null : detectPitch(filteredFrame, sampleRate),
@@ -180,7 +181,8 @@ export function App() {
   function updatePreferences(update: Partial<Preferences>) {
     const nextPreferences = { ...preferences, ...update };
     setPreferences(nextPreferences);
-    mainsHumFrequency.current = nextPreferences.mainsHumFrequency;
+    inputFilters.current = nextPreferences.inputFilters;
+    inputFilterChain.current.configure(nextPreferences.inputFilters, filtersBypassed.current);
     setPreferencesMessage(
       savePreferences(getBrowserStorage(), nextPreferences)
         ? "Preference saved on this device."
@@ -294,26 +296,22 @@ export function App() {
             <p id="instrument-guidance" className="preferences-help" role="status" aria-live="polite">
               Concert instruments show concert notation. Transposing instruments show their written notation. Changes apply immediately.
             </p>
-            <label>
-              Background hum
-              <select
-                id="background-hum"
-                value={preferences.mainsHumFrequency}
-                onChange={(event) =>
-                  updatePreferences({
-                    mainsHumFrequency:
-                      event.target.value === "off" ? "off" : (Number(event.target.value) as 50 | 60),
-                  })
-                }
-              >
-                <option value="off">Off</option>
-                <option value="50">Suppress 50 Hz</option>
-                <option value="60">Suppress 60 Hz</option>
-              </select>
-            </label>
-            <p className="preferences-help">
-              Use only when electrical hum masks your note. It removes a narrow local frequency band.
-            </p>
+            <InputFilters bands={preferences.inputFilters} bypassed={filterBypass} onBypass={(bypassed) => {
+              filtersBypassed.current = bypassed;
+              setFilterBypass(bypassed);
+              inputFilterChain.current.configure(inputFilters.current, bypassed);
+              roomNoiseGate.current.reset();
+              stabilizer.current.reset();
+              roomCalibrationStateRef.current = "idle";
+              setRoomCalibrationState("idle");
+            }} onChange={(bands: readonly InputFilterBand[]) => {
+              inputFilterChain.current.reset();
+              roomNoiseGate.current.reset();
+              stabilizer.current.reset();
+              roomCalibrationStateRef.current = "idle";
+              setRoomCalibrationState("idle");
+              updatePreferences({ inputFilters: bands });
+            }} />
             <button
               type="button"
               disabled={listeningState !== "listening" || roomCalibrationState === "calibrating"}
@@ -351,7 +349,7 @@ export function App() {
                   listeningState === "listening"
                     ? (
                         <Suspense fallback={<p className="signal-monitor-empty">Preparing local diagnostics...</p>}>
-                          <SignalMonitor ref={signalMonitor} />
+                          <SignalMonitor ref={signalMonitor} bands={preferences.inputFilters} bypassed={filterBypass} />
                         </Suspense>
                       )
                     : <p className="signal-monitor-empty" role="status">Start listening to inspect the microphone signal.</p>

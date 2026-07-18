@@ -4,6 +4,11 @@
 
 Live Staff should offer an opt-in input filter chain with independent high-pass, mains-notch, and low-pass sections.
 All three sections remain off by default.
+
+Issue #64 implements this architecture as a bounded four-section chain.
+Users can combine conservative 20-80 Hz high-pass and 8-18 kHz low-pass sections with narrow 40-4,000 Hz band-stop sections using Q values from 8 to 30 and 3-24 dB reduction.
+The monitor displays the raw microphone spectrum and overlays the composed response that is applied to pitch detection, rather than implying that analyzer data is post-filter.
+Band-pass is intentionally deferred because a casual setting can remove most of the detector's 55-1,000 Hz musical range; it requires separate instrument evidence and safety guidance before exposure.
 The first implementation should extend the existing deterministic frame-domain DSP rather than introduce a dependency or rebuild capture around Web Audio filter nodes.
 It must be reviewed with the signal-monitor plan in [issue #49](https://github.com/akofink/live-staff/issues/49) before source implementation begins.
 
