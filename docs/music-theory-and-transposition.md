@@ -4,7 +4,7 @@
 
 Use scientific pitch notation: middle C is C4.
 Detected frequency maps first to a concert MIDI pitch.
-A4 is MIDI 69 and defaults to 440 Hz, with a configurable reference.
+A4 is MIDI 69 and is fixed at 440 Hz in the shipped app.
 
 ## Pitch Terms
 
@@ -24,13 +24,14 @@ writtenMidi = concertMidi - writtenToConcertSemitones
 
 For a B-flat trumpet, written C sounds concert B-flat, so `writtenToConcertSemitones` is `-2`.
 For an E-flat alto saxophone, written C sounds concert E-flat, so it is `-9`.
-These examples must be preserved by unit tests when the instrument catalog is introduced.
+These examples are preserved by unit tests for the shipped instrument catalog.
 
 ## Instrument Data
 
 Instrument definitions are data, not conditional UI behavior.
 Each definition must include an identifier, display name, clef, transposition interval, practical ranges when known, and an accidental preference when useful.
-The initial catalog includes concert pitch, B-flat clarinet, E-flat alto saxophone, B-flat tenor saxophone, B-flat trumpet, F horn, trombone, tuba, violin, viola, cello, and double bass.
+The domain catalog includes concert pitch, B-flat clarinet, E-flat alto saxophone, B-flat tenor saxophone, B-flat trumpet, F horn, trombone, tuba, violin, viola, cello, and double bass.
+The current compact UI exposes concert pitch, B-flat clarinet, B-flat trumpet, E-flat alto saxophone, and F horn.
 Definitions are immutable and use written MIDI ranges, inclusive at both ends, when a practical range is supplied.
 The generic concert-pitch definition has no range because it represents a notation mode rather than a physical instrument.
 
@@ -53,7 +54,7 @@ The generic concert-pitch definition has no range because it represents a notati
 
 ## Clefs
 
-Treble and bass clefs are initial requirements.
+The persistent grand staff renders treble and bass clefs for all current display pitches.
 Alto and tenor clef support is deferred but must fit the domain model.
 
 ## Enharmonic Spelling

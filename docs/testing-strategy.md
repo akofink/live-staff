@@ -2,7 +2,7 @@
 
 ## Unit Tests
 
-Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, and stabilizer sequences.
+Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, stabilizer sequences, pitch history and layout, room-noise gating, filter response and bypass, monitor cadence, and preference validation or migration.
 
 ## Synthetic Signals
 
@@ -24,14 +24,31 @@ Introduce Git LFS only when a future fixture corpus materially increases clone s
 
 ## Browser Tests
 
-When microphone behavior exists, cover permission accepted and denied, absent input devices, suspended contexts, start and stop, instrument switching, persistent grand-staff routing, local preference persistence, and responsive layout.
+Current browser tests cover permission paths, start and stop, instrument switching, grand-staff routing and history, local preferences, filters, diagnostics, and responsive layout.
+Issue [#67](https://github.com/akofink/live-staff/issues/67) adds comprehensive interruption, device-loss, background/resume, and startup-cancellation behavior.
 Browser tests must mock audio where reliable device access is unavailable in CI.
 Signal-monitor browser coverage proves zero spectrum work before opt-in, one microphone request, bounded update cadence, immediate cleanup, accessible native controls, and no overflow at 320 CSS pixels.
 Pure tests cover logarithmic frequency placement, deterministic RMS level, monitor cadence, and disable semantics without wall-clock timing.
 The M4A fixture harness runs in CI to catch decode, browser-runtime, and local-serving regressions.
 It is not a CI accuracy claim: mismatches and absent estimates remain reported data until a reviewed accuracy threshold exists.
 
+## Automated Gate
+
+Run a reproducible install and the same gate used by CI:
+
+```sh
+npm ci
+npm run lint
+npm test
+npm run build
+npm run test:privacy
+npm run verify:privacy
+npm run evaluate:fixtures
+npm run evaluate:performance
+```
+
 ## Manual Validation
 
 Validate with voice, piano or generated tone, and at least one transposing instrument when available.
 Maintain a supported-browser and device matrix as real devices are tested.
+Current iOS Safari, representative Android, sustained mobile, keyboard, and screen-reader evidence remains tracked by [issue #71](https://github.com/akofink/live-staff/issues/71).

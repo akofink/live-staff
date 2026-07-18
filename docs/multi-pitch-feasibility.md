@@ -10,11 +10,11 @@ The spike must not ship, request a new permission, add a dependency, persist aud
 ## Current Baseline
 
 Live Staff captures one preferred mono microphone stream after a user action.
-`MicrophoneCapture` reads 4,096-sample `AnalyserNode` frames on the animation frame loop.
+`MicrophoneCapture` reads 4,096-sample `AnalyserNode` frames on the animation frame loop, while application detection is throttled to about every 80 ms.
 `detectPitch` finds the first acceptable normalized-autocorrelation peak and returns one frequency plus confidence.
 The stabilizer and notation path therefore accept one canonical concert pitch, not a set of simultaneous notes or tracks.
 The documented stable-display target is 100 to 250 ms after a pitch settles.
-The initial JavaScript budget is 100 KB gzip.
+The production entry-JavaScript budget is 100 KB gzip and excludes separately loaded chunks.
 
 This architecture makes a single-pitch detector replaceable, but a multi-pitch result would need a separate adapter and a set-aware presentation and stabilization contract.
 It must not be represented as several independent calls to the monophonic detector because harmonic overlap produces octave, subharmonic, and masking errors.
