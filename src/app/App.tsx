@@ -13,6 +13,7 @@ import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../p
 import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
+import { RoomNoiseGate } from "../audio/roomNoiseGate";
 
 type ListeningState = "idle" | "starting" | "listening" | "error";
 
@@ -27,18 +28,21 @@ export function App() {
   const session = useRef<AudioCaptureSession | undefined>(undefined);
   const stabilizer = useRef(new NoteStabilizer());
   const mainsHumFilter = useRef(new MainsHumFilter());
+  const roomNoiseGate = useRef(new RoomNoiseGate());
   const mainsHumFrequency = useRef(preferences.mainsHumFrequency);
   const lastDetection = useRef(0);
   const pitchHistory = useRef(new PitchHistory());
   const historyExpiry = useRef<number | undefined>(undefined);
   const signalMonitor = useRef<SignalMonitorHandle>(null);
   const signalMonitorEnabledRef = useRef(false);
+  const roomCalibrationStateRef = useRef<"idle" | "calibrating" | "active">("idle");
   const [listeningState, setListeningState] = useState<ListeningState>("idle");
   const [message, setMessage] = useState("Ready to listen locally.");
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
   const [preferencesMessage, setPreferencesMessage] = useState("");
   const [historyEvents, setHistoryEvents] = useState<ReturnType<PitchHistory["snapshot"]>>([]);
   const [signalMonitorEnabled, setSignalMonitorEnabled] = useState(false);
+  const [roomCalibrationState, setRoomCalibrationState] = useState<"idle" | "calibrating" | "active">("idle");
 
   useEffect(() => {
     return () => {
@@ -76,6 +80,9 @@ export function App() {
       session.current = undefined;
       stabilizer.current.reset();
       mainsHumFilter.current.reset();
+      roomNoiseGate.current.reset();
+      roomCalibrationStateRef.current = "idle";
+      setRoomCalibrationState("idle");
       const timestamp = performance.now();
       const nextHistory = pitchHistory.current.update(undefined, timestamp);
       if (nextHistory) {
@@ -105,7 +112,19 @@ export function App() {
         mainsHumFilter.current.setFrequency(
           mainsHumFrequency.current === "off" ? undefined : mainsHumFrequency.current,
         );
-        const estimate = detectPitch(mainsHumFilter.current.process(frame, sampleRate), sampleRate);
+        const filteredFrame = mainsHumFilter.current.process(frame, sampleRate);
+        const estimate = roomNoiseGate.current.process(
+          filteredFrame,
+          roomNoiseGate.current.state === "calibrating" ? null : detectPitch(filteredFrame, sampleRate),
+        );
+        if (roomCalibrationStateRef.current === "calibrating" && roomNoiseGate.current.state !== "calibrating") {
+          const calibrationState = roomNoiseGate.current.state === "active" ? "active" : "idle";
+          roomCalibrationStateRef.current = calibrationState;
+          setRoomCalibrationState(calibrationState);
+          setMessage(calibrationState === "active"
+            ? "Room noise calibrated locally for this listening session."
+            : "The room is already below the detector noise threshold. Calibration is not needed.");
+        }
         const stableNote = stabilizer.current.update(
           estimate ? frequencyToNote(estimate.frequencyHz) : null,
         );
@@ -282,6 +301,24 @@ export function App() {
             </label>
             <p className="preferences-help">
               Use only when electrical hum masks your note. It removes a narrow local frequency band.
+            </p>
+            <button
+              type="button"
+              disabled={listeningState !== "listening" || roomCalibrationState === "calibrating"}
+              onClick={() => {
+                roomNoiseGate.current.startCalibration();
+                stabilizer.current.reset();
+                setNote(undefined);
+                roomCalibrationStateRef.current = "calibrating";
+                setRoomCalibrationState("calibrating");
+                setMessage("Calibrating room noise. Stay quiet for about one second.");
+              }}
+            >
+              {roomCalibrationState === "calibrating" ? "Calibrating room noise..." : "Calibrate room noise"}
+            </button>
+            <p className="preferences-help">
+              Optional and session-only. Stay quiet briefly; louder voice and instrument notes remain detectable.
+              {roomCalibrationState === "active" ? " Calibration is active." : ""}
             </p>
             <details className="advanced-settings">
               <summary>Advanced diagnostics</summary>

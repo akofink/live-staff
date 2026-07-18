@@ -27,6 +27,8 @@ test("progressively reveals settings and keeps instrument controls available dur
   await expect(page.getByLabel("Instrument")).toBeVisible();
   const instrument = page.getByLabel("Instrument");
   const backgroundHum = page.getByLabel("Background hum");
+  const roomCalibration = page.getByRole("button", { name: "Calibrate room noise" });
+  await expect(roomCalibration).toBeDisabled();
 
   await page.getByRole("button", { name: "Start listening" }).click();
   await expect(instrument).toBeEnabled();
@@ -37,8 +39,12 @@ test("progressively reveals settings and keeps instrument controls available dur
   await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
   await expect(instrument).toBeEnabled();
   await expect(backgroundHum).toBeEnabled();
+  await expect(roomCalibration).toBeEnabled();
+  await roomCalibration.click();
+  await expect(page.getByText("The room is already below the detector noise threshold. Calibration is not needed.")).toBeVisible({ timeout: 3_000 });
 
   await page.getByRole("button", { name: "Stop listening" }).click();
+  await expect(roomCalibration).toBeDisabled();
   await expect(instrument).toBeEnabled();
   await expect(page.getByText("Concert instruments show concert notation. Transposing instruments show their written notation. Changes apply immediately.")).toBeVisible();
 });
