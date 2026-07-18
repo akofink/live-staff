@@ -10,7 +10,6 @@ import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
 import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../pitch/pitchHistory";
-import { PitchHistoryStrip } from "../components/PitchHistoryStrip";
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
@@ -41,6 +40,7 @@ export function App() {
   const [note, setNote] = useState<DetectedNote | undefined>(undefined);
   const [preferencesMessage, setPreferencesMessage] = useState("");
   const [historyEvents, setHistoryEvents] = useState<ReturnType<PitchHistory["snapshot"]>>([]);
+  const [historyNowMs, setHistoryNowMs] = useState(0);
   const [signalMonitorEnabled, setSignalMonitorEnabled] = useState(false);
   const [roomCalibrationState, setRoomCalibrationState] = useState<"idle" | "calibrating" | "active">("idle");
 
@@ -51,6 +51,14 @@ export function App() {
       void session.current?.stop();
     };
   }, []);
+
+  useEffect(() => {
+    if (historyEvents.length === 0) {
+      return;
+    }
+    const interval = window.setInterval(() => setHistoryNowMs(performance.now()), 250);
+    return () => window.clearInterval(interval);
+  }, [historyEvents.length]);
 
   function scheduleHistoryExpiry(events: readonly PitchHistoryEvent[], timestamp: number) {
     const nextEnd = events.reduce<number | undefined>(
@@ -69,6 +77,7 @@ export function App() {
       const remainingHistory = expiredHistory ?? pitchHistory.current.snapshot();
       if (expiredHistory) {
         setHistoryEvents(expiredHistory);
+        setHistoryNowMs(now);
       }
       scheduleHistoryExpiry(remainingHistory, now);
     }, Math.max(0, nextEnd + pitchHistoryWindowMs - timestamp + 1));
@@ -87,6 +96,7 @@ export function App() {
       const nextHistory = pitchHistory.current.update(undefined, timestamp);
       if (nextHistory) {
         setHistoryEvents(nextHistory);
+        setHistoryNowMs(timestamp);
       }
       scheduleHistoryExpiry(nextHistory ?? pitchHistory.current.snapshot(), timestamp);
       setNote(undefined);
@@ -131,6 +141,7 @@ export function App() {
         const nextHistory = pitchHistory.current.update(stableNote?.midi, timestamp);
         if (nextHistory) {
           setHistoryEvents(nextHistory);
+          setHistoryNowMs(timestamp);
         }
         setNote(stableNote ?? undefined);
       });
@@ -228,6 +239,10 @@ export function App() {
             accidentalPreference={primaryPitchDisplay === "written" ? selectedInstrument.accidentalPreference ?? "sharp" : "sharp"}
             pitchLabel={pitchLabel}
             loadRenderer
+            historyEvents={historyEvents}
+            historyNowMs={historyNowMs}
+            instrument={selectedInstrument}
+            pitchDisplay={primaryPitchDisplay}
           />
           <section className="note-display" aria-label="Detected pitch">
             <p className="note-name">{displayPitch?.name ?? "--"}</p>
@@ -252,11 +267,6 @@ export function App() {
             )}
           </section>
         </div>
-        <PitchHistoryStrip
-          events={historyEvents}
-          instrument={selectedInstrument}
-          pitchDisplay={primaryPitchDisplay}
-        />
         <details className="preferences">
           <summary>
             <span>
@@ -269,6 +279,7 @@ export function App() {
             <label>
               Instrument
               <select
+                id="instrument"
                 value={preferences.instrumentId}
                 aria-describedby="instrument-guidance"
                 onChange={(event) => updatePreferences({ instrumentId: event.target.value as Preferences["instrumentId"] })}
@@ -286,6 +297,7 @@ export function App() {
             <label>
               Background hum
               <select
+                id="background-hum"
                 value={preferences.mainsHumFrequency}
                 onChange={(event) =>
                   updatePreferences({

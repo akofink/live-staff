@@ -132,20 +132,20 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
 
   await expect(page.getByLabel("Detected pitch").getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Written pitch for B-flat trumpet", { exact: true })).toBeVisible();
-  await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing written pitch for B-flat trumpet D4 on the treble staff" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current written pitch for B-flat trumpet D4 on the treble staff" })).toBeVisible();
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
-  await expect(page.getByText("Written pitch for B-flat trumpet: D4. Treble staff in a persistent treble-and-bass grand staff.")).toBeVisible();
+  await expect(page.getByText("Written pitch for B-flat trumpet: D4. Treble staff.")).toBeVisible();
   await expect(page.getByText("Pitch reference")).toBeVisible();
   await page.getByText("Pitch reference").click();
   await expect(page.getByText("Sounding concert pitch: C4")).toBeVisible();
-  await expect(page.getByRole("list", { name: "Recent written pitch history, newest first" })).toContainText("D4");
+  await expect(page.getByText(/Pitch history, oldest to newest: D4, current, treble staff\./)).toBeAttached();
+  await expect(page.locator(".staff-note-current")).toHaveCount(1);
 
   await page.getByLabel("Instrument").selectOption("concert");
   await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Recent concert pitch history, newest first" })).toContainText("C4");
-  await expect(page.getByRole("list", { name: "Recent concert pitch history, newest first" })).not.toContainText("D4");
+  await expect(page.getByText(/Pitch history, oldest to newest: C4, current, treble staff\./)).toBeAttached();
   await expect(page.getByLabel("Detected pitch").getByText("Concert pitch", { exact: true })).toBeVisible();
-  await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing concert pitch C4 on the treble staff" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch C4 on the treble staff" })).toBeVisible();
   await expect(page.getByText("Pitch reference")).toHaveCount(0);
 });
 
@@ -191,9 +191,16 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByLabel("Detected pitch").getByText("A3", { exact: true })).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByRole("figure", { name: "Grand staff with treble and bass staves showing concert pitch A3 on the bass staff" })).toBeVisible();
-  await expect(page.getByText("Concert pitch: A3. Bass staff in a persistent treble-and-bass grand staff.")).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch A3 on the bass staff" })).toBeVisible();
+  await expect(page.getByText("Concert pitch: A3. Bass staff.")).toBeVisible();
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
+  const initialX = Number(await page.locator(".staff-note-current").getAttribute("cx"));
+  await expect.poll(async () => Number(await page.locator(".staff-note-current").getAttribute("cx"))).toBeLessThan(initialX);
+
+  await page.getByRole("button", { name: "Stop listening" }).click();
+  await expect(page.getByRole("figure", { name: "Grand staff with 1 recent concert pitch event" })).toBeVisible();
+  await expect(page.getByText(/Pitch history, oldest to newest: A3, bass staff, about \d+ seconds old\./)).toBeAttached();
+  await expect(page.locator(".staff-history-layer")).toHaveCount(1);
 });
 
 test("renders idle notation and updates the listening control within budget", async ({ page }) => {
@@ -202,9 +209,9 @@ test("renders idle notation and updates the listening control within budget", as
   page.on("request", (request) => requestUrls.push(request.url()));
 
   await page.goto("/");
-  await expect(page.getByRole("figure", { name: "Empty grand staff with treble and bass staves" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with an empty 10-second pitch history" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Recent notes" })).toContainText("Stable notes will collect here while listening.");
+  await expect(page.getByText("Past 10s · older notes fade · now")).toBeVisible();
   await page.waitForTimeout(250);
 
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
@@ -323,9 +330,8 @@ for (const viewport of [
     const core = [
       page.getByRole("heading", { name: "Live Staff" }),
       page.getByRole("button", { name: "Start listening" }),
-      page.getByRole("figure", { name: "Empty grand staff with treble and bass staves" }),
+      page.getByRole("figure", { name: "Grand staff with an empty 10-second pitch history" }),
       page.getByRole("region", { name: "Detected pitch" }),
-      page.getByRole("region", { name: "Recent notes" }),
       page.locator(".preferences > summary"),
     ];
     for (const element of core) {

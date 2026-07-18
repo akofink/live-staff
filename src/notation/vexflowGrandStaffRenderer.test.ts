@@ -1,186 +1,91 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const calls = {
-  addClef: vi.fn(),
-  connector: vi.fn(),
-  connectorType: vi.fn(),
-  formatterFormat: vi.fn(),
-  stave: vi.fn(),
-  staveInstance: vi.fn(),
-  staveNote: vi.fn(),
-  voiceDraw: vi.fn(),
-};
+const calls = { addClef: vi.fn(), connectorType: vi.fn(), stave: vi.fn() };
+const appended: Array<{ name: string; attributes: Record<string, string>; textContent: string | null }> = [];
+
+vi.stubGlobal("document", {
+  createElementNS: (_namespace: string, name: string) => {
+    const node = {
+      name,
+      attributes: {} as Record<string, string>,
+      textContent: null as string | null,
+      setAttribute(key: string, value: string) { this.attributes[key] = value; },
+      append(child: (typeof appended)[number]) { appended.push(child); },
+    };
+    return node;
+  },
+});
 
 vi.mock("vexflow", () => {
-  class Accidental {
-    constructor(...args: unknown[]) {
-      void args;
-    }
-  }
-
   class Renderer {
     static Backends = { SVG: "svg" };
-
-    constructor(...args: unknown[]) {
-      void args;
-    }
-
-    resize(...args: unknown[]): void {
-      void args;
-    }
-
-    getContext(): object {
-      return {};
-    }
+    resize(): void {}
+    getContext(): object { return {}; }
   }
-
   class Stave {
-    constructor(...args: unknown[]) {
-      calls.stave(...args);
-      calls.staveInstance(this);
-    }
-
-    addClef(...args: unknown[]): this {
-      calls.addClef(...args);
-      return this;
-    }
-
-    setContext(...args: unknown[]): this {
-      void args;
-      return this;
-    }
-
+    constructor(...args: unknown[]) { calls.stave(...args); }
+    addClef(...args: unknown[]): this { calls.addClef(...args); return this; }
+    setContext(): this { return this; }
     draw(): void {}
-
-    getNoteStartX(): number {
-      return 50;
-    }
-
-    getNoteEndX(): number {
-      return 250;
-    }
   }
-
   class StaveConnector {
     static type = { BRACE: "brace", SINGLE_LEFT: "singleLeft" };
-
-    constructor(...args: unknown[]) {
-      calls.connector(...args);
-    }
-
-    setType(...args: unknown[]): this {
-      calls.connectorType(...args);
-      return this;
-    }
-
-    setContext(...args: unknown[]): this {
-      void args;
-      return this;
-    }
-
+    setType(...args: unknown[]): this { calls.connectorType(...args); return this; }
+    setContext(): this { return this; }
     draw(): void {}
   }
-
-  class StaveNote {
-    constructor(...args: unknown[]) {
-      calls.staveNote(...args);
-    }
-
-    addModifier(...args: unknown[]): this {
-      void args;
-      return this;
-    }
-  }
-
-  class Voice {
-    addTickables(...args: unknown[]): this {
-      void args;
-      return this;
-    }
-
-    draw(...args: unknown[]): void {
-      calls.voiceDraw(...args);
-    }
-  }
-
-  class Formatter {
-    joinVoices(...args: unknown[]): this {
-      void args;
-      return this;
-    }
-
-    format(...args: unknown[]): this {
-      void args;
-      calls.formatterFormat();
-      return this;
-    }
-  }
-
-  return { Accidental, Formatter, Renderer, Stave, StaveConnector, StaveNote, Voice };
+  return { Renderer, Stave, StaveConnector };
 });
 
 import { renderGrandStaff } from "./vexflowGrandStaffRenderer";
 
+function element() {
+  const svg = {
+    append: (node: (typeof appended)[number]) => appended.push(node),
+    getAttribute: () => null,
+    setAttribute: vi.fn(),
+    querySelector: () => undefined,
+  } as unknown as SVGSVGElement;
+  return {
+    replaceChildren: vi.fn(),
+    querySelector: vi.fn(() => svg),
+  } as unknown as HTMLDivElement;
+}
+
 describe("renderGrandStaff", () => {
   beforeEach(() => {
-    calls.addClef.mockClear();
-    calls.connector.mockClear();
-    calls.connectorType.mockClear();
-    calls.formatterFormat.mockClear();
-    calls.stave.mockClear();
-    calls.staveInstance.mockClear();
-    calls.staveNote.mockClear();
-    calls.voiceDraw.mockClear();
+    appended.length = 0;
+    Object.values(calls).forEach((call) => call.mockClear());
   });
 
-  it("renders both clefs and formats every detected pitch before repeated live renders", () => {
-    const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
+  it("renders both clefs and stemless chronological noteheads", () => {
+    renderGrandStaff(element(), 67, "treble", "sharp", 400, [
+      { concertMidi: 48, onsetMs: 0, endMs: 100 },
+      { concertMidi: 67, onsetMs: 10_000, endMs: undefined },
+    ], 10_000);
 
-    renderGrandStaff(element, 60, "treble", "sharp", 400);
-    renderGrandStaff(element, 59, "bass", "flat", 400);
-    renderGrandStaff(element, 60, "treble", "sharp", 400);
-
-    expect(calls.addClef).toHaveBeenCalledTimes(6);
-    expect(calls.connectorType).toHaveBeenCalledTimes(6);
-    expect(calls.formatterFormat).toHaveBeenCalledTimes(3);
-    expect(calls.voiceDraw).toHaveBeenCalledTimes(3);
+    expect(calls.addClef.mock.calls).toEqual([["treble"], ["bass"]]);
+    expect(calls.connectorType.mock.calls).toEqual([["brace"], ["singleLeft"]]);
+    const noteheads = appended.filter(({ name }) => name === "ellipse");
+    expect(noteheads).toHaveLength(2);
+    expect(noteheads[0].attributes).toMatchObject({ cx: "68", class: "staff-note-history" });
+    expect(noteheads[1].attributes).toMatchObject({ cx: "382", fill: "#b15a23", class: "staff-note-current" });
+    expect(appended.some(({ name }) => name === "path")).toBe(false);
   });
 
-  it("routes a flat-preference written pitch to the bass staff", () => {
-    const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
+  it("draws accidentals and routes ledger lines on the appropriate stave", () => {
+    renderGrandStaff(element(), 58, "bass", "flat", 320, [
+      { concertMidi: 58, onsetMs: 1_000, endMs: undefined },
+    ], 1_000);
 
-    renderGrandStaff(element, 59, "bass", "flat", 400);
-
-    const [trebleStave, bassStave] = calls.staveInstance.mock.calls.map(([stave]) => stave);
-
-    expect(calls.stave).toHaveBeenNthCalledWith(1, 28, 10, 360);
-    expect(calls.stave).toHaveBeenNthCalledWith(2, 28, 92, 360);
-    expect(calls.connector).toHaveBeenNthCalledWith(1, trebleStave, bassStave);
-    expect(calls.connector).toHaveBeenNthCalledWith(2, trebleStave, bassStave);
-    expect(calls.staveNote).toHaveBeenCalledWith({ clef: "bass", keys: ["b/3"], duration: "q" });
-    expect(calls.voiceDraw).toHaveBeenCalledWith(expect.anything(), bassStave);
+    expect(appended.find(({ name }) => name === "text")?.textContent).toBe("♭");
+    expect(appended.find(({ name }) => name === "ellipse")?.attributes.cy).toBe("127");
   });
 
-  it("routes a treble pitch to the treble staff", () => {
-    const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
+  it("draws an empty persistent grand staff without note marks", () => {
+    renderGrandStaff(element(), undefined, undefined, "sharp", 400);
 
-    renderGrandStaff(element, 60, "treble", "sharp", 400);
-
-    const [trebleStave] = calls.staveInstance.mock.calls.map(([stave]) => stave);
-
-    expect(calls.staveNote).toHaveBeenCalledWith({ clef: "treble", keys: ["c/4"], duration: "q" });
-    expect(calls.voiceDraw).toHaveBeenCalledWith(expect.anything(), trebleStave);
-  });
-
-  it("draws the empty persistent grand staff without creating a note", () => {
-    const element = { replaceChildren: vi.fn() } as unknown as HTMLDivElement;
-
-    renderGrandStaff(element, undefined, undefined, "sharp", 400);
-
-    expect(calls.stave).toHaveBeenCalledTimes(2);
-    expect(calls.addClef).toHaveBeenNthCalledWith(1, "treble");
-    expect(calls.addClef).toHaveBeenNthCalledWith(2, "bass");
-    expect(calls.staveNote).not.toHaveBeenCalled();
-    expect(calls.voiceDraw).not.toHaveBeenCalled();
+    expect(calls.stave.mock.calls).toEqual([[28, 10, 360], [28, 92, 360]]);
+    expect(appended.filter(({ name }) => name === "ellipse")).toEqual([]);
   });
 });
