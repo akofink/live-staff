@@ -87,3 +87,25 @@ The aggregate research-candidate entry increased from 2,305/927 to 2,891/1,101 m
 
 No production change is justified, and issue #77 remains open.
 The next bounded experiment should test cross-frame octave-hypothesis persistence through the replaceable detector adapter, requiring fixture-independent evidence across consecutive frames and measuring the added latency against the same mandatory gates before recorded contracts are inspected.
+
+## SWIPE-Like Follow-Up
+
+The July 22, 2026 follow-up fixed its decision rule before recorded inspection: reject on any mandatory gate failure, fewer than five matching in-range fixture groups, octave errors not materially below 20, or browser/mobile cost incompatible with the 80 ms analysis cadence.
+The research-only estimator uses project-owned iterative radix-2 FFT code, retained FFT work buffers, a MIDI 34 through 83 grid at 1/24-semitone spacing, inverse-square-root harmonic rewards, and negative evidence halfway between harmonics.
+No third-party FFT code or dependency was added.
+
+The candidate failed the pre-recorded gate and was rejected without evaluating recorded fixtures.
+It matched 99 of 100 supported-range windows with zero octave errors, but its absolute cents p95 was 25 rather than at most 20.
+It matched 7 of 10 harmonic and missing-fundamental windows, emitted one false positive on the three absence cases, and missed the 61.74 Hz calibrated-room tolerance by estimating 63.39 Hz.
+It passed both hum-filter paths and reached the modeled stable display at 160 ms.
+
+The benchmark marks its recorded result `skipped-mandatory-gate-failure` so future runs cannot accidentally present recorded outcomes for this rejected form.
+It reports CPU median and p95 for both 2,048- and 4,096-sample frames in addition to the standard 4,096-sample timing.
+Per call it allocates no typed or dynamic arrays and only an optional result object; each observed FFT size retains two `Float64Array` work buffers and one `Uint32Array` bit-reversal table, totaling `FFT size * 20` payload bytes.
+Desktop Chromium measured 19.3 ms median and 21.3 ms p95 for the standard 4,096-sample timing, versus 8.6 and 9.1 ms for control.
+The explicit frame-size runs measured 19.4/21.4 ms median/p95 at 2,048 samples and 19.5/21.7 ms at 4,096 samples, showing that the bounded frequency-grid scoring rather than FFT size dominates this implementation.
+Those figures fit within the desktop 80 ms cadence but are about 2.2 to 2.3 times control cost and do not establish acceptable low-power mobile thermal or battery behavior.
+The two observed FFT sizes retain 122,880 typed-array payload bytes in total.
+The aggregate isolated candidate entry measured 5,008 minified and 1,830 gzip bytes, an increase of 2,117 and 729 bytes over the preceding 2,891/1,101-byte research entry; production import delta remains structurally zero.
+
+No production change is justified, and issue #77 remains open.
