@@ -49,10 +49,16 @@ document.querySelector("#run")?.addEventListener("click", async () => {
     const synthetic = syntheticCorpus();
     const results: Record<string, unknown> = {};
     for (const [name, detector] of Object.entries(benchmarkDetectors)) {
-      results[name] = { scenarios: establishedScenarioResults(detector),
-        recorded: { baselineCompatible: { allFixtures: evaluateFrames(recorded.baseline, detector),
-          policyInRange: evaluateFrames(recorded.baseline.filter(isPolicyInRange), detector) }, expanded: aggregateExpanded(recorded.expanded, detector) },
-        cpu: cpuTiming(detector, synthetic), allocations: detectorAllocationInventory(name) };
+      const scenarios = establishedScenarioResults(detector);
+      const clearsMandatoryGates = Object.values(scenarios).every(({ pass }) => pass);
+      const frameSizeCpu = Object.fromEntries([2_048, 4_096].map((frameSize) => [frameSize,
+        cpuTiming(detector, synthetic.map((frame) => ({ ...frame, samples: frame.samples.slice(0, frameSize) })))]));
+      results[name] = { scenarios,
+        recorded: name === "swipeLike" && !clearsMandatoryGates
+          ? { status: "skipped-mandatory-gate-failure" }
+          : { baselineCompatible: { allFixtures: evaluateFrames(recorded.baseline, detector),
+            policyInRange: evaluateFrames(recorded.baseline.filter(isPolicyInRange), detector) }, expanded: aggregateExpanded(recorded.expanded, detector) },
+        cpu: cpuTiming(detector, synthetic), frameSizeCpu, allocations: detectorAllocationInventory(name) };
     }
     await context.close();
     window.detectorBenchmarkReport = { schemaVersion: 1, environment: { userAgent: navigator.userAgent },
