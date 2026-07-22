@@ -25,7 +25,7 @@ Success means a sustained note remains stable enough to read.
 **Status: Completed and expanded.**
 
 Render accidentals and ledger lines through a replaceable adapter.
-The shipped persistent grand staff routes notes between treble and bass clefs and places the bounded 10-second a-rhythmic history directly across the staff.
+The shipped persistent grand staff routes notes between treble and bass clefs, holds the current note at a stable coordinate, and advances the bounded 10-second a-rhythmic history independently.
 
 ## Milestone 4: Instrument Model
 
