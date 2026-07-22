@@ -159,6 +159,60 @@ export const detectHarmonicSieve: BenchmarkDetector = (frame, sampleRate) => {
   return bestScore >= 0.42 ? { frequencyHz: bestFrequency, confidence } : null;
 };
 
+/** Implements MPM's NSDF, positive-lobe key maxima, and earliest relative cutoff peak. */
+export const detectMpm: BenchmarkDetector = (frame, sampleRate) => {
+  let energy = 0;
+  for (const sample of frame) energy += sample * sample;
+  if (Math.sqrt(energy / frame.length) < minimumRms) return null;
+
+  const minimumLag = Math.floor(sampleRate / maximumHz);
+  const maximumLag = Math.min(Math.floor(sampleRate / minimumHz), frame.length - 2);
+  const nsdf = new Float64Array(maximumLag + 1);
+  for (let lag = 0; lag <= maximumLag; lag += 1) {
+    let correlation = 0;
+    let divisor = 0;
+    for (let index = 0; index < frame.length - lag; index += 1) {
+      const left = frame[index];
+      const right = frame[index + lag];
+      correlation += left * right;
+      divisor += left * left + right * right;
+    }
+    nsdf[lag] = divisor === 0 ? 0 : 2 * correlation / divisor;
+  }
+
+  let globalMaximum = 0;
+  let firstQualifying = -1;
+  const keyMaxima: number[] = [];
+  let index = 1;
+  while (index < maximumLag) {
+    while (index < maximumLag && nsdf[index] <= 0) index += 1;
+    if (index >= maximumLag) break;
+    let maximum = -1;
+    while (index < maximumLag && nsdf[index] > 0) {
+      if (index >= minimumLag && (maximum < 0 || nsdf[index] > nsdf[maximum])) maximum = index;
+      index += 1;
+    }
+    if (maximum >= minimumLag) {
+      keyMaxima.push(maximum);
+      globalMaximum = Math.max(globalMaximum, nsdf[maximum]);
+    }
+  }
+  if (globalMaximum < 0.72) return null;
+  for (const maximum of keyMaxima) {
+    if (nsdf[maximum] >= globalMaximum * 0.93) {
+      firstQualifying = maximum;
+      break;
+    }
+  }
+  if (firstQualifying <= 0 || firstQualifying >= maximumLag) return null;
+  const before = nsdf[firstQualifying - 1];
+  const peak = nsdf[firstQualifying];
+  const after = nsdf[firstQualifying + 1];
+  const divisor = before - 2 * peak + after;
+  const offset = divisor === 0 ? 0 : 0.5 * (before - after) / divisor;
+  return { frequencyHz: sampleRate / (firstQualifying + offset), confidence: peak };
+};
+
 function correlations(frame: Float32Array, sampleRate: number): { values: Float64Array; minimumLag: number } | null {
   let energy = 0;
   for (const sample of frame) energy += sample * sample;
