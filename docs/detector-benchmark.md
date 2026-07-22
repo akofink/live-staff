@@ -85,6 +85,25 @@ The selector measured 5.3/5.7/5.8 ms.
 It allocates one `Float64Array(maximumLag - minimumLag + 1)`, one correlation wrapper, and zero or one result object per call, retaining no references.
 The aggregate research-candidate entry increased from 2,305/927 to 2,891/1,101 minified/gzip bytes, a 586/174-byte research bundle increase; production import delta remains structurally zero.
 
+## Harmonic-Sieve Decision Rule
+
+The July 22, 2026 harmonic-sieve investigation is rejected before recorded inspection if any supported-range, 20-cent, harmonic or missing-fundamental, absence, calibrated-room, hum-filter, or 250 ms modeled-latency gate fails.
+Only after all mandatory gates pass may the immutable recordings be inspected.
+Production selection additionally requires at least five matching in-range fixture groups, materially fewer than 20 octave errors without reducing emissions to conceal errors, acceptable 2,048- and 4,096-sample CPU p50/p95 within the 80 ms desktop cadence, bounded retained buffers and allocations, and acceptable isolated bundle cost.
+The research-only sieve uses a bounded MIDI 34 through 83 candidate grid, local-neighborhood spectral normalization, multi-harmonic coverage, and explicit penalties when half- or third-frequency hypotheses explain the observed partials.
+It remains outside the production entry graph unless every threshold clears.
+
+The candidate failed the pre-recorded gate and was rejected without evaluating recorded fixtures.
+It matched 34 of 100 supported-range windows, emitted 35 estimates, and had a 29.2-cent absolute p95; most estimates below MIDI 66 were absent.
+It recovered 2 of 10 harmonic-dominant or missing-fundamental windows, emitted a false positive for fixed-seed uncertainty, missed all four calibrated-room mixtures, and returned absence after both required hum-filter paths.
+It reached the modeled stable display at 160 ms, the only mandatory gate it passed.
+
+Desktop Chromium measured 4.2 ms median and 4.4 ms p95 for 2,048-sample frames, and 4.5/4.6 ms for 4,096-sample frames.
+Those costs fit within the desktop 80 ms cadence but do not offset the detection failures or establish mobile thermal and battery behavior.
+Per call the implementation allocates no typed or dynamic arrays and only an optional result object.
+The two observed FFT sizes retain two `Float64Array` work buffers and one `Uint32Array` bit-reversal table each, totaling 122,880 typed-array payload bytes and six retained references.
+The aggregate isolated research-candidate entry measured 6,147 minified and 2,134 gzip bytes, 1,139/304 bytes above the preceding SWIPE-like research entry; production import delta remains structurally zero.
+
 No production change is justified, and issue #77 remains open.
 The next bounded experiment should test cross-frame octave-hypothesis persistence through the replaceable detector adapter, requiring fixture-independent evidence across consecutive frames and measuring the added latency against the same mandatory gates before recorded contracts are inspected.
 
