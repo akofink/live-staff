@@ -1,1 +1,1 @@
-export { detectCombProjection, detectFundamentalAware, detectLandmarkHistogram, detectMultiPeriod } from "./candidates";
+export { detectCombProjection, detectFundamentalAware, detectLandmarkHistogram, detectMultiPeriod, detectSwipeLike } from "./candidates";

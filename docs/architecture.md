@@ -79,6 +79,6 @@ sounding frequency -> concert MIDI -> player written MIDI
 - `InputFilterChain`: composes bounded deterministic filters for detector PCM.
 - `RoomNoiseGate`: suppresses calibrated steady-noise detector results for one session.
 - `PitchHistory`: retains bounded committed stable-note events in canonical concert pitch.
-- `NotationRenderer`: renders the persistent grand staff, time-positioned history, and emphasized current pitch.
+- `NotationRenderer`: renders the persistent grand staff, event-positioned history, and fixed-position current pitch.
 
 The exact interfaces can evolve, but domain code must not know which detector, renderer, or UI framework is in use.
