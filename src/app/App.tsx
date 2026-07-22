@@ -14,11 +14,12 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
 import { instrumentOptions, type Preferences } from "../preferences/preferences";
-import { PitchHistory, pitchHistoryWindowMs, type PitchHistoryEvent } from "../pitch/pitchHistory";
+import { PitchHistory } from "../pitch/pitchHistory";
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
 import { InputFilters } from "../components/InputFilters";
+import { ListeningSessionClock } from "./listeningSessionClock";
 
 type ListeningState = "idle" | "starting" | "listening" | "interrupted" | "error";
 
@@ -38,7 +39,7 @@ export function App() {
   const filtersBypassed = useRef(false);
   const lastDetection = useRef(0);
   const pitchHistory = useRef(new PitchHistory());
-  const historyExpiry = useRef<number | undefined>(undefined);
+  const listeningClock = useRef(new ListeningSessionClock());
   const signalMonitor = useRef<SignalMonitorHandle>(null);
   const signalMonitorEnabledRef = useRef(false);
   const roomCalibrationStateRef = useRef<"idle" | "calibrating" | "active">("idle");
@@ -64,34 +65,28 @@ export function App() {
     return () => {
       operation.current += 1;
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.clearTimeout(historyExpiry.current);
       session.current?.setSignalMonitor(undefined);
       void capture.current?.stop();
     };
   }, []);
 
-  function scheduleHistoryExpiry(events: readonly PitchHistoryEvent[], timestamp: number) {
-    window.clearTimeout(historyExpiry.current);
-    const nextEnd = events.reduce<number | undefined>(
-      (earliest, event) => event.endMs !== undefined && (earliest === undefined || event.endMs < earliest)
-        ? event.endMs
-        : earliest,
-      undefined,
-    );
-    if (nextEnd === undefined) {
-      return;
-    }
+  function listeningNow(timestamp = performance.now()) {
+    return listeningClock.current.now(timestamp);
+  }
 
-    historyExpiry.current = window.setTimeout(() => {
-      const now = performance.now();
-      const expiredHistory = pitchHistory.current.update(undefined, now);
-      const remainingHistory = expiredHistory ?? pitchHistory.current.snapshot();
-      if (expiredHistory) {
-        setHistoryEvents(expiredHistory);
-        setHistoryNowMs(now);
-      }
-      scheduleHistoryExpiry(remainingHistory, now);
-    }, Math.max(0, nextEnd + pitchHistoryWindowMs - timestamp + 1));
+  function pauseListeningClock(timestamp = performance.now()) {
+    listeningClock.current.pause(timestamp);
+  }
+
+  function startListeningClock(timestamp = performance.now()) {
+    listeningClock.current.start(timestamp);
+  }
+
+  function resetListeningHistory(timestamp = performance.now()) {
+    listeningClock.current.reset(timestamp);
+    setHistoryEvents(pitchHistory.current.reset());
+    setHistoryNowMs(0);
+    setNote(undefined);
   }
 
   function transition(state: ListeningState, nextMessage: string) {
@@ -108,19 +103,13 @@ export function App() {
     roomCalibrationStateRef.current = "idle";
     setRoomCalibrationState("idle");
     lastDetection.current = 0;
-    const timestamp = performance.now();
-    const nextHistory = pitchHistory.current.update(undefined, timestamp);
-    if (nextHistory) {
-      setHistoryEvents(nextHistory);
-      setHistoryNowMs(timestamp);
-    }
-    scheduleHistoryExpiry(nextHistory ?? pitchHistory.current.snapshot(), timestamp);
-    setNote(undefined);
+    pauseListeningClock();
   }
 
   function handleLifecycle(event: AudioCaptureLifecycleEvent) {
     if (event.state === "running") {
       if (listeningStateRef.current === "interrupted" && session.current) {
+        startListeningClock();
         if (signalMonitorEnabledRef.current) {
           session.current.setSignalMonitor(
             (frame) => signalMonitor.current?.draw(frame),
@@ -163,17 +152,11 @@ export function App() {
     }
 
     if (listeningStateRef.current === "interrupted" && session.current) {
+      const interruptedSession = session.current;
       try {
-        await session.current.resume();
-        if (signalMonitorEnabledRef.current) {
-          session.current.setSignalMonitor(
-            (frame) => signalMonitor.current?.draw(frame),
-            isLowPowerSignalMonitor(),
-          );
-        }
-        window.clearTimeout(historyExpiry.current);
-        transition("listening", `Listening locally at ${session.current.sampleRate} Hz.`);
+        await interruptedSession.resume();
       } catch (error) {
+        if (session.current !== interruptedSession) return;
         await capture.current?.stop();
         session.current = undefined;
         transition("error", error instanceof AudioCaptureError ? error.message : "Microphone audio could not resume. Try again.");
@@ -197,13 +180,16 @@ export function App() {
     inputFilterChain.current.configure(inputFilters.current, filtersBypassed.current);
 
     try {
+      let startupLifecycleEvent: AudioCaptureLifecycleEvent | undefined;
       capture.current ??= new MicrophoneCapture();
       const startedSession = await capture.current.start((frame) => {
-        const timestamp = performance.now();
-        if (timestamp - lastDetection.current < 80) {
+        if (currentOperation !== operation.current || listeningStateRef.current !== "listening") return;
+        const frameTimestamp = performance.now();
+        if (frameTimestamp - lastDetection.current < 80) {
           return;
         }
-        lastDetection.current = timestamp;
+        lastDetection.current = frameTimestamp;
+        const timestamp = listeningNow(frameTimestamp);
 
         const sampleRate = session.current?.sampleRate ?? 44_100;
         const filteredFrame = inputFilterChain.current.process(frame, sampleRate);
@@ -229,20 +215,29 @@ export function App() {
         }
         setNote(stableNote ?? undefined);
       }, (event) => {
-        if (currentOperation === operation.current) handleLifecycle(event);
+        if (currentOperation !== operation.current) return;
+        if (listeningStateRef.current === "starting") {
+          startupLifecycleEvent = event;
+        } else {
+          handleLifecycle(event);
+        }
       });
       if (currentOperation !== operation.current) {
         await startedSession.stop();
         return;
       }
       session.current = startedSession;
+      resetListeningHistory();
+      if (startupLifecycleEvent && startupLifecycleEvent.state !== "running") {
+        handleLifecycle(startupLifecycleEvent);
+        return;
+      }
       if (signalMonitorEnabledRef.current) {
         session.current.setSignalMonitor(
           (frame) => signalMonitor.current?.draw(frame),
           isLowPowerSignalMonitor(),
         );
       }
-      window.clearTimeout(historyExpiry.current);
       transition("listening", `Listening locally at ${session.current.sampleRate} Hz.`);
     } catch (error) {
       if (currentOperation !== operation.current || (error instanceof AudioCaptureError && error.code === "start-canceled")) return;
