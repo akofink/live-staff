@@ -66,6 +66,14 @@ function spectralMagnitude(fft: ReusableFft, frequencyHz: number, sampleRate: nu
   return magnitude(lower) * (1 - fraction) + magnitude(lower + 1) * fraction;
 }
 
+function normalizedSpectralPeak(fft: ReusableFft, frequencyHz: number, sampleRate: number) {
+  const center = spectralMagnitude(fft, frequencyHz, sampleRate);
+  const spacing = Math.max(8, frequencyHz * 0.035);
+  const background = (spectralMagnitude(fft, frequencyHz - spacing, sampleRate)
+    + spectralMagnitude(fft, frequencyHz + spacing, sampleRate)) / 2;
+  return center / (center + background + 1e-9);
+}
+
 /** Uses a bounded log-frequency grid with harmonic rewards and inter-harmonic negative evidence. */
 export const detectSwipeLike: BenchmarkDetector = (frame, sampleRate) => {
   let energy = 0;
@@ -100,6 +108,55 @@ export const detectSwipeLike: BenchmarkDetector = (frame, sampleRate) => {
   const neighboring = spectralMagnitude(fft, 440 * 2 ** ((bestMidi - 69) / 12), sampleRate);
   const confidence = bestScore / (bestScore + neighboring + 1e-9);
   return bestScore > 0.01 ? { frequencyHz: 440 * 2 ** ((bestMidi - 69) / 12), confidence } : null;
+};
+
+const sieveFfts = new Map<number, ReusableFft>();
+
+function harmonicAlignment(fft: ReusableFft, fundamental: number, sampleRate: number) {
+  let weighted = 0;
+  let totalWeight = 0;
+  let covered = 0;
+  const maximumHarmonic = Math.min(12, Math.floor(sampleRate / (2 * fundamental)));
+  for (let harmonic = 1; harmonic <= maximumHarmonic; harmonic += 1) {
+    const weight = 1 / Math.sqrt(harmonic);
+    const peak = normalizedSpectralPeak(fft, harmonic * fundamental, sampleRate);
+    weighted += weight * peak;
+    totalWeight += weight;
+    if (peak >= 0.62) covered += 1;
+  }
+  return weighted / totalWeight * Math.min(1, covered / 4);
+}
+
+/** Sieves bounded fundamentals using locally normalized partials and explicit lower-hypothesis evidence. */
+export const detectHarmonicSieve: BenchmarkDetector = (frame, sampleRate) => {
+  let energy = 0;
+  for (const sample of frame) energy += sample * sample;
+  if (Math.sqrt(energy / frame.length) < minimumRms) return null;
+  const size = 2 ** Math.ceil(Math.log2(frame.length));
+  let fft = sieveFfts.get(size);
+  if (!fft) {
+    fft = new ReusableFft(size);
+    sieveFfts.set(size, fft);
+  }
+  fft.transform(frame);
+
+  let bestFrequency = 0;
+  let bestScore = -Infinity;
+  let runnerUp = -Infinity;
+  for (let midi = 34; midi <= 83; midi += 1 / 24) {
+    const fundamental = 440 * 2 ** ((midi - 69) / 12);
+    const alignment = harmonicAlignment(fft, fundamental, sampleRate);
+    const half = fundamental / 2 >= minimumHz ? harmonicAlignment(fft, fundamental / 2, sampleRate) : 0;
+    const third = fundamental / 3 >= minimumHz ? harmonicAlignment(fft, fundamental / 3, sampleRate) : 0;
+    const score = alignment - 0.2 * Math.max(0, half - alignment * 0.72)
+      - 0.12 * Math.max(0, third - alignment * 0.72);
+    if (score > bestScore) {
+      runnerUp = bestScore;
+      [bestFrequency, bestScore] = [fundamental, score];
+    } else if (score > runnerUp) runnerUp = score;
+  }
+  const confidence = Math.max(0, Math.min(1, 0.65 + (bestScore - runnerUp) * 4));
+  return bestScore >= 0.42 ? { frequencyHz: bestFrequency, confidence } : null;
 };
 
 function correlations(frame: Float32Array, sampleRate: number): { values: Float64Array; minimumLag: number } | null {
