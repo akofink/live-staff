@@ -34,6 +34,6 @@ jobs:
         with:
           path: dist
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - run: npx playwright install --with-deps chromium
       - run: npm run verify:production-privacy
