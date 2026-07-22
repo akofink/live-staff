@@ -75,6 +75,18 @@ describe("detector benchmark logic", () => {
     });
   }, 30_000);
 
+  it("evaluates every mandatory gate before recorded harmonic-sieve evidence", () => {
+    const scenarios = establishedScenarioResults(benchmarkDetectors.harmonicSieve);
+    expect(Object.fromEntries(Object.entries(scenarios).map(([name, result]) => [name, result.pass])), JSON.stringify(scenarios)).toEqual({
+      supportedRange: false,
+      harmonicRecovery: false,
+      absences: false,
+      calibratedRoomGate: false,
+      humFilters: false,
+      latency: true,
+    });
+  }, 30_000);
+
   it("does not express dynamic JavaScript allocations as exact bytes", () => {
     expect(detectorAllocationInventory("control")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });
     expect(detectorAllocationInventory("landmarkHistogram")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });
