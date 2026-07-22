@@ -26,4 +26,5 @@ test("records deterministic offline detector evidence", async ({ page }, testInf
   expect(results.multiPeriod.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 25, octaveErrors: 19 });
   expect(results.combProjection.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 26, octaveErrors: 19 });
   expect(results.landmarkHistogram.recorded.baselineCompatible.policyInRange).toMatchObject({ emitted: 0, octaveErrors: 0 });
+  expect((results.swipeLike as unknown as { recorded: { status: string } }).recorded.status).toBe("skipped-mandatory-gate-failure");
 });

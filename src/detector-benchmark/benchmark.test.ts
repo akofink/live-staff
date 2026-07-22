@@ -61,7 +61,19 @@ describe("detector benchmark logic", () => {
       humFilters: true,
       latency: true,
     });
-  });
+  }, 30_000);
+
+  it("rejects the SWIPE-like candidate before recorded inspection when a mandatory gate fails", () => {
+    const scenarios = establishedScenarioResults(benchmarkDetectors.swipeLike);
+    expect(Object.fromEntries(Object.entries(scenarios).map(([name, result]) => [name, result.pass])), JSON.stringify(scenarios)).toEqual({
+      supportedRange: false,
+      harmonicRecovery: false,
+      absences: false,
+      calibratedRoomGate: false,
+      humFilters: true,
+      latency: true,
+    });
+  }, 30_000);
 
   it("does not express dynamic JavaScript allocations as exact bytes", () => {
     expect(detectorAllocationInventory("control")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });
