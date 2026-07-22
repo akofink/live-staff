@@ -12,14 +12,14 @@ It states clearly that audio remains on the device.
 
 - Before permission: instrument selection and an explicit Start listening action.
 - Active without a stable note: a calm waiting state that does not flicker through guesses.
-- Active with a stable note: a persistent grand staff with the current note emphasized among the bounded 10-second history and an optional compact concert-pitch reference for transposing instruments.
+- Active with a stable note: a persistent grand staff with the current note held in a stable current position, recent committed notes advancing independently in the bounded 10-second history, and an optional compact concert-pitch reference for transposing instruments.
 - Failure: a concise explanation with a recovery action for denied permission, unavailable input, or unsupported browser behavior.
 
 ## Main Screen
 
 The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, and compact setup.
 Frequency, cents, and confidence are secondary to notation.
-Recent notes represent committed stable-note onsets and durations rather than raw detector updates, and the active note is identified as now.
+Recent notes represent committed stable-note onsets and durations rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
 
 ## Responsive Behavior
 

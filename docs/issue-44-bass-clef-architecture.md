@@ -1,5 +1,8 @@
 # Issue 44 Grand-Staff Architecture
 
+This document preserves the issue #44 routing decision.
+The current notation-history behavior is owned by [architecture.md](architecture.md) and [ux.md](ux.md).
+
 ## Decision
 
 Render a persistent piano-style grand staff with aligned treble and bass clefs.
@@ -38,15 +41,14 @@ Generalize the adapter rather than adding a separate bass renderer.
 Create two equal-width `Stave` instances in one VexFlow SVG renderer, add `"treble"` to the upper stave and `"bass"` to the lower stave, and join them with the standard grand-staff left brace and vertical connector.
 Use the same horizontal start and end coordinates for both staves so the active note has one shared visual beat position.
 
-Use a 250 px renderer height in `src/notation/vexflowGrandStaffRenderer.ts`.
-Place the upper stave near 28 px and the lower stave near 145 px, retaining at least 70 px between the upper staff's bottom line and lower staff's top line.
-This leaves room for the brace, both clefs, and C4 ledger lines without crowding the system.
-Continue to use the current 280 px minimum render width and responsive SVG scaling (`src/styles/global.css:222-232`).
+Use a compact renderer height in `src/notation/vexflowGrandStaffRenderer.ts`.
+Place the upper and lower staves far enough apart for the brace, both clefs, and C4 ledger lines without crowding the system.
+Continue to use the current 280 px minimum render width and responsive SVG scaling.
 
-Create one `StaveNote` and one `Voice` only when a stable pitch exists.
-Route that note and voice to the selected stave, pass the matching selected clef to `StaveNote`, and leave the other stave empty but visible.
-Use the same formatter width for either stave so an A3 and C4 occupy the same horizontal location.
-Do not duplicate the note, use cross-staff notation, or animate routing in this issue.
+Create native VexFlow `StaveNote` marks for the active pitch and recent history events.
+Route each mark to the selected stave, pass the matching selected clef to `StaveNote`, and leave the other stave visible.
+Keep the active pitch in a fixed current lane while completed history events advance independently in the compact history lane.
+Do not duplicate a pitch across staves, use cross-staff notation, or animate routing in this issue.
 
 VexFlow 5 provides the required APIs through `stave.addClef("treble" | "bass")`, `new StaveNote({ clef, ... })`, and `StaveConnector`.
 `midiToStaffNote()` creates only VexFlow `letter/octave` keys and accidentals, so it serves both staves without clef-specific spelling logic.
@@ -54,7 +56,7 @@ VexFlow 5 provides the required APIs through `stave.addClef("treble" | "bass")`,
 ## Accessibility
 
 Keep the generated SVG `aria-hidden="true"` because the complete musical state is represented as stable text.
-Name the figure and caption with the full layout, pitch, and active staff, for example `Grand staff with treble and bass staves showing concert pitch A3 on the bass staff` and `Concert pitch: A3. Bass staff in a persistent treble-and-bass grand staff.`.
+Name the figure and caption with the current layout, pitch, and active staff, for example `Grand staff with a 10-second pitch history showing current concert pitch A3 on the bass staff` and `Concert pitch: A3. Bass staff.`.
 The persistent presence of both clefs must be communicated in text, not inferred from their glyphs.
 Do not put the rapidly changing pitch or active staff in a live region.
 The existing textual note display remains the equivalent non-graphic presentation required by `docs/ux.md:27-32`.
@@ -66,7 +68,7 @@ That display model is calculated by #43 from canonical concert MIDI at the displ
 The grand-staff implementation neither derives written MIDI nor labels pitches itself.
 
 `src/notation/staffRouter.ts` selects the active staff from display MIDI.
-`src/notation/vexflowGrandStaffRenderer.ts` creates both staves and routes one formatted `StaveNote` to that selected stave.
+`src/notation/vexflowGrandStaffRenderer.ts` creates both staves and routes formatted `StaveNote` marks to their selected staves.
 The UI derives the figure name, caption, text label, note spelling, and active staff from the same display model.
 
 No clef preference, instrument exception table, second note, or cross-staff notation is added in this issue.
@@ -75,23 +77,23 @@ No clef preference, instrument exception table, second note, or cross-staff nota
 
 1. Unit-test the pure router for initial B3 (59) bass and C4 (60) treble routing, treble-to-bass at A-sharp3 (58), bass-to-treble at C4 (60), and the retained B3 deadband in both directions.
 2. Feed the router the stabilized sequence C4, B3, B3, A-sharp3 and assert treble, treble, treble, bass; then B3, C4 and assert bass, treble.
-3. Extend the VexFlow mock in `src/notation/vexflowGrandStaffRenderer.test.ts` to capture both `Stave.addClef()` calls, connector creation, stave coordinates, `StaveNote` constructor arguments, and `Voice.draw()` targets.
-4. Assert that every render creates visible treble and bass staves, creates no note while waiting, and creates exactly one note and voice on the selected staff for A3 and C4.
-5. Preserve formatter assertions and verify both routes use equal horizontal format widths, so the active note shares one beat position across the grand staff.
+3. Extend the VexFlow mock in `src/notation/vexflowGrandStaffRenderer.test.ts` to capture both `Stave.addClef()` calls, connector creation, stave coordinates, `StaveNote` constructor arguments, accidental modifiers, group attributes, and tick positions.
+4. Assert that every render creates visible treble and bass staves, creates no note while waiting, and routes note marks to the selected staff for A3 and C4.
+5. Preserve coordinate assertions and verify the active note remains in its fixed current position across clef and transposition changes.
 6. Preserve conversion tests under generic names and add A3, B3, and C4 key assertions so spelling remains separate from routing.
-7. Add component/browser coverage with deterministic display-model inputs, not microphone timing, that verifies the accessible grand-staff label and caption for both routes, one `aria-hidden` SVG containing both staves, one displayed note, and an intact 320 px layout.
+7. Add component/browser coverage with deterministic display-model inputs, not microphone timing, that verifies the accessible grand-staff label and caption for both routes, one `aria-hidden` SVG containing both staves, routed note marks, and an intact 320 px layout.
 8. Keep existing `NoteStabilizer` sequence tests as the raw-input flicker defense; do not test staff routing through nondeterministic audio fixtures.
 
 ## UX Sketch
 
 ```text
-Grand staff with treble and bass staves showing concert pitch A3 on the bass staff
+Grand staff with a 10-second pitch history showing current concert pitch A3 on the bass staff
 
 treble clef  [ empty upper staff ]
      brace
-bass clef    [ A3 on the bass staff ]
+bass clef    [ recent history ... current A3 ]
 
-Concert pitch: A3. Bass staff in a persistent treble-and-bass grand staff.
+Concert pitch: A3. Bass staff.
 
 A3
 CONCERT PITCH
