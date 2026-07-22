@@ -90,7 +90,7 @@ export function renderGrandStaff(
   const marks = layoutStaffHistory(historyEvents, nowMs, accidentalPreference, activeStaff);
   if (marks.length === 0 && midi !== undefined && activeStaff !== undefined) {
     const fallbackEvent = { concertMidi: midi, onsetMs: nowMs, endMs: undefined };
-    layoutStaffHistory([fallbackEvent], nowMs, accidentalPreference).forEach((mark) => drawMark(state, mark));
+    layoutStaffHistory([fallbackEvent], nowMs, accidentalPreference, activeStaff).forEach((mark) => drawMark(state, mark));
   } else {
     marks.forEach((mark) => drawMark(state, mark));
   }

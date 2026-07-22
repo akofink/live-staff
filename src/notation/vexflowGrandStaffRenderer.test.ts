@@ -118,6 +118,12 @@ describe("renderGrandStaff", () => {
     expect(calls.drawNote.mock.calls[0][0].options).toMatchObject({ keys: ["b/3"], clef: "bass" });
   });
 
+  it("preserves the current clef in the no-history fallback", () => {
+    renderGrandStaff(element(), 59, "treble", "sharp", 320, [], 1_000);
+
+    expect(calls.drawNote.mock.calls[0][0].options).toMatchObject({ keys: ["b/3"], clef: "treble" });
+  });
+
   it("draws an empty persistent grand staff without note marks", () => {
     renderGrandStaff(element(), undefined, undefined, "sharp", 400);
 
