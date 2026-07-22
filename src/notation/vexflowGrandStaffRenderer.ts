@@ -53,7 +53,7 @@ function drawMark(state: RendererState, mark: StaffHistoryMark): void {
   state.context.closeGroup();
 }
 
-/** Renders an a-rhythmic chronological pitch memory on a persistent grand staff. */
+/** Renders a bounded a-rhythmic pitch memory on a persistent grand staff. */
 export function renderGrandStaff(
   element: HTMLDivElement,
   midi: number | undefined,
