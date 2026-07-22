@@ -70,12 +70,6 @@ export function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (historyEvents.length === 0) return;
-    const interval = window.setInterval(() => setHistoryNowMs(performance.now()), 1_000);
-    return () => window.clearInterval(interval);
-  }, [historyEvents.length]);
-
   function scheduleHistoryExpiry(events: readonly PitchHistoryEvent[], timestamp: number) {
     window.clearTimeout(historyExpiry.current);
     const nextEnd = events.reduce<number | undefined>(

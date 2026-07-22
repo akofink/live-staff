@@ -346,6 +346,18 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
   await expect(page.getByRole("figure", { name: "Grand staff with 1 recent concert pitch event" })).toBeVisible();
   await expect(page.getByText(/Pitch history, oldest to newest: A3, bass staff, about \d+ seconds old\./)).toBeAttached();
   await expect(page.locator(".vf-staff-notation-layer")).toHaveCount(1);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(async () => {
+    const notation = document.querySelector(".staff-graphic svg")!;
+    let mutations = 0;
+    const observer = new MutationObserver((records) => {
+      mutations += records.length;
+    });
+    observer.observe(notation, { attributes: true, childList: true, subtree: true });
+    await new Promise((resolve) => window.setTimeout(resolve, 1_100));
+    observer.disconnect();
+    return mutations;
+  })).toBe(0);
 });
 
 test("renders idle notation and updates the listening control within budget", async ({ page }) => {
