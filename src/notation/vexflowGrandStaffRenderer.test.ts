@@ -1,32 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const calls = { addClef: vi.fn(), connectorType: vi.fn(), stave: vi.fn() };
-const appended: Array<{ name: string; attributes: Record<string, string>; textContent: string | null }> = [];
-
-vi.stubGlobal("document", {
-  createElementNS: (_namespace: string, name: string) => {
-    const node = {
-      name,
-      attributes: {} as Record<string, string>,
-      textContent: null as string | null,
-      setAttribute(key: string, value: string) { this.attributes[key] = value; },
-      append(child: (typeof appended)[number]) { appended.push(child); },
-    };
-    return node;
-  },
-});
+const calls = {
+  accidental: vi.fn(),
+  addClef: vi.fn(),
+  connectorType: vi.fn(),
+  drawNote: vi.fn(),
+  groupAttribute: vi.fn(),
+  openGroup: vi.fn(),
+  stave: vi.fn(),
+  tickX: vi.fn(),
+};
 
 vi.mock("vexflow", () => {
   class Renderer {
     static Backends = { SVG: "svg" };
     resize(): void {}
-    getContext(): object { return {}; }
+    getContext(): object {
+      return {
+        openGroup: (...args: unknown[]) => {
+          calls.openGroup(...args);
+          return { setAttribute: calls.groupAttribute };
+        },
+        closeGroup: vi.fn(),
+      };
+    }
   }
   class Stave {
     constructor(...args: unknown[]) { calls.stave(...args); }
     addClef(...args: unknown[]): this { calls.addClef(...args); return this; }
     setContext(): this { return this; }
     draw(): void {}
+    getNoteStartX(): number { return 68; }
   }
   class StaveConnector {
     static type = { BRACE: "brace", SINGLE_LEFT: "singleLeft" };
@@ -34,18 +38,32 @@ vi.mock("vexflow", () => {
     setContext(): this { return this; }
     draw(): void {}
   }
-  return { Renderer, Stave, StaveConnector };
+  class Accidental {
+    constructor(value: string) { calls.accidental(value); }
+  }
+  class StaveNote {
+    readonly attributes: Record<string, string | undefined> = {};
+    readonly modifiers: unknown[] = [];
+    constructor(readonly options: Record<string, unknown>) {}
+    addModifier(modifier: unknown): this { this.modifiers.push(modifier); return this; }
+    setStave(stave: unknown): this { this.attributes.stave = String(stave); return this; }
+    setContext(): this { return this; }
+    setStyle(): this { return this; }
+    setStemStyle(): this { return this; }
+    draw(): void { calls.drawNote({ options: this.options, attributes: this.attributes, modifiers: this.modifiers }); }
+  }
+  class TickContext {
+    addTickable(): this { return this; }
+    preFormat(): this { return this; }
+    setX(x: number): this { calls.tickX(x); return this; }
+  }
+  return { Accidental, Renderer, Stave, StaveConnector, StaveNote, TickContext };
 });
 
 import { renderGrandStaff } from "./vexflowGrandStaffRenderer";
 
 function element() {
-  const svg = {
-    append: (node: (typeof appended)[number]) => appended.push(node),
-    getAttribute: () => null,
-    setAttribute: vi.fn(),
-    querySelector: () => undefined,
-  } as unknown as SVGSVGElement;
+  const svg = { querySelector: () => undefined } as unknown as SVGSVGElement;
   return {
     replaceChildren: vi.fn(),
     querySelector: vi.fn(() => svg),
@@ -53,39 +71,63 @@ function element() {
 }
 
 describe("renderGrandStaff", () => {
-  beforeEach(() => {
-    appended.length = 0;
-    Object.values(calls).forEach((call) => call.mockClear());
-  });
+  beforeEach(() => Object.values(calls).forEach((call) => call.mockClear()));
 
-  it("renders both clefs and stemless chronological noteheads", () => {
-    renderGrandStaff(element(), 67, "treble", "sharp", 400, [
-      { concertMidi: 48, onsetMs: 0, endMs: 100 },
+  it("renders native stemless notes and accidentals with a stable current coordinate", () => {
+    const target = element();
+    renderGrandStaff(target, 67, "treble", "sharp", 400, [
+      { concertMidi: 61, onsetMs: 0, endMs: 100 },
+      { concertMidi: 60, onsetMs: 200, endMs: 300 },
       { concertMidi: 67, onsetMs: 10_000, endMs: undefined },
     ], 10_000);
 
     expect(calls.addClef.mock.calls).toEqual([["treble"], ["bass"]]);
-    expect(calls.connectorType.mock.calls).toEqual([["brace"], ["singleLeft"]]);
-    const noteheads = appended.filter(({ name }) => name === "ellipse");
-    expect(noteheads).toHaveLength(2);
-    expect(noteheads[0].attributes).toMatchObject({ cx: "68", class: "staff-note-history" });
-    expect(noteheads[1].attributes).toMatchObject({ cx: "382", fill: "#b15a23", class: "staff-note-current" });
-    expect(appended.some(({ name }) => name === "path")).toBe(false);
+    expect(calls.accidental.mock.calls).toEqual([["#"], ["n"]]);
+    expect(calls.drawNote).toHaveBeenCalledTimes(3);
+    expect(calls.drawNote.mock.calls[0][0].options).toMatchObject({ duration: "q", autoStem: false });
+    expect(calls.groupAttribute).toHaveBeenCalledWith("opacity", "0.3");
+    expect(calls.tickX.mock.calls.at(-1)).toEqual([298]);
+
+    renderGrandStaff(target, 69, "treble", "sharp", 400, [
+      { concertMidi: 67, onsetMs: 10_000, endMs: 10_100 },
+      { concertMidi: 69, onsetMs: 10_200, endMs: undefined },
+    ], 10_200);
+    expect(calls.tickX.mock.calls.at(-1)).toEqual([298]);
+    expect(calls.stave).toHaveBeenCalledTimes(2);
   });
 
-  it("draws accidentals and routes ledger lines on the appropriate stave", () => {
+  it("ages history without rebuilding the persistent staves", () => {
+    const target = element();
+    const history = [{ concertMidi: 60, onsetMs: 0, endMs: 100 }];
+    renderGrandStaff(target, undefined, undefined, "sharp", 320, history, 1_000);
+    renderGrandStaff(target, undefined, undefined, "sharp", 320, history, 6_000);
+
+    const opacities = calls.groupAttribute.mock.calls
+      .filter(([name]) => name === "opacity")
+      .map(([, value]) => value);
+    expect(opacities).toEqual(["0.7050000000000001", "0.48"]);
+    expect(calls.stave).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses native flat notation and the bass clef", () => {
     renderGrandStaff(element(), 58, "bass", "flat", 320, [
       { concertMidi: 58, onsetMs: 1_000, endMs: undefined },
     ], 1_000);
 
-    expect(appended.find(({ name }) => name === "text")?.textContent).toBe("♭");
-    expect(appended.find(({ name }) => name === "ellipse")?.attributes.cy).toBe("127");
+    expect(calls.accidental).toHaveBeenCalledWith("b");
+    expect(calls.drawNote.mock.calls[0][0].options).toMatchObject({ keys: ["b/3"], clef: "bass" });
+  });
+
+  it("preserves the current clef in the no-history fallback", () => {
+    renderGrandStaff(element(), 59, "treble", "sharp", 320, [], 1_000);
+
+    expect(calls.drawNote.mock.calls[0][0].options).toMatchObject({ keys: ["b/3"], clef: "treble" });
   });
 
   it("draws an empty persistent grand staff without note marks", () => {
     renderGrandStaff(element(), undefined, undefined, "sharp", 400);
 
     expect(calls.stave.mock.calls).toEqual([[28, 10, 360], [28, 92, 360]]);
-    expect(appended.filter(({ name }) => name === "ellipse")).toEqual([]);
+    expect(calls.drawNote).not.toHaveBeenCalled();
   });
 });

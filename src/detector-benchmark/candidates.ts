@@ -6,6 +6,102 @@ const minimumHz = 55;
 const maximumHz = 1_000;
 const minimumRms = 0.01;
 
+class ReusableFft {
+  readonly real: Float64Array;
+  readonly imaginary: Float64Array;
+  private readonly reversed: Uint32Array;
+
+  constructor(readonly size: number) {
+    this.real = new Float64Array(size);
+    this.imaginary = new Float64Array(size);
+    this.reversed = new Uint32Array(size);
+    const bits = Math.log2(size);
+    for (let index = 0; index < size; index += 1) {
+      let value = index;
+      let result = 0;
+      for (let bit = 0; bit < bits; bit += 1) {
+        result = (result << 1) | (value & 1);
+        value >>>= 1;
+      }
+      this.reversed[index] = result;
+    }
+  }
+
+  transform(frame: Float32Array) {
+    for (let index = 0; index < this.size; index += 1) {
+      const source = this.reversed[index];
+      this.real[index] = source < frame.length
+        ? frame[source] * (0.5 - 0.5 * Math.cos(2 * Math.PI * source / (frame.length - 1))) : 0;
+      this.imaginary[index] = 0;
+    }
+    for (let width = 2; width <= this.size; width *= 2) {
+      const half = width / 2;
+      for (let start = 0; start < this.size; start += width) {
+        for (let offset = 0; offset < half; offset += 1) {
+          const angle = -2 * Math.PI * offset / width;
+          const cosine = Math.cos(angle);
+          const sine = Math.sin(angle);
+          const right = start + offset + half;
+          const real = this.real[right] * cosine - this.imaginary[right] * sine;
+          const imaginary = this.real[right] * sine + this.imaginary[right] * cosine;
+          const left = start + offset;
+          this.real[right] = this.real[left] - real;
+          this.imaginary[right] = this.imaginary[left] - imaginary;
+          this.real[left] += real;
+          this.imaginary[left] += imaginary;
+        }
+      }
+    }
+  }
+}
+
+const swipeFfts = new Map<number, ReusableFft>();
+
+function spectralMagnitude(fft: ReusableFft, frequencyHz: number, sampleRate: number) {
+  const position = frequencyHz * fft.size / sampleRate;
+  const lower = Math.floor(position);
+  if (lower < 1 || lower + 1 >= fft.size / 2) return 0;
+  const fraction = position - lower;
+  const magnitude = (index: number) => Math.sqrt(Math.hypot(fft.real[index], fft.imaginary[index]));
+  return magnitude(lower) * (1 - fraction) + magnitude(lower + 1) * fraction;
+}
+
+/** Uses a bounded log-frequency grid with harmonic rewards and inter-harmonic negative evidence. */
+export const detectSwipeLike: BenchmarkDetector = (frame, sampleRate) => {
+  let energy = 0;
+  for (const sample of frame) energy += sample * sample;
+  if (Math.sqrt(energy / frame.length) < minimumRms) return null;
+  const size = 2 ** Math.ceil(Math.log2(frame.length));
+  let fft = swipeFfts.get(size);
+  if (!fft) {
+    fft = new ReusableFft(size);
+    swipeFfts.set(size, fft);
+  }
+  fft.transform(frame);
+
+  let bestMidi = 0;
+  let bestScore = -Infinity;
+  let totalWeight = 0;
+  for (let harmonic = 1; harmonic <= Math.floor(sampleRate / (2 * minimumHz)); harmonic += 1) totalWeight += 1 / Math.sqrt(harmonic);
+  for (let midi = 34; midi <= 83; midi += 1 / 24) {
+    const fundamental = 440 * 2 ** ((midi - 69) / 12);
+    let score = 0;
+    let weight = 0;
+    for (let harmonic = 1; harmonic * fundamental < sampleRate / 2; harmonic += 1) {
+      const harmonicWeight = 1 / Math.sqrt(harmonic);
+      score += harmonicWeight * spectralMagnitude(fft, harmonic * fundamental, sampleRate);
+      if (harmonic > 1) score -= harmonicWeight * 0.55
+        * spectralMagnitude(fft, (harmonic - 0.5) * fundamental, sampleRate);
+      weight += harmonicWeight;
+    }
+    score /= weight || totalWeight;
+    if (score > bestScore) [bestMidi, bestScore] = [midi, score];
+  }
+  const neighboring = spectralMagnitude(fft, 440 * 2 ** ((bestMidi - 69) / 12), sampleRate);
+  const confidence = bestScore / (bestScore + neighboring + 1e-9);
+  return bestScore > 0.01 ? { frequencyHz: 440 * 2 ** ((bestMidi - 69) / 12), confidence } : null;
+};
+
 function correlations(frame: Float32Array, sampleRate: number): { values: Float64Array; minimumLag: number } | null {
   let energy = 0;
   for (const sample of frame) energy += sample * sample;

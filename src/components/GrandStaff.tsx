@@ -78,7 +78,9 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
     : selectActiveStaff(activeStaff, midi);
   const historyDescription = historyEvents.reduce<{ staff: ActiveStaff | undefined; descriptions: string[] }>((summary, event) => {
     const pitch = toDisplayPitch(event.concertMidi, pitchDisplay, instrument);
-    const staff = selectActiveStaff(summary.staff, pitch.midi);
+    const staff = event.endMs === undefined && activeStaffName
+      ? activeStaffName
+      : selectActiveStaff(summary.staff, pitch.midi);
     const ageSeconds = Math.max(0, Math.round((historyNowMs - event.onsetMs) / 1_000));
     const description = event.endMs === undefined
       ? `${pitch.name}, current, ${staff} staff`
@@ -96,7 +98,7 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
       <div ref={container} className="staff-graphic" aria-busy={loadRenderer && !rendererLoaded} aria-hidden="true" />
       <figcaption>
         <span>{noteName && activeStaffName ? `${pitchLabel}: ${noteName}. ${activeStaffName === "bass" ? "Bass" : "Treble"} staff.` : historyEvents.length > 0 ? "Recent pitch memory." : "Waiting for a stable pitch."}</span>
-        <span aria-hidden="true">Past 10s · older notes fade · now</span>
+        <span aria-hidden="true">Past 10s · event history · current</span>
         <span className="visually-hidden">{historyDescription ? `Pitch history, oldest to newest: ${historyDescription}.` : "No recent stable notes."}</span>
       </figcaption>
     </figure>
