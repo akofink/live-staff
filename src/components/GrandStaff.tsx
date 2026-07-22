@@ -78,7 +78,9 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
     : selectActiveStaff(activeStaff, midi);
   const historyDescription = historyEvents.reduce<{ staff: ActiveStaff | undefined; descriptions: string[] }>((summary, event) => {
     const pitch = toDisplayPitch(event.concertMidi, pitchDisplay, instrument);
-    const staff = selectActiveStaff(summary.staff, pitch.midi);
+    const staff = event.endMs === undefined && activeStaffName
+      ? activeStaffName
+      : selectActiveStaff(summary.staff, pitch.midi);
     const ageSeconds = Math.max(0, Math.round((historyNowMs - event.onsetMs) / 1_000));
     const description = event.endMs === undefined
       ? `${pitch.name}, current, ${staff} staff`
