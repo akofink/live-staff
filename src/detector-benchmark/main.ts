@@ -54,7 +54,7 @@ document.querySelector("#run")?.addEventListener("click", async () => {
       const frameSizeCpu = Object.fromEntries([2_048, 4_096].map((frameSize) => [frameSize,
         cpuTiming(detector, synthetic.map((frame) => ({ ...frame, samples: frame.samples.slice(0, frameSize) })))]));
       results[name] = { scenarios,
-        recorded: (name === "swipeLike" || name === "harmonicSieve") && !clearsMandatoryGates
+        recorded: (name === "swipeLike" || name === "harmonicSieve" || name === "mpm") && !clearsMandatoryGates
           ? { status: "skipped-mandatory-gate-failure" }
           : { baselineCompatible: { allFixtures: evaluateFrames(recorded.baseline, detector),
             policyInRange: evaluateFrames(recorded.baseline.filter(isPolicyInRange), detector) }, expanded: aggregateExpanded(recorded.expanded, detector) },
