@@ -366,6 +366,14 @@ h2 {
   height: auto;
 }
 
+.vf-staff-note-current {
+  filter: drop-shadow(0 0 0.45px #264d3d);
+}
+
+.vf-staff-note-history {
+  transition: opacity 160ms linear;
+}
+
 .staff-display figcaption {
   display: flex;
   justify-content: space-between;
@@ -638,5 +646,6 @@ h2 {
   *::before,
   *::after {
     scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
   }
 }

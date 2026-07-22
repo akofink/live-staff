@@ -280,13 +280,15 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   await page.getByText("Pitch reference").click();
   await expect(page.getByText("Sounding concert pitch: C4")).toBeVisible();
   await expect(page.getByText(/Pitch history, oldest to newest: D4, current, treble staff\./)).toBeAttached();
-  await expect(page.locator(".staff-note-current")).toHaveCount(1);
+  await expect(page.locator(".vf-staff-note-current")).toHaveCount(1);
+  const writtenCurrentX = await page.locator(".vf-staff-note-current").getAttribute("data-note-x");
 
   await page.getByLabel("Instrument").selectOption("concert");
   await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
   await expect(page.getByText(/Pitch history, oldest to newest: C4, current, treble staff\./)).toBeAttached();
   await expect(page.getByLabel("Detected pitch").getByText("Concert pitch", { exact: true })).toBeVisible();
   await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch C4 on the treble staff" })).toBeVisible();
+  await expect(page.locator(".vf-staff-note-current")).toHaveAttribute("data-note-x", writtenCurrentX!);
   await expect(page.getByText("Pitch reference")).toHaveCount(0);
 });
 
@@ -335,13 +337,15 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
   await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch A3 on the bass staff" })).toBeVisible();
   await expect(page.getByText("Concert pitch: A3. Bass staff.")).toBeVisible();
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
-  const initialX = Number(await page.locator(".staff-note-current").getAttribute("cx"));
-  await expect.poll(async () => Number(await page.locator(".staff-note-current").getAttribute("cx"))).toBeLessThan(initialX);
+  const current = page.locator(".vf-staff-note-current");
+  const initialX = await current.getAttribute("data-note-x");
+  await page.waitForTimeout(500);
+  await expect(current).toHaveAttribute("data-note-x", initialX!);
 
   await page.getByRole("button", { name: "Stop listening" }).click();
   await expect(page.getByRole("figure", { name: "Grand staff with 1 recent concert pitch event" })).toBeVisible();
   await expect(page.getByText(/Pitch history, oldest to newest: A3, bass staff, about \d+ seconds old\./)).toBeAttached();
-  await expect(page.locator(".staff-history-layer")).toHaveCount(1);
+  await expect(page.locator(".vf-staff-notation-layer")).toHaveCount(1);
 });
 
 test("renders idle notation and updates the listening control within budget", async ({ page }) => {
@@ -352,7 +356,7 @@ test("renders idle notation and updates the listening control within budget", as
   await page.goto("/");
   await expect(page.getByRole("figure", { name: "Grand staff with an empty 10-second pitch history" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
-  await expect(page.getByText("Past 10s · older notes fade · now")).toBeVisible();
+  await expect(page.getByText("Past 10s · event history · current")).toBeVisible();
   await page.waitForTimeout(250);
 
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
@@ -378,6 +382,19 @@ test("renders idle notation and updates the listening control within budget", as
   });
 
   expect(interactionDuration).toBeLessThan(100);
+});
+
+test("disables notation fading when reduced motion is requested", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
+
+  expect(await page.evaluate(() => {
+    const ruleTarget = document.createElement("g");
+    ruleTarget.classList.add("vf-staff-note-history");
+    document.querySelector(".staff-graphic svg")!.append(ruleTarget);
+    return getComputedStyle(ruleTarget).transitionDuration;
+  })).toBe("1e-05s");
 });
 
 test("keeps signal monitoring opt-in, bounded, accessible, and immediately stoppable", async ({ page }) => {

@@ -71,10 +71,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (historyEvents.length === 0) {
-      return;
-    }
-    const interval = window.setInterval(() => setHistoryNowMs(performance.now()), 250);
+    if (historyEvents.length === 0) return;
+    const interval = window.setInterval(() => setHistoryNowMs(performance.now()), 1_000);
     return () => window.clearInterval(interval);
   }, [historyEvents.length]);
 

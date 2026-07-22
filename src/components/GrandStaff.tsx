@@ -96,7 +96,7 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
       <div ref={container} className="staff-graphic" aria-busy={loadRenderer && !rendererLoaded} aria-hidden="true" />
       <figcaption>
         <span>{noteName && activeStaffName ? `${pitchLabel}: ${noteName}. ${activeStaffName === "bass" ? "Bass" : "Treble"} staff.` : historyEvents.length > 0 ? "Recent pitch memory." : "Waiting for a stable pitch."}</span>
-        <span aria-hidden="true">Past 10s · older notes fade · now</span>
+        <span aria-hidden="true">Past 10s · event history · current</span>
         <span className="visually-hidden">{historyDescription ? `Pitch history, oldest to newest: ${historyDescription}.` : "No recent stable notes."}</span>
       </figcaption>
     </figure>
