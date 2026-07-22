@@ -85,8 +85,46 @@ The selector measured 5.3/5.7/5.8 ms.
 It allocates one `Float64Array(maximumLag - minimumLag + 1)`, one correlation wrapper, and zero or one result object per call, retaining no references.
 The aggregate research-candidate entry increased from 2,305/927 to 2,891/1,101 minified/gzip bytes, a 586/174-byte research bundle increase; production import delta remains structurally zero.
 
+## Harmonic-Sieve Decision Rule
+
+The July 22, 2026 harmonic-sieve investigation is rejected before recorded inspection if any supported-range, 20-cent, harmonic or missing-fundamental, absence, calibrated-room, hum-filter, or 250 ms modeled-latency gate fails.
+Only after all mandatory gates pass may the immutable recordings be inspected.
+Production selection additionally requires at least five matching in-range fixture groups, materially fewer than 20 octave errors without reducing emissions to conceal errors, acceptable 2,048- and 4,096-sample CPU p50/p95 within the 80 ms desktop cadence, bounded retained buffers and allocations, and acceptable isolated bundle cost.
+The research-only sieve uses a bounded MIDI 34 through 83 candidate grid, local-neighborhood spectral normalization, multi-harmonic coverage, and explicit penalties when half- or third-frequency hypotheses explain the observed partials.
+It remains outside the production entry graph unless every threshold clears.
+
+The candidate failed the pre-recorded gate and was rejected without evaluating recorded fixtures.
+It matched 34 of 100 supported-range windows, emitted 35 estimates, and had a 29.2-cent absolute p95; most estimates below MIDI 66 were absent.
+It recovered 2 of 10 harmonic-dominant or missing-fundamental windows, emitted a false positive for fixed-seed uncertainty, missed all four calibrated-room mixtures, and returned absence after both required hum-filter paths.
+It reached the modeled stable display at 160 ms, the only mandatory gate it passed.
+
+Desktop Chromium measured 4.2 ms median and 4.4 ms p95 for 2,048-sample frames, and 4.5/4.6 ms for 4,096-sample frames.
+Those costs fit within the desktop 80 ms cadence but do not offset the detection failures or establish mobile thermal and battery behavior.
+Per call the implementation allocates no typed or dynamic arrays and only an optional result object.
+The two observed FFT sizes retain two `Float64Array` work buffers and one `Uint32Array` bit-reversal table each, totaling 122,880 typed-array payload bytes and six retained references.
+The aggregate isolated research-candidate entry measured 6,147 minified and 2,134 gzip bytes, 1,139/304 bytes above the preceding SWIPE-like research entry; production import delta remains structurally zero.
+
 No production change is justified, and issue #77 remains open.
-The next bounded experiment should test cross-frame octave-hypothesis persistence through the replaceable detector adapter, requiring fixture-independent evidence across consecutive frames and measuring the added latency against the same mandatory gates before recorded contracts are inspected.
+
+## McLeod Pitch Method Follow-Up
+
+The July 22, 2026 investigation fixed the same stop rule before recorded inspection: reject on any supported-range or 20-cent, harmonic or missing-fundamental, absence, calibrated-room, hum-filter, or 250 ms modeled-latency failure.
+Production selection additionally required at least five matching in-range fixture groups, materially fewer than 20 octave errors without suppressing emissions, acceptable 2,048- and 4,096-sample CPU p50/p95 within the 80 ms desktop cadence, bounded allocations and state, and acceptable isolated bundle cost.
+
+The research-only candidate follows the normalized square difference function and peak-picking procedure in McLeod and Wyvill's [A Smarter Way to Find Pitch](https://quod.lib.umich.edu/i/icmc/bbp2372.2005.107/1): it computes `2r'(tau) / m'(tau)`, extracts one key maximum from each positive NSDF lobe, and selects the earliest key maximum at least 93% of the global key maximum.
+It is materially distinct from the previously rejected informal YIN/McLeod-style attempt and adds no dependency.
+
+Stateless MPM failed the mandatory pre-recorded gate, so recorded fixtures were not inspected and no two-frame `f`, `f/2`, or `2f` hypothesis state was added.
+It passed all 100 supported-range windows with a 0.014-cent absolute p95, all 10 harmonic-dominant and missing-fundamental windows, all three absence cases, and the 160 ms modeled stable-display latency gate.
+It failed calibrated-room mixtures at 61.74 Hz by estimating 1,509.15 Hz and at 146.83 Hz by estimating 73.39 Hz.
+After both required hum-filter paths it returned MIDI 38 rather than MIDI 57.
+
+Desktop Chromium measured 3.8 ms median and 4.0 ms p95 for 2,048-sample frames, and 8.3/8.9 ms for 4,096-sample frames.
+Those costs fit within the desktop 80 ms cadence, but mobile CPU, thermal, battery, and sustained-heap evidence remains unavailable.
+Per call the candidate allocates one `Float64Array(maximumLag + 1)`, one dynamic key-maximum array, and zero or one result object, retaining no references or cross-frame state.
+The isolated aggregate candidate entry measured 7,124 minified and 2,393 gzip bytes, 977/259 bytes above the preceding 6,147/2,134-byte research entry; production import delta remains structurally zero.
+
+Production remains untouched, no temporal candidate is justified, and issue #77 remains open.
 
 ## SWIPE-Like Follow-Up
 

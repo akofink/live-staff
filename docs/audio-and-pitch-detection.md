@@ -46,12 +46,13 @@ The UI exposes five states: idle, starting, listening, interrupted, and error.
 The primary control is the only recovery action: it cancels starting, stops listening, resumes an interrupted live session, or starts a fresh session after a terminal error.
 Repeated starts share one pending request, and canceling startup invalidates its result so any stream delivered later is stopped before an audio context is created.
 
-Context suspension, page backgrounding, and a device-route notification pause frame and monitor work, clear the current note, and reset filter delay, stabilization, and room calibration state.
+Context suspension, page backgrounding, and a device-route notification pause frame and monitor work and reset filter delay, stabilization, and room calibration state.
 Resuming a still-live session reuses its stream and context without another microphone request.
 A track ending, a context closing, or analysis throwing is terminal and releases frame callbacks, event listeners, monitor buffers and callbacks, graph nodes, every track, and the context before offering a fresh user-initiated start.
 Device-change events are advisory because browsers do not expose a consistent route identity; they never trigger microphone permission or reacquisition automatically.
 
-Pitch history remains visible after an intentional stop, but an active event is closed on every interruption or terminal path and its expiry timer is replaced rather than duplicated.
+Pitch-history age is listening-session time, so stop, interruption, terminal error, or canceled startup freezes the current notation and history without timeout or animation work.
+A successfully started replacement session clears the frozen prior-session history before accepting new frames; resuming an interrupted live session continues the same paused session clock.
 Signal monitoring remains opt-in and performs no work while the session is paused or released.
 
 ## Published Demo Detector

@@ -154,13 +154,19 @@ test("resumes a suspended context and recovers repeatedly from simulated device 
       constructor() { super(); TestAudioContext.current = this; }
       createMediaStreamSource() { return { connect() {}, disconnect() {} }; }
       createAnalyser() {
+        let sample = 0;
         return {
           fftSize: 4_096,
           frequencyBinCount: 2_048,
           minDecibels: -100,
           maxDecibels: -30,
           disconnect() {},
-          getFloatTimeDomainData(frame: Float32Array) { frame.fill(0); },
+          getFloatTimeDomainData(frame: Float32Array) {
+            for (let index = 0; index < frame.length; index += 1) {
+              frame[index] = Math.sin((2 * Math.PI * 261.625565 * (sample + index)) / 48_000);
+            }
+            sample += frame.length;
+          },
           getFloatFrequencyData(frame: Float32Array) { frame.fill(-100); },
         };
       }
@@ -187,16 +193,22 @@ test("resumes a suspended context and recovers repeatedly from simulated device 
   await page.goto("/");
   await page.getByRole("button", { name: "Start listening" }).click();
   await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+  await expect(page.getByLabel("Detected pitch").locator(".note-name")).toHaveText("C4", { timeout: 10_000 });
   await page.evaluate(() => (window as typeof window & { suspendAudio(): void }).suspendAudio());
   await expect(page.getByRole("button", { name: "Resume listening" })).toBeVisible();
+  await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch C4 on the treble staff" })).toBeVisible();
   await page.getByRole("button", { name: "Resume listening" }).click();
   await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
 
   for (const expectedRequests of [2, 3]) {
     await page.evaluate(() => (window as typeof window & { endTrack(): void }).endTrack());
     await expect(page.getByText("The microphone disconnected. Connect it and try again.")).toBeVisible();
+    const frozenNotation = await page.locator(".staff-graphic").innerHTML();
+    await page.waitForTimeout(200);
+    expect(await page.locator(".staff-graphic").innerHTML()).toBe(frozenNotation);
     await page.getByRole("button", { name: "Start listening" }).click();
     await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+    await expect(page.getByLabel("Detected pitch").locator(".note-name")).toHaveText("C4", { timeout: 10_000 });
     await expect.poll(() => page.evaluate(() => (window as typeof window & { lifecycleState: { requests: number } }).lifecycleState.requests)).toBe(expectedRequests);
   }
 
@@ -292,23 +304,30 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   await expect(page.getByText("Pitch reference")).toHaveCount(0);
 });
 
-test("routes a deterministic low concert pitch to the bass staff in the persistent grand staff", async ({ page }) => {
+test("freezes stopped history across inactive time and clears it after restart", async ({ page }) => {
   await page.addInitScript(() => {
     class TestAudioContext {
+      static sessions = 0;
       readonly sampleRate = 44_100;
       readonly state = "running";
+      readonly session = ++TestAudioContext.sessions;
 
       createMediaStreamSource() {
         return { connect() {}, disconnect() {} };
       }
 
       createAnalyser() {
+        const silent = this.session > 1;
         let sample = 0;
         return {
           fftSize: 0,
           connect() {},
           disconnect() {},
           getFloatTimeDomainData(frame: Float32Array) {
+            if (silent) {
+              frame.fill(0);
+              return;
+            }
             for (let index = 0; index < frame.length; index += 1) {
               frame[index] = Math.sin((2 * Math.PI * 220 * (sample + index)) / 44_100);
             }
@@ -343,9 +362,10 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
   await expect(current).toHaveAttribute("data-note-x", initialX!);
 
   await page.getByRole("button", { name: "Stop listening" }).click();
-  await expect(page.getByRole("figure", { name: "Grand staff with 1 recent concert pitch event" })).toBeVisible();
-  await expect(page.getByText(/Pitch history, oldest to newest: A3, bass staff, about \d+ seconds old\./)).toBeAttached();
+  await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch A3 on the bass staff" })).toBeVisible();
+  await expect(page.getByText(/Pitch history, oldest to newest: A3, current, bass staff\./)).toBeAttached();
   await expect(page.locator(".vf-staff-notation-layer")).toHaveCount(1);
+  const frozenNotation = await page.locator(".staff-graphic").innerHTML();
   await page.waitForTimeout(250);
   expect(await page.evaluate(async () => {
     const notation = document.querySelector(".staff-graphic svg")!;
@@ -358,6 +378,15 @@ test("routes a deterministic low concert pitch to the bass staff in the persiste
     observer.disconnect();
     return mutations;
   })).toBe(0);
+  await page.clock.install();
+  await page.clock.fastForward(60_000);
+  expect(await page.locator(".staff-graphic").innerHTML()).toBe(frozenNotation);
+
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
+  await page.clock.fastForward(1_000);
+  await expect(page.getByRole("figure", { name: "Grand staff with an empty 10-second pitch history" })).toBeVisible();
+  await expect(page.getByLabel("Detected pitch").locator(".note-name")).toHaveText("--");
 });
 
 test("renders idle notation and updates the listening control within budget", async ({ page }) => {
