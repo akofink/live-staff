@@ -19,7 +19,7 @@ It states clearly that audio remains on the device.
 
 The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, and compact setup.
 Frequency, cents, and confidence are secondary to notation.
-Recent notes represent committed stable-note onsets and durations rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
+Recent notes represent committed stable-note events rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
 
 ## Responsive Behavior
 
