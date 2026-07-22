@@ -4,7 +4,7 @@ import { NoteStabilizer } from "../pitch/stabilizer";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
 import { InputFilterChain, defaultNotch } from "../audio/inputFilterChain";
 import { MainsHumFilter } from "../audio/mainsHumFilter";
-import { detectCombProjection, detectFundamentalAware, detectLandmarkHistogram, detectMultiPeriod, type BenchmarkDetector } from "./candidates";
+import { detectCombProjection, detectFundamentalAware, detectLandmarkHistogram, detectMultiPeriod, detectSwipeLike, type BenchmarkDetector } from "./candidates";
 
 export const benchmarkDetectors: Readonly<Record<string, BenchmarkDetector>> = {
   control: detectPitch,
@@ -12,6 +12,7 @@ export const benchmarkDetectors: Readonly<Record<string, BenchmarkDetector>> = {
   multiPeriod: detectMultiPeriod,
   combProjection: detectCombProjection,
   landmarkHistogram: detectLandmarkHistogram,
+  swipeLike: detectSwipeLike,
 };
 
 export interface LabeledFrame { readonly id: string; readonly samples: Float32Array; readonly sampleRate: number; readonly expectedMidi: number | null }
@@ -183,6 +184,9 @@ export function detectorAllocationInventory(detectorName: string) {
     bytes: "unknown: JS number-array capacity, elements, and plain-object representation are engine-dependent", retainedReferences: 0 };
   if (detectorName === "landmarkHistogram") return { perCall: { typedArrays: 1, dynamicJsArrays: 1, plainObjects: "0 or 1 result object" },
     typedArrayPayload: "Uint16Array(floor(sampleRate / 55) + 1)", bytes: "unknown: crossing-array and result-object representation are engine-dependent", retainedReferences: 0 };
+  if (detectorName === "swipeLike") return { perCall: { typedArrays: 0, dynamicJsArrays: 0, plainObjects: "0 or 1 result object" },
+    retained: "Two Float64Array FFT work buffers and one Uint32Array bit-reversal table per observed power-of-two frame size",
+    bytes: "retained typed-array payload is FFT size * 20; result-object representation is engine-dependent", retainedReferences: 3 };
   return { perCall: { typedArrays: 1, dynamicJsArrays: 0, plainObjects: "1 correlation wrapper plus 0 or 1 result object" },
     typedArrayPayload: "Float64Array(maximumLag - minimumLag + 1)", bytes: "typed-array payload is length * 8; plain-object representation is engine-dependent", retainedReferences: 0 };
 }
