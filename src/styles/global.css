@@ -354,6 +354,45 @@ h2 {
   border-block: 1px solid #d8d0c1;
 }
 
+.history-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.45rem 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.history-export label {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 700;
+}
+
+.history-export select {
+  min-width: 8rem;
+  min-height: 2.75rem;
+  padding: 0.45rem;
+  border: 1px solid #5c5548;
+  border-radius: 0.35rem;
+  background: #fffdf7;
+  color: inherit;
+  font: inherit;
+}
+
+.history-export button {
+  width: fit-content;
+  min-height: 2.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.history-export-status {
+  flex-basis: 100%;
+  min-height: 0;
+  margin: 0;
+  color: #5c5548;
+}
+
 .staff-graphic {
   width: 100%;
   min-width: 0;
@@ -593,6 +632,21 @@ h2 {
 
   .listening-control button {
     width: 100%;
+  }
+
+  .history-export {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) auto;
+    align-items: end;
+  }
+
+  .history-export select,
+  .history-export button {
+    width: 100%;
+  }
+
+  .history-export-status {
+    grid-column: 1 / -1;
   }
 
   .live-workspace {

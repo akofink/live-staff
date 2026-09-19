@@ -53,6 +53,7 @@ Device-change events are advisory because browsers do not expose a consistent ro
 
 Pitch-history age is listening-session time, so stop, interruption, terminal error, or canceled startup freezes the current notation and history without timeout or animation work.
 A successfully started replacement session clears the frozen prior-session history before accepting new frames; resuming an interrupted live session continues the same paused session clock.
+An explicit export action can download that frozen snapshot as local CSV, JSON, or plain text without uploading it or persisting history in the application.
 Signal monitoring remains opt-in and performs no work while the session is paused or released.
 
 ## Published Demo Detector

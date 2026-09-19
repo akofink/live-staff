@@ -20,6 +20,15 @@ import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
 import { InputFilters } from "../components/InputFilters";
 import { ListeningSessionClock } from "./listeningSessionClock";
+import { saveLocalTextFile } from "./localDownload";
+import {
+  buildHistoryExport,
+  formatHistoryExport,
+  historyExportFileName,
+  historyExportFormats,
+  historyExportMediaType,
+  type HistoryExportFormat,
+} from "../pitch/historyExport";
 
 type ListeningState = "idle" | "starting" | "listening" | "interrupted" | "error";
 
@@ -54,6 +63,8 @@ export function App() {
   const [signalMonitorEnabled, setSignalMonitorEnabled] = useState(false);
   const [roomCalibrationState, setRoomCalibrationState] = useState<"idle" | "calibrating" | "active">("idle");
   const [filterBypass, setFilterBypass] = useState(false);
+  const [exportFormat, setExportFormat] = useState<HistoryExportFormat>("csv");
+  const [exportMessage, setExportMessage] = useState("");
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -289,6 +300,44 @@ export function App() {
     ? "Concert pitch"
     : `Written pitch for ${selectedInstrument.name}`;
 
+  async function exportHistory() {
+    const events = pitchHistory.current.snapshot();
+    if (events.length === 0) {
+      setExportMessage("No stable notes to export yet.");
+      return;
+    }
+
+    const historyDocument = buildHistoryExport({
+      events,
+      nowMs: listeningNow(),
+      instrumentId: preferences.instrumentId,
+      instrument: selectedInstrument,
+      pitchDisplay: primaryPitchDisplay,
+      roomCalibrationState,
+      filtersBypassed: filterBypass,
+      inputFilters: preferences.inputFilters,
+    });
+
+    try {
+      const result = await saveLocalTextFile({
+        name: historyExportFileName(exportFormat),
+        type: historyExportMediaType(exportFormat),
+        contents: formatHistoryExport(historyDocument, exportFormat),
+      });
+      setExportMessage(
+        result === "shared"
+          ? "Shared from this device. Nothing was uploaded."
+          : "Downloaded to this device. Nothing was uploaded.",
+      );
+    } catch (error) {
+      setExportMessage(
+        error instanceof DOMException && error.name === "AbortError"
+          ? "Export canceled."
+          : "The history file could not be saved on this device.",
+      );
+    }
+  }
+
   return (
     <main className="app-shell">
       <section className="hero" aria-labelledby="app-title">
@@ -360,6 +409,38 @@ export function App() {
             )}
           </section>
         </div>
+        <section className="history-export" aria-label="Export pitch history">
+          <label>
+            Format
+            <select
+              value={exportFormat}
+              aria-describedby="history-export-guidance"
+              onChange={(event) => setExportFormat(event.target.value as HistoryExportFormat)}
+            >
+              {historyExportFormats.map((format) => (
+                <option key={format} value={format}>
+                  {format === "csv" ? "CSV" : format === "json" ? "JSON" : "Plain text"}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={historyEvents.length === 0}
+            aria-describedby="history-export-guidance"
+            onClick={() => void exportHistory()}
+          >
+            Export history
+          </button>
+          <p id="history-export-guidance" className="visually-hidden">
+            Downloads the current bounded stable-note history onto this device.
+            Timing is observed elapsed time, not beats or meter.
+            Nothing is uploaded.
+          </p>
+          <p className="history-export-status" role="status" aria-live="polite">
+            {exportMessage}
+          </p>
+        </section>
         <details className="preferences">
           <summary>
             <span>
