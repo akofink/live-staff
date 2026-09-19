@@ -29,4 +29,5 @@ test("records deterministic offline detector evidence", async ({ page }, testInf
   expect((results.swipeLike as unknown as { recorded: { status: string } }).recorded.status).toBe("skipped-mandatory-gate-failure");
   expect((results.harmonicSieve as unknown as { recorded: { status: string } }).recorded.status).toBe("skipped-mandatory-gate-failure");
   expect((results.mpm as unknown as { recorded: { status: string } }).recorded.status).toBe("skipped-mandatory-gate-failure");
+  expect((results.yin as unknown as { recorded: { status: string } }).recorded.status).toBe("skipped-mandatory-gate-failure");
 });

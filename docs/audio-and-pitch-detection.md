@@ -9,7 +9,7 @@ It uses equal temperament and must cover useful low brass through high voice, st
 
 The shipped in-repository normalized-autocorrelation detector is wrapped behind `PitchDetector` so it can be changed without touching music or UI code.
 `MicrophoneCapture` reads 4,096-sample `AnalyserNode` frames, while the app evaluates a detector frame about every 80 ms.
-YIN and the McLeod Pitch Method remain candidates for a benchmark-driven replacement.
+Paper-faithful YIN and McLeod Pitch Method research candidates failed mandatory room and hum-filter gates, so production still uses normalized autocorrelation.
 An `AudioWorklet` remains a future option if measured scheduling or main-thread cost justifies a capture redesign.
 Read the actual `AudioContext.sampleRate`; never assume one.
 
@@ -69,7 +69,7 @@ It enforces the observed regression floor for this single piano corpus: at least
 Those floors prevent further regression; they are not supported-range accuracy claims.
 Strict deterministic evidence requires 100% of sine and harmonic-rich signals at every chromatic pitch from Bb1 at 58.27 Hz through B5 at 987.77 Hz to be within 20 cents, with zero octave errors, zero false positives, and 100% absence for reviewed silence, sub-threshold tones, and above-threshold seeded noise.
 The configured autocorrelation search remains 55 to 1,000 Hz, but exact endpoint tones are not claimed: a 4,096-sample frame does not provide reviewed endpoint peak evidence.
-YIN and McLeod Pitch Method remain candidates for the next benchmark-driven detector decision.
+Paper-faithful YIN and McLeod Pitch Method research candidates failed calibrated-room and hum-filter gates, so they are not production replacements.
 
 ## Advanced Signal Monitor
 
@@ -81,7 +81,7 @@ Disabling the checkbox, stopping listening, or unmounting the app removes the ca
 
 ## Open Technical Decisions
 
-- Select and benchmark a maintained detector.
+- Wait for the independently verified #82 corpus before further fundamental-estimator experiments.
 - Choose detector frame sizes for low-note resolution versus latency.
 - Expand project-owned recordings beyond one piano, room, codec, and capture route.
 - Confirm mobile Safari behavior in a real-device spike.

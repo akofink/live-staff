@@ -147,3 +147,29 @@ The two observed FFT sizes retain 122,880 typed-array payload bytes in total.
 The aggregate isolated candidate entry measured 5,008 minified and 1,830 gzip bytes, an increase of 2,117 and 729 bytes over the preceding 2,891/1,101-byte research entry; production import delta remains structurally zero.
 
 No production change is justified, and issue #77 remains open.
+
+## YIN Follow-Up
+
+The September 19, 2026 investigation fixed the same stop rule before recorded inspection: reject on any supported-range or 20-cent, harmonic or missing-fundamental, absence, calibrated-room, hum-filter, or 250 ms modeled-latency failure.
+Production selection additionally required at least five matching in-range fixture groups, materially fewer than 20 octave errors without suppressing emissions, acceptable 2,048- and 4,096-sample CPU p50/p95 within the 80 ms desktop cadence, bounded allocations and state, and acceptable isolated bundle cost.
+
+The research-only candidate follows the difference function, cumulative mean normalized difference, absolute threshold, and parabolic interpolation in de Cheveigne and Kawahara's [YIN, a fundamental frequency estimator for speech and music](https://doi.org/10.1121/1.1458024).
+It selects the earliest lag whose local CMNDF minimum is below the paper's 0.1 threshold and returns absence when no such dip exists.
+It is materially distinct from production normalized autocorrelation, from paper-faithful MPM, and from the previously rejected informal YIN/McLeod-style hybrid.
+It adds no dependency and no cross-frame state.
+
+Stateless YIN failed the mandatory pre-recorded gate, so recorded fixtures were not inspected and the paper's temporal best-local-estimate step was not added.
+It passed all 100 supported-range windows with a 0.204-cent absolute p95, all 10 harmonic-dominant and missing-fundamental windows, all three absence cases, and the 160 ms modeled stable-display latency gate.
+It failed calibrated-room mixtures at 110 Hz by returning absence and at 146.83 Hz by estimating 73.39 Hz.
+After both required hum-filter paths it returned MIDI 38 rather than MIDI 57.
+
+Desktop Chromium measured 3.7 ms median and 3.9 ms p95 for the standard 4,096-sample timing.
+The explicit frame-size runs measured 1.6/1.9 ms median/p95 at 2,048 samples and 3.7/4.3 ms at 4,096 samples.
+Those costs fit within the desktop 80 ms cadence, but mobile CPU, thermal, battery, and sustained-heap evidence remains unavailable.
+Per call the candidate allocates one `Float64Array(maximumLag + 1)` and zero or one result object, retaining no references or cross-frame state.
+The isolated aggregate candidate entry measured 7,984 minified and 2,567 gzip bytes, 860/174 bytes above the preceding 7,124/2,393-byte research entry; production import delta remains structurally zero.
+
+Production remains untouched.
+Lag-domain estimators and spectral grid estimators have now both failed the same mandatory room or hum-filter gates, or failed earlier precision and absence gates, against this corpus.
+No remaining untried fundamental estimator is justified without the independently verified #82 recordings.
+Issue #77 remains open.
