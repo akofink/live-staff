@@ -2,7 +2,7 @@
 
 ## Unit Tests
 
-Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, stabilizer sequences, pitch history and layout, room-noise gating, filter response and bypass, monitor cadence, and preference validation or migration.
+Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, stabilizer sequences, pitch history and layout, history export formatting, room-noise gating, filter response and bypass, monitor cadence, and preference validation or migration.
 
 ## Synthetic Signals
 
@@ -25,6 +25,7 @@ Introduce Git LFS only when a future fixture corpus materially increases clone s
 ## Browser Tests
 
 Current browser tests cover permission paths, start and stop, instrument switching, grand-staff routing and history, local preferences, filters, diagnostics, and responsive layout.
+History-export tests cover deterministic CSV, JSON, and plain-text serialization, CSV escaping, written-pitch derivation after live instrument changes, and local download or share without a network URL.
 Issue [#67](https://github.com/akofink/live-staff/issues/67) adds comprehensive interruption, device-loss, background/resume, and startup-cancellation behavior.
 Browser tests must mock audio where reliable device access is unavailable in CI.
 Signal-monitor browser coverage proves zero spectrum work before opt-in, one microphone request, bounded update cadence, immediate cleanup, accessible native controls, and no overflow at 320 CSS pixels.

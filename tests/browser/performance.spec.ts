@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
 test("continues working after network loss and leaves reloads to the deployment", async ({ page }) => {
@@ -387,6 +388,68 @@ test("freezes stopped history across inactive time and clears it after restart",
   await page.clock.fastForward(1_000);
   await expect(page.getByRole("figure", { name: "Grand staff with an empty 10-second pitch history" })).toBeVisible();
   await expect(page.getByLabel("Detected pitch").locator(".note-name")).toHaveText("--");
+});
+
+test("exports frozen stabilized history locally after an explicit action", async ({ page }) => {
+  await page.addInitScript(() => {
+    class TestAudioContext {
+      readonly sampleRate = 44_100;
+      readonly state = "running";
+      createMediaStreamSource() {
+        return { connect() {}, disconnect() {} };
+      }
+      createAnalyser() {
+        let sample = 0;
+        return {
+          fftSize: 0,
+          connect() {},
+          disconnect() {},
+          getFloatTimeDomainData(frame: Float32Array) {
+            for (let index = 0; index < frame.length; index += 1) {
+              frame[index] = Math.sin((2 * Math.PI * 220 * (sample + index)) / 44_100);
+            }
+            sample += frame.length;
+          },
+        };
+      }
+      close() {
+        return Promise.resolve();
+      }
+    }
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => Promise.resolve({ getTracks: () => [] }),
+    });
+    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+  });
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Export history" })).toBeDisabled();
+
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await expect(page.getByLabel("Detected pitch").getByText("A3", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Stop listening" }).click();
+  await page.locator(".preferences > summary").press("Enter");
+  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await page.getByLabel("Format").selectOption("csv");
+
+  const exportRequests: string[] = [];
+  page.on("request", (request) => { exportRequests.push(request.url()); });
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Export history" }).click(),
+  ]);
+
+  expect(download.suggestedFilename()).toBe("live-staff-pitch-history.csv");
+  const contents = await readFile(await download.path(), "utf8");
+  expect(contents).toContain("concert_midi,concert_pitch,written_midi,written_pitch");
+  expect(contents).toContain("57,A3,59,B3,");
+  expect(contents).toContain("b-flat-trumpet");
+  expect(contents).not.toMatch(/"(?:tempo|bpm|beatsPerMinute|timeSignature)"/);
+  await expect(page.getByRole("status").filter({ hasText: "Downloaded to this device. Nothing was uploaded." })).toBeVisible();
+  expect(exportRequests).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 
 test("renders idle notation and updates the listening control within budget", async ({ page }) => {

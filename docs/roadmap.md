@@ -69,7 +69,8 @@ Its local validation tooling can land independently, but #82 remains open until 
 
 ## Deferred Work
 
-MIDI, polyphonic input, automatic instrument recognition, persisted session history or practice logs, lessons, teacher tools, accounts, analytics, and native applications remain deferred until users validate the core experience.
+Standard MIDI File export, polyphonic input, automatic instrument recognition, persisted session history or practice logs, lessons, teacher tools, accounts, analytics, and native applications remain deferred until users validate the core experience.
+Local CSV, JSON, and plain-text export of the bounded in-memory stable-note history is the [issue #97](https://github.com/akofink/live-staff/issues/97) post-1.0 enhancement; SMF remains deferred for the reasons in [export MIDI feasibility](export-midi-feasibility.md).
 The [multi-pitch feasibility report](multi-pitch-feasibility.md) defers product polyphony, source separation, and timbre/source association while allowing only a bounded offline two-pitch benchmark.
 The [input filter chain](input-filter-chain-design.md), [room calibration](room-noise-calibration.md), and opt-in signal monitor are shipped; real-device validation remains part of issue #71.
 Configurable A4, expansion beyond the current five selectable instruments, and separate pitch-display modes have no current evidence-backed 1.0 requirement.

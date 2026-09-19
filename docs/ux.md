@@ -17,9 +17,12 @@ It states clearly that audio remains on the device.
 
 ## Main Screen
 
-The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, and compact setup.
+The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, local history export, and compact setup.
 Frequency, cents, and confidence are secondary to notation.
 Recent notes represent committed stable-note events rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
+Export is an explicit user action that downloads or shares the current bounded history on the device.
+It stays disabled until at least one committed event exists.
+The control names CSV, JSON, and plain-text formats, states that timing is observed elapsed time, and confirms that nothing is uploaded.
 
 ## Responsive Behavior
 
@@ -48,6 +51,7 @@ Written: C5
 [ Pitch reference: Concert B-flat4 ]
 Listening: Stable
 
+[ Export history: CSV JSON TXT ]
 [ Setup: B-flat trumpet ]
 [ Advanced diagnostics ]
 ```
