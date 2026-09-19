@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@eslint/js": "latest",
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.1",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
