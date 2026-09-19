@@ -4,7 +4,7 @@ import { NoteStabilizer } from "../pitch/stabilizer";
 import { RoomNoiseGate } from "../audio/roomNoiseGate";
 import { InputFilterChain, defaultNotch } from "../audio/inputFilterChain";
 import { MainsHumFilter } from "../audio/mainsHumFilter";
-import { detectCombProjection, detectFundamentalAware, detectHarmonicSieve, detectLandmarkHistogram, detectMpm, detectMultiPeriod, detectSwipeLike, type BenchmarkDetector } from "./candidates";
+import { detectCombProjection, detectFundamentalAware, detectHarmonicSieve, detectLandmarkHistogram, detectMpm, detectMultiPeriod, detectSwipeLike, detectYin, type BenchmarkDetector } from "./candidates";
 
 export const benchmarkDetectors: Readonly<Record<string, BenchmarkDetector>> = {
   control: detectPitch,
@@ -15,6 +15,7 @@ export const benchmarkDetectors: Readonly<Record<string, BenchmarkDetector>> = {
   swipeLike: detectSwipeLike,
   harmonicSieve: detectHarmonicSieve,
   mpm: detectMpm,
+  yin: detectYin,
 };
 
 export interface LabeledFrame { readonly id: string; readonly samples: Float32Array; readonly sampleRate: number; readonly expectedMidi: number | null }
@@ -191,6 +192,8 @@ export function detectorAllocationInventory(detectorName: string) {
     bytes: "retained typed-array payload is FFT size * 20; result-object representation is engine-dependent", retainedReferences: 3 };
   if (detectorName === "mpm") return { perCall: { typedArrays: 1, dynamicJsArrays: 1, plainObjects: "0 or 1 result object" },
     typedArrayPayload: "Float64Array(maximumLag + 1)", bytes: "typed-array payload is length * 8; key-maximum array capacity and result-object representation are engine-dependent", retainedReferences: 0 };
+  if (detectorName === "yin") return { perCall: { typedArrays: 1, dynamicJsArrays: 0, plainObjects: "0 or 1 result object" },
+    typedArrayPayload: "Float64Array(maximumLag + 1)", bytes: "typed-array payload is length * 8; result-object representation is engine-dependent", retainedReferences: 0 };
   return { perCall: { typedArrays: 1, dynamicJsArrays: 0, plainObjects: "1 correlation wrapper plus 0 or 1 result object" },
     typedArrayPayload: "Float64Array(maximumLag - minimumLag + 1)", bytes: "typed-array payload is length * 8; plain-object representation is engine-dependent", retainedReferences: 0 };
 }

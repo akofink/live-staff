@@ -87,6 +87,18 @@ describe("detector benchmark logic", () => {
     });
   }, 30_000);
 
+  it("rejects paper-faithful stateless YIN before recorded inspection when mandatory gates fail", () => {
+    const scenarios = establishedScenarioResults(benchmarkDetectors.yin);
+    expect(Object.fromEntries(Object.entries(scenarios).map(([name, result]) => [name, result.pass])), JSON.stringify(scenarios)).toEqual({
+      supportedRange: true,
+      harmonicRecovery: true,
+      absences: true,
+      calibratedRoomGate: false,
+      humFilters: false,
+      latency: true,
+    });
+  }, 30_000);
+
   it("rejects paper-faithful stateless MPM before recorded inspection when mandatory gates fail", () => {
     const scenarios = establishedScenarioResults(benchmarkDetectors.mpm);
     expect(Object.fromEntries(Object.entries(scenarios).map(([name, result]) => [name, result.pass])), JSON.stringify(scenarios)).toEqual({
@@ -103,5 +115,6 @@ describe("detector benchmark logic", () => {
     expect(detectorAllocationInventory("control")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });
     expect(detectorAllocationInventory("landmarkHistogram")).toMatchObject({ perCall: { dynamicJsArrays: 1 }, bytes: expect.stringContaining("unknown") });
     expect(detectorAllocationInventory("mpm")).toMatchObject({ perCall: { typedArrays: 1, dynamicJsArrays: 1 }, bytes: expect.stringContaining("engine-dependent") });
+    expect(detectorAllocationInventory("yin")).toMatchObject({ perCall: { typedArrays: 1, dynamicJsArrays: 0 }, bytes: expect.stringContaining("engine-dependent") });
   });
 });

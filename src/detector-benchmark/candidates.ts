@@ -159,6 +159,54 @@ export const detectHarmonicSieve: BenchmarkDetector = (frame, sampleRate) => {
   return bestScore >= 0.42 ? { frequencyHz: bestFrequency, confidence } : null;
 };
 
+/** Implements YIN's difference function, CMNDF, absolute threshold, and parabolic interpolation. */
+export const detectYin: BenchmarkDetector = (frame, sampleRate) => {
+  let energy = 0;
+  for (const sample of frame) energy += sample * sample;
+  if (Math.sqrt(energy / frame.length) < minimumRms) return null;
+
+  const minimumLag = Math.floor(sampleRate / maximumHz);
+  const maximumLag = Math.min(Math.floor(sampleRate / minimumHz), frame.length - 2);
+  const cmndf = new Float64Array(maximumLag + 1);
+  cmndf[0] = 1;
+  for (let lag = 1; lag <= maximumLag; lag += 1) {
+    let sum = 0;
+    for (let index = 0; index < frame.length - lag; index += 1) {
+      const delta = frame[index] - frame[index + lag];
+      sum += delta * delta;
+    }
+    cmndf[lag] = sum;
+  }
+  let running = 0;
+  for (let lag = 1; lag <= maximumLag; lag += 1) {
+    running += cmndf[lag];
+    cmndf[lag] = running === 0 ? 1 : cmndf[lag] * lag / running;
+  }
+
+  const threshold = 0.1;
+  let tau = -1;
+  let lag = minimumLag;
+  while (lag < maximumLag) {
+    if (cmndf[lag] < threshold) {
+      while (lag + 1 <= maximumLag && cmndf[lag + 1] < cmndf[lag]) lag += 1;
+      tau = lag;
+      break;
+    }
+    lag += 1;
+  }
+  if (tau < minimumLag) return null;
+
+  let offset = 0;
+  if (tau > 0 && tau < maximumLag) {
+    const before = cmndf[tau - 1];
+    const peak = cmndf[tau];
+    const after = cmndf[tau + 1];
+    const divisor = before - 2 * peak + after;
+    offset = divisor === 0 ? 0 : 0.5 * (before - after) / divisor;
+  }
+  return { frequencyHz: sampleRate / (tau + offset), confidence: 1 - cmndf[tau] };
+};
+
 /** Implements MPM's NSDF, positive-lobe key maxima, and earliest relative cutoff peak. */
 export const detectMpm: BenchmarkDetector = (frame, sampleRate) => {
   let energy = 0;
