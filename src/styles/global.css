@@ -426,6 +426,45 @@ h2 {
   text-transform: uppercase;
 }
 
+.history-spacing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem 0.85rem;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.history-spacing legend {
+  padding: 0;
+  color: #5c5548;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.history-spacing label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  font-size: 0.9rem;
+}
+
+.history-spacing input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #264d3d;
+}
+
+.history-spacing p {
+  flex-basis: 100%;
+  margin: 0;
+  color: #5c5548;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -678,6 +717,14 @@ h2 {
   .staff-display figcaption {
     font-size: 0.68rem;
     flex-wrap: wrap;
+  }
+
+  .history-spacing {
+    gap: 0.25rem 0.75rem;
+  }
+
+  .history-spacing label {
+    min-height: 2.5rem;
   }
 
   .settings-summary {

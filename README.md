@@ -61,6 +61,7 @@ Set `VITE_BASE_PATH` only when building for a non-root deployment path.
 - [Room-noise calibration](docs/room-noise-calibration.md)
 - [Input filter chain](docs/input-filter-chain-design.md)
 - [Browser-only multi-pitch feasibility](docs/multi-pitch-feasibility.md)
+- [Browser-only melody transcription feasibility](docs/melody-transcription-feasibility.md)
 - [Music theory and transposition](docs/music-theory-and-transposition.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Browser fixture evaluation](docs/browser-fixture-evaluation.md)

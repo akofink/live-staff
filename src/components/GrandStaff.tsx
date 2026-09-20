@@ -4,6 +4,7 @@ import type { InstrumentDefinition } from "../instruments/instruments";
 import { toDisplayPitch, type PitchRepresentation } from "../instruments/displayPitch";
 import type { PitchHistoryEvent } from "../pitch/pitchHistory";
 import { selectActiveStaff, type ActiveStaff } from "../notation/staffRouter";
+import { staffHistorySpacings, type StaffHistorySpacing } from "../notation/staffHistoryLayout";
 
 type GrandStaffRenderer = typeof import("../notation/vexflowGrandStaffRenderer");
 
@@ -30,6 +31,7 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
   const container = useRef<HTMLDivElement>(null);
   const [activeStaff, setActiveStaff] = useState<ActiveStaff | undefined>(undefined);
   const [rendererLoaded, setRendererLoaded] = useState(false);
+  const [historySpacing, setHistorySpacing] = useState<StaffHistorySpacing>("event");
 
   useEffect(() => {
     const element = container.current;
@@ -60,7 +62,7 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
         ...event,
         concertMidi: toDisplayPitch(event.concertMidi, pitchDisplay, instrument).midi,
       }));
-      const render = () => renderGrandStaff(element, midi, nextActiveStaff, accidentalPreference, element.clientWidth, displayHistory, historyNowMs);
+      const render = () => renderGrandStaff(element, midi, nextActiveStaff, accidentalPreference, element.clientWidth, displayHistory, historyNowMs, historySpacing);
       observer = new ResizeObserver(render);
       observer.observe(element);
       render();
@@ -71,7 +73,7 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
       cancelled = true;
       observer?.disconnect();
     };
-  }, [accidentalPreference, activeStaff, historyEvents, historyNowMs, instrument, loadRenderer, midi, pitchDisplay]);
+  }, [accidentalPreference, activeStaff, historyEvents, historyNowMs, historySpacing, instrument, loadRenderer, midi, pitchDisplay]);
 
   const activeStaffName = midi === undefined
     ? undefined
@@ -93,14 +95,37 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
       ? `Grand staff with ${historyEvents.length} recent ${pitchDisplay} pitch ${historyEvents.length === 1 ? "event" : "events"}`
       : "Grand staff with an empty 10-second pitch history";
 
+  const spacingCaption = historySpacing === "proportional" ? "proportional time" : "event history";
+
   return (
     <figure className="staff-display" aria-label={description}>
       <div ref={container} className="staff-graphic" aria-busy={loadRenderer && !rendererLoaded} aria-hidden="true" />
       <figcaption>
         <span>{noteName && activeStaffName ? `${pitchLabel}: ${noteName}. ${activeStaffName === "bass" ? "Bass" : "Treble"} staff.` : historyEvents.length > 0 ? "Recent pitch memory." : "Waiting for a stable pitch."}</span>
-        <span aria-hidden="true">Past 10s · event history · current</span>
+        <span aria-hidden="true">Past 10s · {spacingCaption} · current</span>
         <span className="visually-hidden">{historyDescription ? `Pitch history, oldest to newest: ${historyDescription}.` : "No recent stable notes."}</span>
       </figcaption>
+      <fieldset className="history-spacing">
+        <legend>History spacing</legend>
+        {staffHistorySpacings.map((spacing) => (
+          <label key={spacing}>
+            <input
+              type="radio"
+              name="history-spacing"
+              value={spacing}
+              checked={historySpacing === spacing}
+              aria-describedby="history-spacing-guidance"
+              onChange={() => setHistorySpacing(spacing)}
+            />
+            {spacing === "proportional" ? "Proportional time" : "Event spacing"}
+          </label>
+        ))}
+        <p id="history-spacing-guidance">
+          Event spacing places completed notes equally.
+          Proportional time places them by observed onset in the past 10 seconds.
+          Empty space is not a rest, beat, or note value.
+        </p>
+      </fieldset>
     </figure>
   );
 }

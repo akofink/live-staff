@@ -12,7 +12,7 @@ It states clearly that audio remains on the device.
 
 - Before permission: instrument selection and an explicit Start listening action.
 - Active without a stable note: a calm waiting state that does not flicker through guesses.
-- Active with a stable note: a persistent grand staff with the current note held in a stable current position, recent committed notes advancing independently in the bounded 10-second history, and an optional compact concert-pitch reference for transposing instruments.
+- Active with a stable note: a persistent grand staff with the current note held in a stable current position, recent committed notes advancing independently in the bounded 10-second history, a session-only choice between equal event spacing and proportional onset time, and an optional compact concert-pitch reference for transposing instruments.
 - Failure: a concise explanation with a recovery action for denied permission, unavailable input, or unsupported browser behavior.
 
 ## Main Screen
@@ -20,6 +20,9 @@ It states clearly that audio remains on the device.
 The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, local history export, and compact setup.
 Frequency, cents, and confidence are secondary to notation.
 Recent notes represent committed stable-note events rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
+Event spacing remains the default a-rhythmic layout.
+Proportional time places completed notes by observed onset so chronology is visible as horizontal space.
+That space is not a rest, beat, note value, or classified silence.
 Export is an explicit user action that downloads or shares the current bounded history on the device.
 It stays disabled until at least one committed event exists.
 The control names CSV, JSON, and plain-text formats, states that timing is observed elapsed time, and confirms that nothing is uploaded.
@@ -46,6 +49,7 @@ Live Staff
 [ Start listening ]
 
        [ persistent grand staff ]
+       [ Event spacing | Proportional time ]
 
 Written: C5
 [ Pitch reference: Concert B-flat4 ]

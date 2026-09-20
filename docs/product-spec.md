@@ -8,7 +8,9 @@ Validate this path end to end:
 microphone input -> pitch detection -> stable concert pitch -> instrument transposition -> staff rendering
 ```
 
-The proof of concept includes microphone permission, local live capture, monophonic pitch detection, detected frequency, concert and written note calculation, a persistent treble-and-bass grand staff with an active note and a bounded 10-second a-rhythmic history, an optional note label, a signal state, and a silence state.
+The proof of concept includes microphone permission, local live capture, monophonic pitch detection, detected frequency, concert and written note calculation, a persistent treble-and-bass grand staff with an active note and a bounded 10-second history, an optional note label, a signal state, and a silence state.
+The history default remains a-rhythmic event spacing.
+Proportional-time spacing is an experimental view of the same observed timestamps and is not rhythmic transcription.
 
 It excludes accounts, cloud storage, persisted audio or detection history, analytics, lessons, MIDI, polyphonic recognition, sheet import, payment, social features, and any backend.
 

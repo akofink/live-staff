@@ -2,7 +2,7 @@
 
 ## Unit Tests
 
-Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, stabilizer sequences, pitch history and layout, history export formatting, room-noise gating, filter response and bypass, monitor cadence, and preference validation or migration.
+Test pure domain behavior for frequency-to-fractional-MIDI conversion, nearest-note conversion, cents deviation, transposition, octave handling, active-staff routing hysteresis, accidental preference, ranges, stabilizer sequences, pitch history and event or proportional layout, history export formatting, room-noise gating, filter response and bypass, monitor cadence, and preference validation or migration.
 
 ## Synthetic Signals
 
