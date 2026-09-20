@@ -20,6 +20,8 @@ The command injects the checkout SHA and serves the harness on the local network
 Open the printed network URL ending in `/release-evidence.html` on the device under test.
 If the device cannot reach the development host, use the harness on the inspecting desktop and enter the physical device details there.
 Confirm that the App URL names the exact deployed candidate, then use **Open app in a new tab**.
+Current production evidence in [1.0-candidate.md](release-evidence/1.0-candidate.md) is for commit `ded54f7` at `https://live-staff.akofink.com/`.
+Do not reuse older attended exports as current rows for that commit.
 
 The report is saved only in the harness origin's `localStorage`.
 Export both JSON and Markdown after each device session and review the files before committing any evidence.

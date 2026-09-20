@@ -54,5 +54,5 @@ These floors describe the existing immutable single-piano corpus and prevent agg
 They do not establish detector accuracy, cross-instrument support, or production readiness.
 Strict supported-range, false-positive, uncertainty, octave, and modeled stable-display gates use deterministic synthetic signals in the detector unit suite.
 
-New physical fixture sets must follow the [fixture capture protocol](fixture-capture-protocol.md) and pass its manifest validator before evaluator integration.
-The existing catalog remains unchanged and is not evidence that the new capture matrix has been performed.
+New physical fixture sets must follow the [fixture capture protocol](fixture-capture-protocol.md) and [fixture capture kit](fixture-capture-kit.md) and pass the manifest validator before evaluator integration.
+The existing catalog remains unchanged and is not evidence that the [remaining capture matrix](release-evidence/82-remaining-capture-matrix.md) has been performed.

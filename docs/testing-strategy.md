@@ -18,6 +18,7 @@ Do not commit large audio files without considering repository impact.
 The initial `tests/fixtures/piano-iphone-16-pro-macbook-air-m2/` corpus is 1.6 MB total and is tracked directly in Git.
 It is raw AAC/M4A recorded in a residential room through an iPhone 16 Pro microphone connected to a MacBook Air M2 with QuickTime Player, so it represents realistic rather than laboratory-clean input.
 Keep source recordings unchanged and retain recording context plus checksums in the fixture-set README.
+New #82 sets use the [fixture capture kit](fixture-capture-kit.md); do not retrofit the frozen piano directory.
 Use a browser decoding harness for M4A analysis because Node unit tests do not natively decode it.
 Run `npm run evaluate:fixtures` to evaluate the original files through a pinned headless Chromium browser and save its machine-readable result.
 Introduce Git LFS only when a future fixture corpus materially increases clone size or includes larger lossless recordings.
@@ -43,6 +44,7 @@ Run a reproducible install and the same gate used by CI:
 npm ci
 npm run lint
 npm test
+npm run test:fixture-manifest
 npm run build
 npm run test:privacy
 npm run verify:privacy

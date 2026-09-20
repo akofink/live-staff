@@ -64,6 +64,8 @@ Set `VITE_BASE_PATH` only when building for a non-root deployment path.
 - [Music theory and transposition](docs/music-theory-and-transposition.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Browser fixture evaluation](docs/browser-fixture-evaluation.md)
+- [Fixture capture protocol](docs/fixture-capture-protocol.md)
+- [Fixture capture kit](docs/fixture-capture-kit.md)
 - [Release policy](docs/release-policy.md)
 - [1.0 candidate support and evidence](docs/release-evidence/1.0-candidate.md)
 - [Roadmap](docs/roadmap.md)

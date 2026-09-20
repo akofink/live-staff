@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "setId": "example-family-source-path-rate",
+  "capturedAt": "2026-01-01T00:00:00Z",
+  "instrument": {
+    "family": "piano",
+    "makeModel": "Replace with a non-personal make and model",
+    "identifier": "instrument-1"
+  },
+  "performer": {
+    "anonymousId": "performer-1",
+    "confirmedPerformedNotes": true
+  },
+  "capture": {
+    "device": "Replace with device model, not a serial number",
+    "microphone": "Replace with microphone description",
+    "path": "laptop-built-in",
+    "distanceMeters": 0.5,
+    "sampleRateHz": 48000
+  },
+  "room": {
+    "description": "Replace with a non-identifying room description",
+    "condition": "quiet"
+  },
+  "consent": {
+    "projectUseGranted": true,
+    "publicRepositoryGranted": true,
+    "confirmedAt": "2026-01-01T00:00:00Z",
+    "confirmedByAnonymousId": "performer-1"
+  },
+  "takes": [
+    {
+      "takeId": "low-quiet-0-5m-take-1",
+      "expected": {
+        "concertPitch": "A3",
+        "concertMidi": 57,
+        "referenceFrequencyHz": 220,
+        "verificationMethod": "hardware-tuner",
+        "verifiedAt": "2026-01-01T00:00:00Z",
+        "verifiedByAnonymousId": "verifier-1"
+      },
+      "dynamic": "medium",
+      "provenance": {
+        "originalCapture": "Replace with how the lossless and AAC files were obtained from the same take",
+        "pairingMethod": "aac-from-lossless-master",
+        "processing": "aac-encoded-from-lossless-master"
+      },
+      "files": [
+        {
+          "role": "lossless",
+          "path": "low-quiet-0-5m-take-1.wav",
+          "container": "wav",
+          "codec": "pcm-s24le",
+          "sampleRateHz": 48000,
+          "channels": 1,
+          "bytes": 1,
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "role": "aac",
+          "path": "low-quiet-0-5m-take-1.m4a",
+          "container": "m4a",
+          "codec": "aac-lc",
+          "sampleRateHz": 48000,
+          "channels": 1,
+          "bytes": 1,
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ],
+  "decoderConsistency": [
+    {
+      "takeId": "low-quiet-0-5m-take-1",
+      "decoder": "Replace with decoder name",
+      "decoderVersion": "Replace with decoder version",
+      "losslessSourceSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "aacSourceSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pcmFormat": "f32le-interleaved-normalized",
+      "channels": 1,
+      "losslessDecodedSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "aacDecodedSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sampleRateHz": 48000,
+      "losslessDecodedFrames": 1,
+      "aacDecodedFrames": 1,
+      "comparisonStartFrame": 0,
+      "comparedFrames": 1,
+      "aacOffsetFromLosslessFrames": 0,
+      "alignmentMethod": "whole-frame-cross-correlation",
+      "peakAbsoluteDifference": 0,
+      "rmsDifference": 0,
+      "notes": "AAC is lossy. Record the comparison window and any decoder limitation. Do not claim identical PCM hashes."
+    }
+  ]
+}
