@@ -61,6 +61,9 @@ The preference module deliberately does not duplicate that domain calculation.
 
 Recent-note history consumes only committed stabilizer output and stores canonical concert MIDI, onset, and end timestamps in memory.
 It retains at most 10 seconds and 32 events, is cleared by a page reload, and derives its displayed spelling and transposition from current preferences.
+The staff can show that history with equal event spacing or with proportional onset placement in the same rolling window.
+That spacing choice is session-only and is not written to preferences.
+Empty space in proportional mode is unclassified gap, not a rest or beat.
 An explicit export action can download that same snapshot as local CSV, JSON, or plain text.
 The files are never uploaded, and the application still does not persist history.
 Timing in those files is observed elapsed milliseconds, not meter, tempo, beat, or note values.
@@ -86,6 +89,6 @@ sounding frequency -> concert MIDI -> player written MIDI
 - `RoomNoiseGate`: suppresses calibrated steady-noise detector results for one session.
 - `PitchHistory`: retains bounded committed stable-note events in canonical concert pitch.
 - `HistoryExport`: formats a snapshot of that history plus current instrument and filter metadata.
-- `NotationRenderer`: renders the persistent grand staff, event-positioned history, and fixed-position current pitch.
+- `NotationRenderer`: renders the persistent grand staff, event or proportional history spacing, and fixed-position current pitch.
 
 The exact interfaces can evolve, but domain code must not know which detector, renderer, or UI framework is in use.

@@ -281,7 +281,9 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   await page.goto("/");
   await page.locator(".preferences > summary").press("Enter");
   await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
-  await expect(page.getByRole("radio")).toHaveCount(0);
+  await expect(page.getByRole("group", { name: "History spacing" })).toBeVisible();
+  await expect(page.getByRole("radio")).toHaveCount(2);
+  await expect(page.getByRole("radio", { name: /concert|written/i })).toHaveCount(0);
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByLabel("Detected pitch").getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
@@ -461,6 +463,11 @@ test("renders idle notation and updates the listening control within budget", as
   await expect(page.getByRole("figure", { name: "Grand staff with an empty 10-second pitch history" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start listening" })).toBeVisible();
   await expect(page.getByText("Past 10s · event history · current")).toBeVisible();
+  await page.getByRole("radio", { name: "Proportional time" }).check();
+  await expect(page.getByText("Past 10s · proportional time · current")).toBeVisible();
+  await page.getByRole("radio", { name: "Event spacing" }).check();
+  await expect(page.getByText("Past 10s · event history · current")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
   await page.waitForTimeout(250);
 
   await expect(page.locator(".staff-graphic svg")).toHaveCount(1);

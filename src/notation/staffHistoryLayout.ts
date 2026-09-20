@@ -3,6 +3,9 @@ import { pitchHistoryMaxEvents, pitchHistoryWindowMs, type PitchHistoryEvent } f
 import { selectActiveStaff, type ActiveStaff } from "./staffRouter";
 import { midiToStaffNote } from "./staffNote";
 
+export const staffHistorySpacings = ["event", "proportional"] as const;
+export type StaffHistorySpacing = (typeof staffHistorySpacings)[number];
+
 export interface StaffHistoryMark {
   readonly midi: number;
   readonly staff: ActiveStaff;
@@ -13,11 +16,23 @@ export interface StaffHistoryMark {
   readonly current: boolean;
 }
 
+function eventPosition(current: boolean, historyCount: number, historyIndex: number): number {
+  if (current) return 1;
+  return historyCount <= 1 ? 1 : historyIndex / (historyCount - 1);
+}
+
+function proportionalPosition(current: boolean, onsetMs: number, nowMs: number): number {
+  if (current) return 1;
+  const windowStart = nowMs - pitchHistoryWindowMs;
+  return Math.max(0, Math.min(1, (onsetMs - windowStart) / pitchHistoryWindowMs));
+}
+
 export function layoutStaffHistory(
   events: readonly PitchHistoryEvent[],
   nowMs: number,
   accidentalPreference: AccidentalPreference,
   currentStaff?: ActiveStaff,
+  spacing: StaffHistorySpacing = "event",
 ): readonly StaffHistoryMark[] {
   let previousStaff: ActiveStaff | undefined;
   const previousAccidentals = new Map<string, "#" | "b">();
@@ -41,7 +56,9 @@ export function layoutStaffHistory(
       previousAccidentals.delete(accidentalKey);
     }
     const current = event.endMs === undefined;
-    const position = current ? 1 : historyCount <= 1 ? 1 : historyIndex / (historyCount - 1);
+    const position = spacing === "proportional"
+      ? proportionalPosition(current, event.onsetMs, nowMs)
+      : eventPosition(current, historyCount, historyIndex);
     if (!current) historyIndex += 1;
 
     return {

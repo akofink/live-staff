@@ -2,7 +2,7 @@ import { Accidental, Renderer, Stave, StaveConnector, StaveNote, TickContext } f
 import type { AccidentalPreference } from "../instruments/instruments";
 import type { PitchHistoryEvent } from "../pitch/pitchHistory";
 import type { ActiveStaff } from "./staffRouter";
-import { layoutStaffHistory, type StaffHistoryMark } from "./staffHistoryLayout";
+import { layoutStaffHistory, type StaffHistoryMark, type StaffHistorySpacing } from "./staffHistoryLayout";
 
 const staffHeight = 190;
 const staffInset = 28;
@@ -53,7 +53,7 @@ function drawMark(state: RendererState, mark: StaffHistoryMark): void {
   state.context.closeGroup();
 }
 
-/** Renders a bounded a-rhythmic pitch memory on a persistent grand staff. */
+/** Renders a bounded pitch memory on a persistent grand staff. */
 export function renderGrandStaff(
   element: HTMLDivElement,
   midi: number | undefined,
@@ -62,6 +62,7 @@ export function renderGrandStaff(
   width: number,
   historyEvents: readonly PitchHistoryEvent[] = [],
   nowMs = 0,
+  spacing: StaffHistorySpacing = "event",
 ): void {
   const renderWidth = Math.max(width, 280);
   let state = rendererStates.get(element);
@@ -86,11 +87,12 @@ export function renderGrandStaff(
     return;
   }
   svg.querySelector(".vf-staff-notation-layer")?.remove();
-  state.context.openGroup("staff-notation-layer");
-  const marks = layoutStaffHistory(historyEvents, nowMs, accidentalPreference, activeStaff);
+  const layer = state.context.openGroup("staff-notation-layer");
+  layer.setAttribute("data-history-spacing", spacing);
+  const marks = layoutStaffHistory(historyEvents, nowMs, accidentalPreference, activeStaff, spacing);
   if (marks.length === 0 && midi !== undefined && activeStaff !== undefined) {
     const fallbackEvent = { concertMidi: midi, onsetMs: nowMs, endMs: undefined };
-    layoutStaffHistory([fallbackEvent], nowMs, accidentalPreference, activeStaff).forEach((mark) => drawMark(state, mark));
+    layoutStaffHistory([fallbackEvent], nowMs, accidentalPreference, activeStaff, spacing).forEach((mark) => drawMark(state, mark));
   } else {
     marks.forEach((mark) => drawMark(state, mark));
   }

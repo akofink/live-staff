@@ -45,4 +45,27 @@ describe("layoutStaffHistory", () => {
     expect(marks[0].midi).toBe(52);
     expect(marks.at(-1)?.current).toBe(true);
   });
+
+  it("places completed onsets on the rolling window in proportional spacing", () => {
+    const marks = layoutStaffHistory([
+      { concertMidi: 48, onsetMs: 0, endMs: 100 },
+      { concertMidi: 60, onsetMs: 5_000, endMs: 5_100 },
+      { concertMidi: 67, onsetMs: 10_000, endMs: undefined },
+    ], 10_000, "sharp", undefined, "proportional");
+
+    expect(marks.map(({ position, current }) => ({ position, current }))).toEqual([
+      { position: 0, current: false },
+      { position: 0.5, current: false },
+      { position: 1, current: true },
+    ]);
+  });
+
+  it("clamps proportional onsets that begin before the visible window", () => {
+    const marks = layoutStaffHistory([
+      { concertMidi: 48, onsetMs: 500, endMs: 9_500 },
+      { concertMidi: 60, onsetMs: 8_000, endMs: 8_100 },
+    ], 12_000, "sharp", undefined, "proportional");
+
+    expect(marks.map(({ position }) => position)).toEqual([0, 0.6]);
+  });
 });

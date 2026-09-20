@@ -130,4 +130,26 @@ describe("renderGrandStaff", () => {
     expect(calls.stave.mock.calls).toEqual([[28, 10, 360], [28, 92, 360]]);
     expect(calls.drawNote).not.toHaveBeenCalled();
   });
+
+  it("places completed history by observed onset in proportional spacing", () => {
+    const target = element();
+    const history = [
+      { concertMidi: 48, onsetMs: 0, endMs: 100 },
+      { concertMidi: 60, onsetMs: 5_000, endMs: 5_100 },
+      { concertMidi: 67, onsetMs: 10_000, endMs: undefined },
+    ];
+
+    renderGrandStaff(target, 67, "treble", "sharp", 400, history, 10_000, "event");
+    const eventXs = calls.tickX.mock.calls.map(([x]) => x);
+    calls.tickX.mockClear();
+    calls.groupAttribute.mockClear();
+
+    renderGrandStaff(target, 67, "treble", "sharp", 400, history, 10_000, "proportional");
+    const proportionalXs = calls.tickX.mock.calls.map(([x]) => x);
+
+    expect(eventXs).toEqual([0, 240, 298]);
+    expect(proportionalXs).toEqual([0, 120, 298]);
+    expect(calls.groupAttribute).toHaveBeenCalledWith("data-history-spacing", "proportional");
+    expect(calls.drawNote.mock.calls.at(-1)?.[0].options).toMatchObject({ duration: "q", autoStem: false });
+  });
 });
