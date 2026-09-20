@@ -32,3 +32,12 @@ test("rejects unknown fields", async () => { const { path } = await fixture({ in
 test("rejects contradictory pitch evidence", async () => { const { path, manifest } = await fixture(); manifest.takes[0].expected.concertMidi = 58; await writeFile(path, JSON.stringify(manifest)); await assert.rejects(validateManifest(path, probe), /concertPitch and concertMidi disagree/); });
 test("rejects media metadata that differs from the file", async () => { const { path } = await fixture(); const wrongProbe = async () => ({ format: "wav", codec: "pcm_s16le", profile: "", sampleRateHz: 44100, channels: 2 }); await assert.rejects(validateManifest(path, wrongProbe), /does not match ffprobe/); });
 test("exports a deterministic operator checklist", async () => { const { path } = await fixture(); const manifest = await validateManifest(path, probe); assert.match(captureChecklist(manifest), /do not derive it from a filename/); assert.match(captureChecklist(manifest), /take-1: confirm A3 at 220 Hz/); });
+test("keeps the operator manifest template as complete JSON", async () => {
+  const template = JSON.parse(await readFile(new URL("../tests/fixtures/templates/manifest.template.json", import.meta.url), "utf8"));
+  for (const key of ["schemaVersion", "setId", "capturedAt", "instrument", "performer", "capture", "room", "consent", "takes", "decoderConsistency"]) {
+    assert.equal(Object.hasOwn(template, key), true, key);
+  }
+  assert.equal(template.schemaVersion, 1);
+  assert.equal(template.takes.length, 1);
+  assert.equal(template.decoderConsistency.length, 1);
+});

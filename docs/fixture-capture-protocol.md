@@ -4,6 +4,7 @@
 
 This protocol prepares reusable tooling for issue [#82](https://github.com/akofink/live-staff/issues/82).
 It does not add recordings or physical evidence.
+Operators should follow the [fixture capture kit](fixture-capture-kit.md) and the [remaining capture matrix](release-evidence/82-remaining-capture-matrix.md) rather than inventing a smaller matrix.
 The CLI reads only local files, makes no network requests, never requests microphone permission, and is absent from the production entry graph.
 Do not place names, contact details, precise addresses, serial numbers, account identifiers, or unrelated speech in a manifest or recording.
 
@@ -68,4 +69,5 @@ Record unsupported sample rates or paths as unavailable in the operator log rath
 Future evaluator reports must stratify results by instrument family and source, expected reference frequency, fundamental-to-strongest-partial ratio, SNR, onset versus sustain window, frame size, room condition, dynamic, distance, sample rate, codec, device, microphone, and capture path.
 Fundamental-to-partial ratio and SNR are derived analysis values, not capture labels, and must preserve the analysis method and window coordinates in the report.
 The current evaluator remains a frozen baseline for the existing corpus until validated manifests and physical recordings land.
+The remaining physical cells are enumerated in the [capture matrix](release-evidence/82-remaining-capture-matrix.md); the frozen piano AAC set fills none of them.
 Issue #77 owns detector behavior; issue #71 owns attended physical-device evidence.

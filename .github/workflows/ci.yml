@@ -22,6 +22,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run test:fixture-manifest
       - run: npm run build
       - run: npm run test:privacy
       - run: npm run verify:privacy
