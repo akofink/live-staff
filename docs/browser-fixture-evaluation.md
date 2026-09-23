@@ -46,7 +46,8 @@ Investigate decode failures, missing estimates, octave errors, and pitch mismatc
 Do not replace, normalize, trim, re-encode, or otherwise modify a fixture while investigating.
 
 The headless command uses a pinned Playwright Chromium revision, so it makes decoder and runtime behavior reproducible for a given browser and detector revision.
-The recorded corpus gate requires at least 3 of the 10 in-range fixtures to produce one matching window, at least 31 estimates to be emitted, and no more than 20 octave errors.
+The frozen piano corpus regression floor is 3 matching fixtures, 31 estimates, and at most 20 octave errors.
+It is a detector regression guard, not a release gate or accuracy claim.
 The baseline is three matching fixtures out of ten and 20 octave errors among 31 emitted estimates.
 C1 and F1 are retained as visible out-of-range observations but excluded from the in-range aggregate.
 
@@ -54,5 +55,5 @@ These floors describe the existing immutable single-piano corpus and prevent agg
 They do not establish detector accuracy, cross-instrument support, or production readiness.
 Strict supported-range, false-positive, uncertainty, octave, and modeled stable-display gates use deterministic synthetic signals in the detector unit suite.
 
-New physical fixture sets must follow the [fixture capture protocol](fixture-capture-protocol.md) and [fixture capture kit](fixture-capture-kit.md) and pass the manifest validator before evaluator integration.
+If a new fixture set is explicitly requested, use the [optional capture protocol](fixture-capture-protocol.md) and validate its manifest before evaluator integration.
 The existing catalog remains unchanged and is not evidence that the [remaining capture matrix](release-evidence/82-remaining-capture-matrix.md) has been performed.

@@ -14,7 +14,7 @@ Proportional-time spacing is an experimental view of the same observed timestamp
 
 It excludes accounts, cloud storage, persisted audio or detection history, analytics, lessons, MIDI, polyphonic recognition, sheet import, payment, social features, and any backend.
 
-## Version 1.0 Requirements
+## Core Behavior
 
 - A compact, data-driven selection of common concert and transposing instruments.
 - Correct treble and bass staff display.
@@ -27,32 +27,33 @@ It excludes accounts, cloud storage, persisted audio or detection history, analy
 - Continued listening and interaction if the network is lost after the application has loaded.
 
 These instrument-first presentation requirements shipped in PR #53 and intentionally replaced separate pitch-display controls.
-The alternate-instrument comparison mode remains the separate Transposition Coach milestone rather than a 1.0 requirement.
+Alternate-instrument comparison remains a possible Transposition Coach idea, not current work.
 Reference pitch remains fixed at A4 = 440 Hz because no independently justified configurable-reference requirement has been established.
 
-Version 1.0 does not promise that a new visit or reload works offline.
-Users must load the application while online before a session, after which the loaded client can continue without a network connection.
+A new visit or reload needs a network connection.
+After an online load, the client can continue if the connection drops.
 Installable PWA behavior and reloadable offline use remain out of scope until there is a requirement that justifies persistent application caching and its update lifecycle.
 
-## Nonfunctional Requirements
+## Practical Expectations
 
 - Stable notes should normally appear about 100 to 250 ms after pitch settles.
 - UI interaction must remain responsive during audio analysis.
 - Audio stays local and listening state remains visible.
 - Controls are keyboard accessible and state is not color-only.
-- Strict TypeScript, tested music logic, and documented conventions are required.
+- Use strict TypeScript and test the music logic a change touches.
 
-## Out of Scope for 1.0
+## Out of Scope
 
 - Polyphonic recognition, score following, automatic instrument recognition, structured courses, teacher dashboards, sync, multiplayer, server-side analysis, AI lessons, music scanning, and automatic key detection.
 
-## Proof-of-Concept Acceptance Criteria
+## Proof-of-Concept Behavior
 
 - It runs as a static web app and requests microphone access only after an action.
 - It processes audio locally and detects sustained monophonic pitches over a useful range.
 - It suppresses silence and uncertain detections and renders a stable staff note.
 - It supports at least one concert-pitch and one transposing instrument with correct written pitch.
 - Core conversion and transposition behavior has automated coverage.
-- Automated Chromium coverage passes, and current desktop plus real-mobile evidence is required by [issue #71](https://github.com/akofink/live-staff/issues/71) before 1.0.
+- Automated Chromium coverage passes for the behavior under test.
 
-See the [release policy](release-policy.md), [testing strategy](testing-strategy.md), [input filter chain](input-filter-chain-design.md), [room-noise calibration](room-noise-calibration.md), and [multi-pitch decision](multi-pitch-feasibility.md) for the corresponding gates and boundaries.
+See the [release policy](release-policy.md), [testing strategy](testing-strategy.md), [input filter chain](input-filter-chain-design.md), [room-noise calibration](room-noise-calibration.md), and [multi-pitch decision](multi-pitch-feasibility.md) for the practical checks and the boundaries that are intentionally out of scope.
+A numbered 1.0 release is not a current requirement. See [ADR 0005](adr/0005-personal-preview-not-release-program.md).

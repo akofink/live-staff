@@ -2,9 +2,9 @@
 
 ## Boundary
 
-This protocol prepares reusable tooling for issue [#82](https://github.com/akofink/live-staff/issues/82).
-It does not add recordings or physical evidence.
-Operators should follow the [fixture capture kit](fixture-capture-kit.md) and the [remaining capture matrix](release-evidence/82-remaining-capture-matrix.md) rather than inventing a smaller matrix.
+This protocol is an optional method for a recording the maintainer explicitly requests.
+It is not current work, and it does not require a capture matrix.
+Issue #82 is closed.
 The CLI reads only local files, makes no network requests, never requests microphone permission, and is absent from the production entry graph.
 Do not place names, contact details, precise addresses, serial numbers, account identifiers, or unrelated speech in a manifest or recording.
 
@@ -44,30 +44,14 @@ A positive `aacOffsetFromLosslessFrames` means the compared AAC window begins th
 Do not claim AAC samples should hash-identically to lossless samples.
 9. Validate the manifest, review the exported checklist, and inspect staged files for personal or unrelated audio before commit.
 
-## Required Capture Matrix
+## Withdrawn Matrix
 
-The physical follow-up needs the following exact minimum matrix.
-For every cell, record three independently verified notes spanning the source's usable low, middle, and high range, including the detector's lower bound near B-flat1 when the instrument can produce it.
-Capture two takes per note at quiet, medium, and loud dynamics, at 0.5 m and 2 m, in both quiet and HVAC/fan conditions.
-Each take requires a same-take lossless/AAC pair and decoder-consistency report.
-
-| Instrument source | Minimum distinct sources or performers |
-| --- | ---: |
-| Acoustic piano | 2 pianos and 2 performers |
-| Voice | 2 performers |
-| Woodwind | 1 performer |
-| Brass | 1 performer |
-| Bowed string | 1 performer |
-| Plucked string | 1 performer |
-
-Repeat that instrument matrix across phone built-in, laptop built-in, wired external, and Bluetooth capture paths where each path is supported.
-For every supported device/path combination, capture one complete quiet-room, medium-dynamic, 0.5 m subset at both 44.1 and 48 kHz.
-Record unsupported sample rates or paths as unavailable in the operator log rather than fabricating or converting files.
+The old multi-instrument, multi-path, multi-distance matrix is withdrawn.
+Do not recreate it, and do not log unavailable paths as if the matrix were still required.
+The [retired note](release-evidence/82-remaining-capture-matrix.md) replaces that list.
 
 ## Evidence Integration
 
-Future evaluator reports must stratify results by instrument family and source, expected reference frequency, fundamental-to-strongest-partial ratio, SNR, onset versus sustain window, frame size, room condition, dynamic, distance, sample rate, codec, device, microphone, and capture path.
-Fundamental-to-partial ratio and SNR are derived analysis values, not capture labels, and must preserve the analysis method and window coordinates in the report.
-The current evaluator remains a frozen baseline for the existing corpus until validated manifests and physical recordings land.
-The remaining physical cells are enumerated in the [capture matrix](release-evidence/82-remaining-capture-matrix.md); the frozen piano AAC set fills none of them.
-Issue #77 owns detector behavior; issue #71 owns attended physical-device evidence.
+The current evaluator remains a regression check for the frozen piano corpus.
+It does not wait on new recordings.
+Issues #71 and #77 are closed and do not own follow-up evidence.

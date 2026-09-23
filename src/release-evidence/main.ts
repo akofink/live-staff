@@ -7,8 +7,7 @@ const fieldDefinitions = [
   ["buildSha", "Build SHA"], ["appUrl", "App URL"], ["device", "Device model"],
   ["os", "OS and version"], ["browser", "Browser"], ["browserVersion", "Browser version"], ["inputRoute", "Input route"],
   ["viewport", "CSS viewport/display mode"], ["assistiveTechnology", "Assistive technology and version"],
-  ["durationMinutes", "Sustained duration (minutes)"], ["batteryStart", "Battery start"], ["batteryEnd", "Battery end"],
-  ["thermalObservation", "Thermal/memory observation"],
+  ["durationMinutes", "Optional session duration (minutes)"],
 ] as const;
 
 function emptyReport(): EvidenceReport {
@@ -62,13 +61,13 @@ for (const check of evidenceChecks) {
   const instruction = document.createElement("p");
   instruction.textContent = check.instruction;
   const selectLabel = document.createElement("label");
-  selectLabel.textContent = `${check.area} attended result`;
+  selectLabel.textContent = `${check.area} result`;
   const select = document.createElement("select");
   select.name = `${check.id}-result`;
   for (const value of resultValues) select.add(new Option(value, value));
   select.value = report.checks[check.id].result;
   const attendedLabel = document.createElement("label");
-  attendedLabel.textContent = "I attended this check and recorded every unavailable scenario";
+  attendedLabel.textContent = "I tried this check";
   const attended = document.createElement("input");
   attended.type = "checkbox";
   attended.name = `${check.id}-attended`;
@@ -100,7 +99,7 @@ function download(contents: string, extension: string, type: string): void {
   }
   const link = document.createElement("a");
   link.href = URL.createObjectURL(new Blob([contents], { type }));
-  link.download = `live-staff-evidence-${report.buildSha.slice(0, 12) || "unrecorded"}.${extension}`;
+  link.download = `live-staff-device-notes-${report.buildSha.slice(0, 12) || "unrecorded"}.${extension}`;
   link.click();
   URL.revokeObjectURL(link.href);
 }
@@ -117,7 +116,7 @@ document.querySelector<HTMLButtonElement>("#open-app")!.addEventListener("click"
 document.querySelector<HTMLButtonElement>("#export-json")!.addEventListener("click", () => download(`${JSON.stringify(report, null, 2)}\n`, "json", "application/json"));
 document.querySelector<HTMLButtonElement>("#export-markdown")!.addEventListener("click", () => download(reportToMarkdown(report), "md", "text/markdown"));
 document.querySelector<HTMLButtonElement>("#clear")!.addEventListener("click", () => {
-  if (!window.confirm("Delete this browser's locally stored evidence report? Export it first if it must be retained.")) return;
+  if (!window.confirm("Delete these locally stored device notes? Export them first if you want to keep them.")) return;
   localStorage.removeItem(storageKey);
   window.location.reload();
 });

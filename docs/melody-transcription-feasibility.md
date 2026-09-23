@@ -5,10 +5,11 @@
 Ship a bounded proportional-time history layout as an explicit experimental view.
 Keep equal event spacing as the default a-rhythmic mode.
 Do not infer meter, tempo, pulse, measures, note values, or written rests.
-Do not claim detector accuracy or 1.0 completion.
+Do not treat this layout as a detector-accuracy claim.
 
-This report answers [issue #98](https://github.com/akofink/live-staff/issues/98).
-It is post-1.0 experimental work and must not delay [#71](https://github.com/akofink/live-staff/issues/71) or [#72](https://github.com/akofink/live-staff/issues/72).
+This report answered [issue #98](https://github.com/akofink/live-staff/issues/98), which is closed.
+Proportional-time history shipped.
+Rhythm inference is not current work.
 
 ## Three Distinct Layers
 
@@ -42,7 +43,7 @@ That string selects a notehead shape.
 It is not a quarter-note value, a beat, or a rest.
 
 The production detector remains a replaceable monophonic autocorrelation adapter.
-[#77](https://github.com/akofink/live-staff/issues/77) and the broader [#82](https://github.com/akofink/live-staff/issues/82) corpus are still open.
+Issues #77 and #82 are closed.
 No detector-accuracy claim follows from this layout work.
 
 ## Quality Metrics
@@ -89,7 +90,7 @@ Those experiments need a reviewed silence-versus-uncertainty rule, confidence, a
 
 Do not add first-class gap events until stabilizer output can name hold, absence, and suppression separately.
 Do not treat existing piano fixtures or synthetic tones as a melody-transcription corpus.
-Project-owned voice and multi-instrument melody recordings remain part of [#82](https://github.com/akofink/live-staff/issues/82) and attended capture.
+A new melody-recording corpus is not current work.
 
 Standard MIDI File export remains deferred for the reasons in [export MIDI feasibility](export-midi-feasibility.md).
 It would still be an elapsed-time container, not rhythmic transcription.
@@ -112,6 +113,6 @@ These cases must stay visible rather than be smoothed into invented notation.
 Implement the bounded proportional-time view now.
 Keep a-rhythmic event spacing available and default.
 Keep the three layers distinct in documentation, UI copy, and export disclaimers.
-Revisit rest symbols, pulse, and quantization only after detector evidence from #77 and a broader #82 corpus can support a silence-versus-uncertainty rule.
+Revisit rest symbols, pulse, and quantization only if the maintainer asks for that experiment.
 
 This recommendation is a layout decision, not a transcription-quality claim.

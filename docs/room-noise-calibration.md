@@ -23,12 +23,13 @@ The calibration itself adds about 960 ms of explicit setup time and intentionall
 Normal stabilization still requires two accepted detector frames, about 160 ms at the current cadence.
 Calibration skips pitch detection and performs only one 4,096-sample RMS pass per frame.
 The active gate performs the same single pass and allocates no arrays or retained per-frame objects.
-Its retained state is four numbers and one boolean, well below the 2 MiB mobile budget.
+Its retained state is four numbers and one boolean.
 The existing detector remains the dominant CPU cost because it evaluates normalized autocorrelation across hundreds of lags.
 
 The synthetic tests exercise the same sample count and 48 kHz rate commonly reported by MacBook microphones.
 The thresholds are ratios rather than device-specific absolute levels, so 44.1 kHz and mobile microphone gain do not change gate behavior.
-Real iOS Safari and Android hardware were not available in this worktree, so thermal behavior and automatic-gain differences remain a manual production acceptance item.
+Real iOS Safari and Android hardware were not measured here.
+Thermal behavior and automatic-gain differences are not a production acceptance item.
 
 ## Tradeoffs
 

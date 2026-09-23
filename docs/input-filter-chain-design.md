@@ -66,8 +66,8 @@ Work and memory remain bounded by section count and frame size.
 Unit tests cover coefficient responses, passbands, stopbands, nearby musical notes, ordering, configuration changes, bypass identity, reset, invalid preferences, and legacy migration.
 Browser and performance tests cover live edits, persistence, global bypass, monitor integration, cleanup, native control semantics, and the 320 px layout.
 
-Remaining 1.0 work is real-device validation rather than source implementation.
-[Issue #71](https://github.com/akofink/live-staff/issues/71) covers current iOS Safari and representative Android behavior, VoiceOver and keyboard use, sustained performance, memory, battery or thermal observations, interruptions, route changes, and real voice or instrument outcomes.
+The filter path is shipped.
+Real-device, thermal, and screen-reader validation is not remaining 1.0 work.
 
 ## References
 

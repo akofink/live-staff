@@ -104,7 +104,7 @@ Per call the implementation allocates no typed or dynamic arrays and only an opt
 The two observed FFT sizes retain two `Float64Array` work buffers and one `Uint32Array` bit-reversal table each, totaling 122,880 typed-array payload bytes and six retained references.
 The aggregate isolated research-candidate entry measured 6,147 minified and 2,134 gzip bytes, 1,139/304 bytes above the preceding SWIPE-like research entry; production import delta remains structurally zero.
 
-No production change is justified, and issue #77 remains open.
+No production change was justified at the time.
 
 ## McLeod Pitch Method Follow-Up
 
@@ -124,7 +124,7 @@ Those costs fit within the desktop 80 ms cadence, but mobile CPU, thermal, batte
 Per call the candidate allocates one `Float64Array(maximumLag + 1)`, one dynamic key-maximum array, and zero or one result object, retaining no references or cross-frame state.
 The isolated aggregate candidate entry measured 7,124 minified and 2,393 gzip bytes, 977/259 bytes above the preceding 6,147/2,134-byte research entry; production import delta remains structurally zero.
 
-Production remains untouched, no temporal candidate is justified, and issue #77 remains open.
+Production remained untouched, and no temporal candidate was justified at the time.
 
 ## SWIPE-Like Follow-Up
 
@@ -146,7 +146,7 @@ Those figures fit within the desktop 80 ms cadence but are about 2.2 to 2.3 time
 The two observed FFT sizes retain 122,880 typed-array payload bytes in total.
 The aggregate isolated candidate entry measured 5,008 minified and 1,830 gzip bytes, an increase of 2,117 and 729 bytes over the preceding 2,891/1,101-byte research entry; production import delta remains structurally zero.
 
-No production change is justified, and issue #77 remains open.
+No production change was justified at the time.
 
 ## YIN Follow-Up
 
@@ -171,5 +171,6 @@ The isolated aggregate candidate entry measured 7,984 minified and 2,567 gzip by
 
 Production remains untouched.
 Lag-domain estimators and spectral grid estimators have now both failed the same mandatory room or hum-filter gates, or failed earlier precision and absence gates, against this corpus.
-No remaining untried fundamental estimator is justified without the independently verified #82 recordings.
-Issue #77 remains open.
+No further fundamental-estimator experiment is current work.
+Issue #77 is closed.
+Do not reopen it to wait for a new recording corpus.

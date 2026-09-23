@@ -6,7 +6,7 @@ Live Staff is a static client-side web app.
 It has no backend in the initial architecture.
 Microphone audio is processed locally and is never uploaded.
 
-The 1.0 offline contract is resilience after initial load, not reloadable offline use.
+The app keeps working after an online load if the network drops, but a new visit or reload needs a connection.
 Once the document and its first-party assets have loaded, listening and application interactions require no network connection.
 A new visit or reload requires the static deployment to be reachable.
 

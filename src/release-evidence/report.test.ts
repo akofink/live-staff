@@ -24,6 +24,21 @@ function report(): EvidenceReport {
 }
 
 describe("attended evidence report", () => {
+  it("accepts optional notes without device metadata", () => {
+    const value = report();
+    expect(validateEvidenceReport({
+      ...value,
+      buildSha: "unrecorded",
+      device: "",
+      os: "",
+      browser: "",
+      browserVersion: "",
+      inputRoute: "",
+      viewport: "",
+      assistiveTechnology: "",
+    })).toBe(true);
+  });
+
   it("accepts a complete versioned report and rejects fabricated or incomplete result shapes", () => {
     expect(validateEvidenceReport(report())).toBe(true);
     expect(validateEvidenceReport({ ...report(), checks: {} })).toBe(false);
@@ -32,13 +47,30 @@ describe("attended evidence report", () => {
     expect(validateEvidenceReport({ ...report(), appUrl: "javascript:alert(1)" })).toBe(false);
   });
 
+  it("does not require a 30-minute, battery, or thermal result", () => {
+    const value = report();
+    const changed = {
+      ...value,
+      durationMinutes: "2",
+      batteryStart: "",
+      batteryEnd: "",
+      thermalObservation: "",
+      checks: { ...value.checks, sustained: { result: "pass" as const, attended: true, notes: "No visible slowdown" } },
+    };
+
+    expect(validateEvidenceReport(changed)).toBe(true);
+    expect(evidenceChecks.find(({ id }) => id === "sustained")?.instruction).not.toContain("30 minutes");
+  });
+
   it("exports deterministic Markdown with limitations and escaped table content", () => {
     const value = report();
     const changed = { ...value, checks: { ...value.checks, layout: { result: "blocked" as const, attended: true, notes: "No device | unavailable\nRetest required" } } };
     const markdown = reportToMarkdown(changed);
 
     expect(markdown).toContain("No device \\| unavailable Retest required");
-    expect(markdown).toContain("No result was inferred automatically.");
+    expect(markdown).toContain("Nothing was inferred automatically.");
+    expect(markdown).not.toContain("Thermal observation");
+    expect(markdown).not.toContain("Battery:");
     expect(markdown.match(/\| blocked \|/g)).toHaveLength(1);
   });
 

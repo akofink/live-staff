@@ -36,14 +36,14 @@ npm run evaluate:performance
 ```
 
 Run the checks relevant to the change before committing.
-Browser-facing, audio, notation, responsive-layout, or performance changes normally require both evaluation commands.
+Use the fixture and performance evaluators for audio or detector changes when they help cover the behavior.
 
 ## Testing Expectations
 
-- Unit test all pitch conversion, transposition, spelling, range, and stabilization behavior.
-- Use deterministic synthetic signals and small project-owned audio fixtures for detector tests.
-- Add browser tests for permission, start/stop, interruption, preference persistence, and responsive behavior when those features exist.
-- Manually validate sustained voice or generated tones, then real instruments when available.
+- Unit test pitch conversion, transposition, spelling, range, and stabilization behavior that the change touches.
+- Use deterministic synthetic signals and the existing small fixtures for detector tests.
+- Add a browser test when the change alters permission, start/stop, interruption, preferences, or layout.
+- A quick listen with voice or a tone is welcome when it is easy. It is not a release gate.
 
 ## Runtime And Performance
 
@@ -62,19 +62,21 @@ Browser-facing, audio, notation, responsive-layout, or performance changes norma
 
 ## Definition of Done
 
-A feature is complete only when its behavior, error and empty states, mobile layout, accessibility, tests, and relevant documentation are addressed.
-It must preserve local-only audio handling and must not introduce an unnecessary service dependency.
+A change is done when the behavior works, the relevant automated checks pass, and local-only audio handling still holds.
+Do not block it on a device matrix, a screen-reader certification, a thermal or battery run, or a new recording corpus.
+Say what is still rough instead of inventing a compliance program around it.
 
 ## Issue Tracking
 
-- Create or update a GitHub issue for a newly discovered, actionable finding that is outside the current branch's scope.
-- Reference the issue from each follow-up branch and pull request.
-- Do not create issues for transient investigation notes or work already covered by an open issue or pull request.
+- File a GitHub issue only for work the maintainer wants tracked.
+- Do not open evidence, release, capture, or research programs on your own.
+- Do not reopen closed issues #71, #72, #77, #82, or #98 as gates.
+- Skip transient notes and work already covered by an open issue or pull request.
 
 ## Delivery And Cleanup
 
 - Before reporting that completed work lacks a pull request, inspect open and closed pull requests, `origin/main`, and recent workflow runs.
-- Keep the worktree and agent available through pull-request checks, merge, Pages deployment, and production verification.
-- For deployed UI or audio changes, verify `https://live-staff.akofink.com/` in a real browser, including console, network, relevant desktop/mobile layouts, and the changed interaction when permissions allow.
-- Treat a successful Pages workflow as necessary but not sufficient production evidence.
-- Remove the feature worktree, local branch, remote branch, browser session, shell pane, and agent window only after merge and required production verification.
+- Keep the worktree available through pull-request checks and merge.
+- For a user-visible behavior change, a quick look at `https://live-staff.akofink.com/` after deploy is useful when practical.
+- Remove the feature worktree and branch after merge when no follow-up is needed.
+- Do not add a device, thermal, or privacy-network campaign.
