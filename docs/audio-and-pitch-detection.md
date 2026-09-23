@@ -82,7 +82,6 @@ Disabling the checkbox, stopping listening, or unmounting the app removes the ca
 
 ## Open Technical Decisions
 
-- Wait for the independently verified #82 corpus before further fundamental-estimator experiments.
-- Choose detector frame sizes for low-note resolution versus latency.
-- Expand project-owned recordings beyond one piano, room, codec, and capture route.
-- Confirm mobile Safari behavior in a real-device spike.
+- Do not start another detector research pass unless the maintainer asks for a specific fix.
+- The frozen piano corpus can show octave errors. That is a known limit, not a capture assignment.
+- Frame-size choices can wait until a concrete latency or low-note problem needs a change.

@@ -1,12 +1,11 @@
 # Fixture Capture Kit
 
-This kit is the operator workflow for issue [#82](https://github.com/akofink/live-staff/issues/82).
-It does not add recordings.
-It does not mark any capture-matrix cell complete.
-It does not claim detector accuracy, physical-device support, screen-reader coverage, or 1.0 completion.
+This kit is retired as current work.
+Issue #82 is closed, and the capture matrix is not an acceptance target.
+Use these notes only if the maintainer explicitly asks for a new recording.
+Do not start a capture session from this document.
 
-The [fixture capture protocol](fixture-capture-protocol.md) remains the contract.
-Use this kit to run that contract without inventing labels from filenames or detector output.
+The [fixture capture protocol](fixture-capture-protocol.md) describes an optional method, not a contract that must be completed.
 
 ## Do Not Capture From This Kit
 
@@ -17,34 +16,34 @@ Use this kit to run that contract without inventing labels from filenames or det
 - Do not place names, contact details, precise addresses, serial numbers, account identifiers, or unrelated speech in a manifest, checklist, or recording.
 
 The existing piano corpus is a frozen AAC-only baseline.
-It has no v1 manifest and no lossless pair, so it fills **zero** cells of the remaining matrix.
+Leave it unchanged.
+It does not need a lossless pair or a matrix cell.
 
-## Remaining Work
+## Not Remaining Work
 
-The exact remaining capture matrix is [82-remaining-capture-matrix.md](release-evidence/82-remaining-capture-matrix.md).
-Every listed cell is remaining as of commit `ded54f7`.
-A cell is complete only when its primary take recipe is present, independently verified, manifest-validated, and reviewed for consent and privacy.
-Unsupported hardware is logged as unavailable.
-It is not fabricated.
+The old matrix is [withdrawn](release-evidence/82-remaining-capture-matrix.md).
+No cell is remaining.
+Do not log unavailable hardware, and do not treat a missing recording as incomplete release work.
 
 ## Files In This Kit
 
 | File | Use |
 | --- | --- |
-| [Remaining capture matrix](release-evidence/82-remaining-capture-matrix.md) | Exact remaining cells and the per-cell take recipe |
+| [Retired matrix note](release-evidence/82-remaining-capture-matrix.md) | States that the old cell list is withdrawn |
 | [Manifest template](../tests/fixtures/templates/manifest.template.json) | Copy into a **new** fixture-set directory and replace every example value |
 | [Template notes](../tests/fixtures/templates/README.md) | Field-by-field fill instructions |
 | [Manifest schema](../tests/fixtures/manifest.schema.json) | Version 1 structural contract |
 | `npm run fixtures:stats` | Print filename, byte count, and SHA-256 for audio files in a set directory |
 | `npm run fixtures:validate` | Authoritative validator for a filled manifest |
 
-## Session Checklist
+## Optional Checklist
 
-Complete this list once per new fixture-set directory.
+Use this list only after an explicit request for a new recording.
+Do not start it from this kit.
 One directory is one instrument source, performer, device, microphone path, distance, room condition, and sample rate.
 A remaining matrix cell needs four such directories at the native sample rate, plus a fifth other-rate directory when that rate is supported.
 
-- [ ] Confirm issue #82 is still the owner of this capture and that this directory is **not** the frozen piano set.
+- [ ] Confirm the maintainer explicitly asked for this recording and that this directory is **not** the frozen piano set.
 - [ ] Obtain explicit project-use and public-repository consent before recording.
 - [ ] Assign anonymous set-local identifiers for the performer, verifier, and instrument.
 - [ ] Record the instrument family and a non-personal make/model description.
@@ -95,15 +94,8 @@ Do not commit decoded PCM unless a later reviewed decision says otherwise.
 The validator cannot detect personal content in free text or audio.
 Human review remains required.
 
-## First Cell Versus Complete Matrix
+## Not Current Work
 
-The remaining matrix is the acceptance target for #82.
-If hardware or performers arrive in stages, finish and validate one complete cell, meaning all required directories for that source and path, rather than scattering incomplete takes.
-An incomplete directory may exist privately, but it does not fill a matrix cell and should not be described as #82 progress in a release record.
-
-## Related Evidence
-
-Issue #77 owns detector behavior.
-Issue #71 owns attended physical-device evidence.
-This kit supplies recordings those issues can later use.
-It does not close them.
+Do not finish a cell, fill a matrix, or describe a recording as release progress.
+Issues #71, #77, and #82 are closed.
+A future recording needs a new, explicit request.

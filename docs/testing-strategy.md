@@ -18,7 +18,8 @@ Do not commit large audio files without considering repository impact.
 The initial `tests/fixtures/piano-iphone-16-pro-macbook-air-m2/` corpus is 1.6 MB total and is tracked directly in Git.
 It is raw AAC/M4A recorded in a residential room through an iPhone 16 Pro microphone connected to a MacBook Air M2 with QuickTime Player, so it represents realistic rather than laboratory-clean input.
 Keep source recordings unchanged and retain recording context plus checksums in the fixture-set README.
-New #82 sets use the [fixture capture kit](fixture-capture-kit.md); do not retrofit the frozen piano directory.
+Do not retrofit the frozen piano directory.
+The old capture kit is an optional reference, not a required corpus.
 Use a browser decoding harness for M4A analysis because Node unit tests do not natively decode it.
 Run `npm run evaluate:fixtures` to evaluate the original files through a pinned headless Chromium browser and save its machine-readable result.
 Introduce Git LFS only when a future fixture corpus materially increases clone size or includes larger lossless recordings.
@@ -27,7 +28,7 @@ Introduce Git LFS only when a future fixture corpus materially increases clone s
 
 Current browser tests cover permission paths, start and stop, instrument switching, grand-staff routing and history, local preferences, filters, diagnostics, and responsive layout.
 History-export tests cover deterministic CSV, JSON, and plain-text serialization, CSV escaping, written-pitch derivation after live instrument changes, and local download or share without a network URL.
-Issue [#67](https://github.com/akofink/live-staff/issues/67) adds comprehensive interruption, device-loss, background/resume, and startup-cancellation behavior.
+Lifecycle tests cover interruption, device loss, background/resume, and startup cancellation.
 Browser tests must mock audio where reliable device access is unavailable in CI.
 Signal-monitor browser coverage proves zero spectrum work before opt-in, one microphone request, bounded update cadence, immediate cleanup, accessible native controls, and no overflow at 320 CSS pixels.
 Pure tests cover logarithmic frequency placement, deterministic RMS level, monitor cadence, and disable semantics without wall-clock timing.
@@ -36,9 +37,10 @@ These tests establish application state transitions and cleanup invariants, not 
 The M4A fixture harness runs in CI to catch decode, browser-runtime, local-serving, and reviewed corpus regressions.
 Its floors of 3 matching fixtures, 31 emitted estimates, and at most 20 octave errors are a baseline for one piano corpus, not a general accuracy claim.
 
-## Automated Gate
+## Common Automated Checks
 
-Run a reproducible install and the same gate used by CI:
+Run the checks that match the change.
+The broad suite is available when useful:
 
 ```sh
 npm ci
@@ -54,8 +56,8 @@ npm run evaluate:performance
 
 ## Manual Validation
 
-Validate with voice, piano or generated tone, and at least one transposing instrument when available.
-Maintain a supported-browser and device matrix as real devices are tested.
-[Issue #71](https://github.com/akofink/live-staff/issues/71) owns durable real-device evidence for iOS Safari and Android backgrounding, screen lock, phone or OS audio interruption, permission revocation, wired and Bluetooth route changes, external microphone loss, sustained thermal behavior, keyboard use, screen readers, and browser-specific permission UI.
-Those cases cannot be represented faithfully by replacing Chromium browser objects in automation and must not be inferred from the controlled lifecycle tests.
-Use the [attended release evidence harness](attended-release-evidence.md) to record these human observations locally and export reviewable JSON and Markdown without capturing audio or uploading evidence.
+Try voice, a piano or generated tone, and a transposing instrument when that is easy.
+Automated Chromium tests do not prove every phone browser.
+That gap is a known limit, not an open evidence project.
+The [attended harness](attended-release-evidence.md) is optional local notes if a device session happens to occur.
+Do not schedule thermal, battery, screen-reader, or route-matrix sessions as release work.

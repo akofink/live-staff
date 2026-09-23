@@ -37,7 +37,7 @@ The app selects written notation automatically for transposing instruments, prov
 
 ## Milestone 5: Proof of Concept
 
-**Status: Implementation completed; release evidence remains in Milestone 7.**
+**Status: Shipped as a personal preview.**
 
 Complete the first-run flow, selector, microphone states, labels, and phone layout.
 Success means a new user can understand the app without instruction.
@@ -45,34 +45,29 @@ Subsequent shipped work added progressive disclosure, local preferences, room ca
 
 ## Milestone 6: Transposition Coach
 
-**Status: Not started and not required for core 1.0 hardening.**
+**Status: Not started. Not current work.**
 
 Add target-instrument selection and a dual display derived independently from canonical concert pitch.
 
 ## Milestone 7: Version 1.0 Hardening
 
-**Status: In progress.**
+**Status: Retired.**
 
-Complete browser and device coverage, accessibility review, the offline-contract decision, detector evidence, lifecycle recovery, privacy evidence, performance review, and deployment documentation.
-The milestone exits through the 1.0 hardening gate in the [release policy](release-policy.md).
-The offline decision is complete: 1.0 continues working after an online load loses connectivity, but new visits and reloads require the network; no service worker or persistent application cache is used.
+A numbered 1.0 release is not current work.
+The site stays an unversioned preview.
+The offline behavior is already decided: a loaded page keeps working if the network drops, and a new visit still needs a connection.
+There is no service worker and no persistent application cache.
 
-Recommended execution order:
-
-1. [#67 Harden microphone lifecycle and interruption recovery](https://github.com/akofink/live-staff/issues/67) and [#69 define enforceable detector evidence](https://github.com/akofink/live-staff/issues/69) can proceed independently.
-2. [#68 define the offline contract](https://github.com/akofink/live-staff/issues/68) in parallel with the foundational hardening.
-3. [#71 record real-device, accessibility, privacy, and sustained-performance evidence](https://github.com/akofink/live-staff/issues/71) after lifecycle and detector claims settle.
-4. [#72 run the dedicated 1.0 release review](https://github.com/akofink/live-staff/issues/72) after all preceding requirements and evidence close.
-
-The reusable [fixture capture protocol](fixture-capture-protocol.md) and [fixture capture kit](fixture-capture-kit.md) define validated manifests, immutable same-take lossless/AAC assets, decoder comparison records, operator checklists, and the [remaining physical capture matrix](release-evidence/82-remaining-capture-matrix.md) for [#82](https://github.com/akofink/live-staff/issues/82).
-That local tooling can land independently, but #82 remains open until the operator-assisted recordings exist and are reviewed; those recordings complement detector work in #77 and attended device evidence in #71.
+Do not revive the closed device-evidence, release-review, detector-research, or capture-corpus issues as a milestone exit.
+See [ADR 0005](adr/0005-personal-preview-not-release-program.md).
 
 ## Deferred Work
 
-Standard MIDI File export, polyphonic input, automatic instrument recognition, persisted session history or practice logs, lessons, teacher tools, accounts, analytics, and native applications remain deferred until users validate the core experience.
+Standard MIDI File export, polyphonic input, automatic instrument recognition, persisted session history or practice logs, lessons, teacher tools, accounts, analytics, and native applications stay deferred until there is a reason to build them.
 Local CSV, JSON, and plain-text export of the bounded in-memory stable-note history shipped for [issue #97](https://github.com/akofink/live-staff/issues/97); SMF remains deferred for the reasons in [export MIDI feasibility](export-midi-feasibility.md).
-[Issue #98](https://github.com/akofink/live-staff/issues/98) adds an experimental proportional-time history view and records the transcription boundary in [melody transcription feasibility](melody-transcription-feasibility.md).
-Rhythm inference, rest symbols, and note values remain deferred.
+Proportional-time history shipped with [issue #98](https://github.com/akofink/live-staff/issues/98), which is now closed.
+The boundary is in [melody transcription feasibility](melody-transcription-feasibility.md).
+Rhythm inference, rest symbols, and note values stay deferred.
 The [multi-pitch feasibility report](multi-pitch-feasibility.md) defers product polyphony, source separation, and timbre/source association while allowing only a bounded offline two-pitch benchmark.
-The [input filter chain](input-filter-chain-design.md), [room calibration](room-noise-calibration.md), and opt-in signal monitor are shipped; real-device validation remains part of issue #71.
-Configurable A4, expansion beyond the current five selectable instruments, and separate pitch-display modes have no current evidence-backed 1.0 requirement.
+The [input filter chain](input-filter-chain-design.md), [room calibration](room-noise-calibration.md), and opt-in signal monitor are shipped.
+Configurable A4, more instruments, and separate pitch-display modes are ideas, not current work.

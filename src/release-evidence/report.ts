@@ -50,12 +50,10 @@ export const evidenceChecks: readonly EvidenceCheck[] = [
   { id: "keyboard", area: "Accessibility", instruction: "Navigate from page start without a pointer. Confirm logical focus order, visible focus, native names, units, values, disabled states, and disclosure states." },
   { id: "screen-reader", area: "Accessibility", instruction: "With the named VoiceOver or TalkBack configuration, confirm idle, permission, listening, silence or uncertain input, detected note, denial, device loss, and recovery messages are announced once and remain understandable. Confirm raw SVG is not read." },
   { id: "privacy-network", area: "Privacy", instruction: "Inspect the browser network log from before Start through Stop and local preference changes. Fail for any audio, detection, preference, profile, analytics, telemetry, or third-party executable request. Record request observations without private URLs or identifiers." },
-  { id: "sustained", area: "Sustained performance", instruction: "Run at least 30 minutes with filters and monitor enabled. Record duration, battery start/end, thermal observation, memory when available, responsiveness, and any dropped or frozen display." },
+  { id: "sustained", area: "Optional extended use", instruction: "If an extended session happens naturally, note any obvious responsiveness problem. No duration, battery, or temperature measurement is expected." },
 ] as const;
 
 const textFields = ["startedAt", "updatedAt", "buildSha", "appUrl", "device", "os", "browser", "browserVersion", "inputRoute", "viewport", "assistiveTechnology", "durationMinutes", "batteryStart", "batteryEnd", "thermalObservation"] as const;
-const requiredMetadata = ["buildSha", "appUrl", "device", "os", "browser", "browserVersion", "inputRoute", "viewport", "assistiveTechnology"] as const;
-
 export function isEvidenceReportShape(value: unknown): value is EvidenceReport {
   if (!value || typeof value !== "object") return false;
   const report = value as Record<string, unknown>;
@@ -77,8 +75,7 @@ export function isEvidenceReportShape(value: unknown): value is EvidenceReport {
 export function validateEvidenceReport(value: unknown): value is EvidenceReport {
   if (!isEvidenceReportShape(value)) return false;
   const report = value;
-  if (!requiredMetadata.every((field) => report[field].trim().length > 0)) return false;
-  if (!/^[a-fA-F0-9]{7,40}$/.test(report.buildSha)) return false;
+  if (report.buildSha !== "unrecorded" && !/^[a-fA-F0-9]{7,40}$/.test(report.buildSha)) return false;
   if (Number.isNaN(Date.parse(report.startedAt)) || Number.isNaN(Date.parse(report.updatedAt))) return false;
   try {
     const protocol = new URL(report.appUrl).protocol;
@@ -90,9 +87,6 @@ export function validateEvidenceReport(value: unknown): value is EvidenceReport 
     const check = report.checks[id];
     return check.result === "not-run" ? !check.attended : check.attended && check.notes.trim().length > 0;
   })) return false;
-  if (report.checks.sustained && report.checks.sustained.result === "pass") {
-    if (Number(report.durationMinutes) < 30 || !(report.batteryStart as string).trim() || !(report.batteryEnd as string).trim() || !(report.thermalObservation as string).trim()) return false;
-  }
   return true;
 }
 
@@ -106,7 +100,7 @@ export function reportToMarkdown(report: EvidenceReport): string {
     return `| ${check.area} | ${markdownText(check.instruction)} | ${observation.attended ? "yes" : "no"} | ${observation.result} | ${markdownText(observation.notes)} |`;
   });
   return [
-    "# Live Staff Attended Release Evidence",
+    "# Optional Live Staff Device Notes",
     "",
     `- Build SHA: \`${markdownText(report.buildSha)}\``,
     `- App URL: ${markdownText(report.appUrl)}`,
@@ -118,13 +112,10 @@ export function reportToMarkdown(report: EvidenceReport): string {
     `- Input route: ${markdownText(report.inputRoute)}`,
     `- Viewport: ${markdownText(report.viewport)}`,
     `- Assistive technology: ${markdownText(report.assistiveTechnology)}`,
-    `- Sustained duration: ${markdownText(report.durationMinutes)} minutes`,
-    `- Battery: ${markdownText(report.batteryStart)} to ${markdownText(report.batteryEnd)}`,
-    `- Thermal observation: ${markdownText(report.thermalObservation)}`,
     "",
-    "This report contains attended human observations. No result was inferred automatically.",
+    "These are optional notes from a person. Nothing was inferred automatically.",
     "",
-    "| Area | Instruction | Attended and unavailable scenarios recorded | Result | Notes and limitations |",
+    "| Area | Suggestion | Tried | Result | Notes |",
     "| --- | --- | --- | --- | --- |",
     ...rows,
     "",

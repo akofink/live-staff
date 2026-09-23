@@ -4,17 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <title>Live Staff attended release evidence</title>
+    <title>Live Staff optional device notes</title>
   </head>
   <body>
     <main>
       <header>
-        <p class="eyebrow">Developer-only attended harness</p>
-        <h1>Live Staff release evidence</h1>
+        <p class="eyebrow">Optional local notes</p>
+        <h1>Live Staff device notes</h1>
         <p>This page records human observations locally. It does not test automatically, capture audio, or upload data.</p>
       </header>
       <section aria-labelledby="session-heading">
-        <h2 id="session-heading">Test session</h2>
+        <h2 id="session-heading">Session notes</h2>
         <div id="session-fields" class="fields"></div>
         <div class="actions">
           <button id="open-app" type="button">Open app in a new tab</button>
@@ -25,13 +25,13 @@
         <p id="save-status">Not yet saved.</p>
       </section>
       <section aria-labelledby="checks-heading">
-        <h2 id="checks-heading">Attended checks</h2>
-        <p>Choose a result only after performing the instruction on the named device. Record limitations and private-data-safe observations.</p>
+        <h2 id="checks-heading">Optional observations</h2>
+        <p>Use these prompts only if you happen to try the app on a device. They are not release gates.</p>
         <div id="checks"></div>
       </section>
       <aside>
-        <h2>Release guardrails</h2>
-        <p>Do not close #71 until all required physical-device, accessibility, sustained-performance, and privacy reports exist. Do not make detector accuracy claims until #77 is resolved and the deployed commit is retested.</p>
+        <h2>Not a release checklist</h2>
+        <p>These notes are optional. No device matrix, thermal session, or detector sign-off is required.</p>
       </aside>
     </main>
     <script type="module" src="/src/release-evidence/main.ts"></script>

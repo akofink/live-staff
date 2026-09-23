@@ -61,4 +61,5 @@ Listening: Stable
 ```
 
 The advanced disclosure can opt into a raw waveform and spectrum with the composed detector-filter response.
-Native controls provide the shipped accessibility baseline; current keyboard, screen-reader, and real-device evidence remains a 1.0 gate in [issue #71](https://github.com/akofink/live-staff/issues/71).
+Native controls are the accessibility baseline.
+A formal screen-reader or device-certification pass is not a current requirement.

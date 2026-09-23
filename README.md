@@ -8,8 +8,10 @@ The published app includes local microphone capture, written-pitch transposition
 ## Status
 
 The monophonic microphone-to-staff experience is shipped through the interactive filter chain in PR #65.
-The in-repository autocorrelation detector remains a proof of concept over a 55 to 1,000 Hz range, not a production-grade guarantee for every instrument, room, or browser.
-Current 1.0 work is detector evidence and real-device and accessibility validation; polyphony and source association remain deferred.
+The in-repository autocorrelation detector is a proof of concept over a 55 to 1,000 Hz range.
+It can show the wrong octave, especially on piano, and that limitation is accepted until a specific fix is requested.
+The site is an unversioned personal preview, not a 1.0 release program.
+Polyphony and source association remain out of scope.
 
 ## Privacy
 
@@ -18,7 +20,8 @@ It is not uploaded, recorded, or sent to a server.
 No account or backend is planned for the core product.
 
 After the application loads online, it continues working if the connection is lost.
-A new visit or reload requires a connection; version 1.0 does not install a service worker or persist an offline application cache.
+A new visit or reload requires a connection.
+The app does not install a service worker or persist an offline application cache.
 
 ## Requirements
 
@@ -68,7 +71,8 @@ Set `VITE_BASE_PATH` only when building for a non-root deployment path.
 - [Fixture capture protocol](docs/fixture-capture-protocol.md)
 - [Fixture capture kit](docs/fixture-capture-kit.md)
 - [Release policy](docs/release-policy.md)
-- [1.0 candidate support and evidence](docs/release-evidence/1.0-candidate.md)
+- [Historical support notes](docs/release-evidence/1.0-candidate.md)
+- [Personal preview decision](docs/adr/0005-personal-preview-not-release-program.md)
 - [Roadmap](docs/roadmap.md)
 - [Working flow](docs/working-flow.md)
 
