@@ -14,7 +14,7 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { coachPitches } from "../instruments/coach";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
-import { instrumentOptions, type InstrumentId, type Preferences } from "../preferences/preferences";
+import { instrumentOptions, maximumA4Hz, minimumA4Hz, type InstrumentId, type Preferences } from "../preferences/preferences";
 import { PitchHistory } from "../pitch/pitchHistory";
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
@@ -219,7 +219,7 @@ export function App() {
             : "The room is already below the detector noise threshold. Calibration is not needed.");
         }
         const stableNote = stabilizer.current.update(
-          estimate ? frequencyToNote(estimate.frequencyHz) : null,
+          estimate ? frequencyToNote(estimate.frequencyHz, preferences.a4Hz) : null,
         );
         const nextHistory = pitchHistory.current.update(stableNote?.midi, timestamp);
         if (nextHistory) {
@@ -322,6 +322,7 @@ export function App() {
       roomCalibrationState,
       filtersBypassed: filterBypass,
       inputFilters: preferences.inputFilters,
+      a4Hz: preferences.a4Hz,
     });
 
     try {
@@ -501,6 +502,19 @@ export function App() {
             <p id="target-instrument-guidance" className="preferences-help">
               Shows another part's pitch for the same sounding note beside your own. Session-only.
             </p>
+            <label>
+              A4 reference pitch: {preferences.a4Hz} Hz
+              <input
+                type="range"
+                min={minimumA4Hz}
+                max={maximumA4Hz}
+                step={1}
+                value={preferences.a4Hz}
+                aria-label="A4 reference pitch"
+                aria-valuetext={`${preferences.a4Hz} hertz`}
+                onChange={(event) => updatePreferences({ a4Hz: Number(event.target.value) })}
+              />
+            </label>
             <InputFilters bands={preferences.inputFilters} bypassed={filterBypass} onBypass={(bypassed) => {
               filtersBypassed.current = bypassed;
               setFilterBypass(bypassed);

@@ -3,7 +3,7 @@
 ## First Run
 
 The first screen explains the value in one sentence and provides a prominent Start listening action beside the listening state.
-Instrument, target-instrument comparison, room calibration, and bounded input-filter controls are available in a collapsed Setup disclosure.
+Instrument, target-instrument comparison, A4 reference pitch, room calibration, and bounded input-filter controls are available in a collapsed Setup disclosure. The A4 reference defaults to 440 Hz and can be adjusted from 415 to 466 Hz.
 Instrument selection determines the primary notation: concert instruments use concert notation and transposing instruments use their written notation.
 It remains available while listening so the current text and staff update immediately without restarting capture.
 It states clearly that audio remains on the device.

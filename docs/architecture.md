@@ -52,8 +52,8 @@ Disabling the monitor or stopping capture removes the observer immediately.
 
 ## Local Preferences
 
-`src/preferences/` owns the serializable instrument and filter choices plus a small browser storage adapter.
-Only those choices are written to `localStorage`; microphone audio, audio frames, detected frequencies, detected notes, history, calibration, global bypass, and monitor samples are never persisted.
+`src/preferences/` owns the serializable instrument, A4 reference pitch, and filter choices plus a small browser storage adapter.
+Only those choices are written to `localStorage`; microphone audio, audio frames, detected frequencies, detected notes, history, calibration, global bypass, and monitor samples are never persisted. The A4 reference defaults to 440 Hz and is bounded to 415 through 466 Hz.
 Signal-monitor state and samples are also never persisted.
 Malformed values and unavailable browser storage safely use defaults.
 The React UI resolves the selected preference to an instrument definition and derives its display pitch from canonical concert MIDI.
@@ -67,7 +67,7 @@ Empty space in proportional mode is unclassified gap, not a rest or beat.
 An explicit export action can download that same snapshot as local CSV, JSON, or plain text.
 The files are never uploaded, and the application still does not persist history.
 Timing in those files is observed elapsed milliseconds, not meter, tempo, beat, or note values.
-Concert frequency is the equal-tempered value of the committed MIDI note at A4 = 440 Hz.
+Concert frequency is the equal-tempered value of the committed MIDI note at the selected A4 reference pitch.
 Standard MIDI File export remains deferred; see [export MIDI feasibility](export-midi-feasibility.md).
 
 ## Canonical Data Flow
