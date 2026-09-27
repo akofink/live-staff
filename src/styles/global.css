@@ -354,14 +354,15 @@ h2 {
   border-block: 1px solid #d8d0c1;
 }
 
-.target-pitch {
-  margin: 0.5rem 0 0;
+.staff-target-pitch {
+  margin: 0.35rem 0 0;
+  color: #264d3d;
+  font-size: 0.9rem;
 }
 
-.target-pitch strong {
-  color: #264d3d;
+.staff-target-pitch strong {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .history-export {

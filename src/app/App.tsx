@@ -392,6 +392,12 @@ export function App() {
             historyNowMs={historyNowMs}
             instrument={selectedInstrument}
             pitchDisplay={primaryPitchDisplay}
+            targetComparison={targetInstrument ? {
+              label: targetInstrument.writtenToConcertSemitones === 0
+                ? "Target concert pitch"
+                : `Target written pitch for ${targetInstrument.name}`,
+              noteName: targetPitch?.name ?? "--",
+            } : undefined}
           />
           <section className="note-display" aria-label="Detected pitch">
             <p className="note-name">{displayPitch?.name ?? "--"}</p>
@@ -408,14 +414,6 @@ export function App() {
                 <dd>{note ? `${note.cents >= 0 ? "+" : ""}${note.cents} cents` : "--"}</dd>
               </div>
             </dl>
-            {targetInstrument && (
-              <p className="target-pitch">
-                {targetInstrument.writtenToConcertSemitones === 0
-                  ? "Target concert pitch"
-                  : `Target written pitch for ${targetInstrument.name}`}
-                : <strong>{targetPitch?.name ?? "--"}</strong>
-              </p>
-            )}
             {primaryPitchDisplay === "written" && concertPitch && (
               <details className="pitch-reference">
                 <summary>Pitch reference</summary>

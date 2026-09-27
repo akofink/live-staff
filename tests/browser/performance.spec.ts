@@ -370,6 +370,11 @@ test("compares a session-only target written pitch derived from concert pitch on
   await page.getByRole("button", { name: "Start listening" }).click();
   await expect(page.getByLabel("Detected pitch").getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Target written pitch for E-flat alto saxophone: A4")).toBeVisible();
+  const comparison = page.locator(".staff-display .staff-target-pitch");
+  await expect(comparison).toHaveCount(1);
+  expect((await comparison.boundingBox())!.y).toBeLessThan(720);
+  await expect(page.locator(".note-display .staff-target-pitch")).toHaveCount(0);
+  await expect(page.locator(".staff-graphic svg")).toHaveCount(1);
 
   await page.getByLabel(/^Instrument/).selectOption("concert");
   await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
