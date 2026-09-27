@@ -20,7 +20,7 @@ It excludes accounts, cloud storage, persisted audio or detection history, analy
 - Correct treble and bass staff display.
 - Instrument-first notation that defaults concert instruments to concert pitch and transposing instruments to written pitch.
 - A compact sounding or concert-pitch reference for transposing instruments.
-- Locally persisted instrument and filter preferences.
+- Locally persisted instrument, A4 reference pitch, and filter preferences.
 - Responsive phone, tablet, and desktop layouts.
 - Clear permission, listening, silence, and failure states.
 - Static deployment without an account or payment requirement.
@@ -28,7 +28,7 @@ It excludes accounts, cloud storage, persisted audio or detection history, analy
 
 These instrument-first presentation requirements shipped in PR #53 and intentionally replaced separate pitch-display controls.
 Alternate-instrument comparison remains a possible Transposition Coach idea, not current work.
-Reference pitch remains fixed at A4 = 440 Hz because no independently justified configurable-reference requirement has been established.
+A4 reference pitch is adjustable from 415 to 466 Hz, defaults to 440 Hz, and is saved with local preferences.
 
 A new visit or reload needs a network connection.
 After an online load, the client can continue if the connection drops.

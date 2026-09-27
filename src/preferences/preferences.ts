@@ -10,14 +10,18 @@ export const instrumentOptions = [
 
 export type InstrumentId = (typeof instrumentOptions)[number]["id"];
 export type MainsHumFrequency = "off" | 50 | 60;
+export const minimumA4Hz = 415;
+export const maximumA4Hz = 466;
 
 export interface Preferences {
+  readonly a4Hz: number;
   readonly instrumentId: InstrumentId;
   readonly mainsHumFrequency: MainsHumFrequency;
   readonly inputFilters: readonly InputFilterBand[];
 }
 
 export const defaultPreferences: Preferences = {
+  a4Hz: 440,
   instrumentId: "concert",
   mainsHumFrequency: "off",
   inputFilters: [],
@@ -56,6 +60,10 @@ export function isPreferences(value: unknown): value is Preferences {
 
   const candidate = value as Record<string, unknown>;
   return (
+    typeof candidate.a4Hz === "number" &&
+    Number.isInteger(candidate.a4Hz) &&
+    candidate.a4Hz >= minimumA4Hz &&
+    candidate.a4Hz <= maximumA4Hz &&
     isInstrumentId(candidate.instrumentId) &&
     (candidate.mainsHumFrequency === "off" ||
       candidate.mainsHumFrequency === 50 ||

@@ -26,7 +26,7 @@ Introduce Git LFS only when a future fixture corpus materially increases clone s
 
 ## Browser Tests
 
-Current browser tests cover permission paths, start and stop, instrument switching, grand-staff routing and history, local preferences, filters, diagnostics, and responsive layout.
+Current browser tests cover permission paths, start and stop, instrument switching, grand-staff routing and history, local preferences including bounded A4 reference pitch, filters, diagnostics, and responsive layout.
 History-export tests cover deterministic CSV, JSON, and plain-text serialization, CSV escaping, written-pitch derivation after live instrument changes, and local download or share without a network URL.
 Lifecycle tests cover interruption, device loss, background/resume, and startup cancellation.
 Browser tests must mock audio where reliable device access is unavailable in CI.
