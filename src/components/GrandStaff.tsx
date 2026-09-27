@@ -25,9 +25,10 @@ interface GrandStaffProps {
   readonly historyNowMs: number;
   readonly instrument: InstrumentDefinition;
   readonly pitchDisplay: PitchRepresentation;
+  readonly targetComparison?: { readonly label: string; readonly noteName: string };
 }
 
-export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, loadRenderer, historyEvents, historyNowMs, instrument, pitchDisplay }: GrandStaffProps) {
+export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, loadRenderer, historyEvents, historyNowMs, instrument, pitchDisplay, targetComparison }: GrandStaffProps) {
   const container = useRef<HTMLDivElement>(null);
   const [activeStaff, setActiveStaff] = useState<ActiveStaff | undefined>(undefined);
   const [rendererLoaded, setRendererLoaded] = useState(false);
@@ -105,6 +106,11 @@ export function GrandStaff({ midi, noteName, accidentalPreference, pitchLabel, l
         <span aria-hidden="true">Past 10s · {spacingCaption} · current</span>
         <span className="visually-hidden">{historyDescription ? `Pitch history, oldest to newest: ${historyDescription}.` : "No recent stable notes."}</span>
       </figcaption>
+      {targetComparison && (
+        <p className="staff-target-pitch">
+          {targetComparison.label}: <strong>{targetComparison.noteName}</strong>
+        </p>
+      )}
       <fieldset className="history-spacing">
         <legend>History spacing</legend>
         {staffHistorySpacings.map((spacing) => (

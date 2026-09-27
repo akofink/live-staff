@@ -19,7 +19,8 @@ It states clearly that audio remains on the device.
 
 The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, local history export, and compact setup.
 Frequency, cents, and confidence are secondary to notation.
-When a target instrument is chosen, the current-note details add one line with the target's written pitch, or its concert pitch for a concert target.
+When a target instrument is chosen, a compact line immediately below the player's staff caption shows the target's written pitch, or its concert pitch for a concert target.
+This keeps the comparison visible on a 320 px phone without a second staff or a separate history lane; the player's notation remains primary.
 The target choice adds nothing to the main screen until it is set and resets on reload.
 Recent notes represent committed stable-note events rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
 Event spacing remains the default a-rhythmic layout.
@@ -51,6 +52,7 @@ Live Staff
 [ Start listening ]
 
        [ persistent grand staff ]
+       [ optional target pitch beneath player caption ]
        [ Event spacing | Proportional time ]
 
 Written: C5
