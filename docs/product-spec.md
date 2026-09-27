@@ -27,7 +27,8 @@ It excludes accounts, cloud storage, persisted audio or detection history, analy
 - Continued listening and interaction if the network is lost after the application has loaded.
 
 These instrument-first presentation requirements shipped in PR #53 and intentionally replaced separate pitch-display controls.
-Alternate-instrument comparison remains a possible Transposition Coach idea, not current work.
+Transposition Coach comparison has started: a session-only target instrument adds a compact target pitch readout beside the player's notation.
+The player staff stays the primary notation; see [issue #123](https://github.com/akofink/live-staff/issues/123) for later slices.
 A4 reference pitch is adjustable from 415 to 466 Hz, defaults to 440 Hz, and is saved with local preferences.
 
 A new visit or reload needs a network connection.

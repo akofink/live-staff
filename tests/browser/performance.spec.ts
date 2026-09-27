@@ -25,7 +25,7 @@ test("continues working after network loss and leaves reloads to the deployment"
   await page.getByRole("button", { name: "Start listening" }).click();
   await expect(page.getByRole("button", { name: "Stop listening" })).toBeVisible();
   await page.locator(".preferences > summary").press("Enter");
-  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await page.getByLabel(/^Instrument/).selectOption("b-flat-trumpet");
   await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
   expect(offlineRequests).toBe(0);
 
@@ -69,14 +69,14 @@ test("progressively reveals settings and keeps instrument controls available dur
   await page.goto("/");
   const settings = page.locator(".preferences > summary");
   await expect(settings).toContainText("Instrument and input settings");
-  await expect(page.getByLabel("Instrument")).not.toBeVisible();
+  await expect(page.getByLabel(/^Instrument/)).not.toBeVisible();
   await expect(page.getByLabel("A4 reference pitch")).not.toBeVisible();
   await settings.press("Enter");
-  await expect(page.getByLabel("Instrument")).toBeVisible();
+  await expect(page.getByLabel(/^Instrument/)).toBeVisible();
   await expect(page.getByLabel("A4 reference pitch")).toHaveValue("440");
   await expect(page.getByLabel("A4 reference pitch")).toHaveAttribute("min", "415");
   await expect(page.getByLabel("A4 reference pitch")).toHaveAttribute("max", "466");
-  const instrument = page.getByLabel("Instrument");
+  const instrument = page.getByLabel(/^Instrument/);
   const roomCalibration = page.getByRole("button", { name: "Calibrate room noise" });
   await expect(roomCalibration).toBeDisabled();
 
@@ -110,7 +110,7 @@ test("keeps instrument settings available after microphone startup fails", async
   await page.getByRole("button", { name: "Start listening" }).click();
 
   await expect(page.getByText("Microphone access was denied. Allow access and try again.")).toBeVisible();
-  await expect(page.getByLabel("Instrument")).toBeEnabled();
+  await expect(page.getByLabel(/^Instrument/)).toBeEnabled();
   await expect(page.getByRole("group", { name: "Input filters" })).toBeVisible();
 });
 
@@ -228,7 +228,7 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/");
   await page.locator(".preferences > summary").press("Enter");
-  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await page.getByLabel(/^Instrument/).selectOption("b-flat-trumpet");
   await page.getByLabel("A4 reference pitch").press("ArrowRight");
   await page.getByLabel("A4 reference pitch").press("ArrowRight");
   await expect(page.getByLabel("A4 reference pitch")).toHaveValue("442");
@@ -240,7 +240,7 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await page.reload();
   await expect(page.locator(".preferences > summary")).toContainText("B-flat trumpet");
   await page.locator(".preferences > summary").press("Enter");
-  await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
+  await expect(page.getByLabel(/^Instrument/)).toHaveValue("b-flat-trumpet");
   await expect(page.getByLabel("A4 reference pitch")).toHaveValue("442");
 });
 
@@ -288,7 +288,7 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
 
   await page.goto("/");
   await page.locator(".preferences > summary").press("Enter");
-  await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
+  await expect(page.getByLabel(/^Instrument/)).toHaveValue("b-flat-trumpet");
   await expect(page.getByRole("group", { name: "History spacing" })).toBeVisible();
   await expect(page.getByRole("radio")).toHaveCount(2);
   await expect(page.getByRole("radio", { name: /concert|written/i })).toHaveCount(0);
@@ -306,13 +306,89 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   await expect(page.locator(".vf-staff-note-current")).toHaveCount(1);
   const writtenCurrentX = await page.locator(".vf-staff-note-current").getAttribute("data-note-x");
 
-  await page.getByLabel("Instrument").selectOption("concert");
+  await page.getByLabel(/^Instrument/).selectOption("concert");
   await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
   await expect(page.getByText(/Pitch history, oldest to newest: C4, current, treble staff\./)).toBeAttached();
   await expect(page.getByLabel("Detected pitch").getByText("Concert pitch", { exact: true })).toBeVisible();
   await expect(page.getByRole("figure", { name: "Grand staff with a 10-second pitch history showing current concert pitch C4 on the treble staff" })).toBeVisible();
   await expect(page.locator(".vf-staff-note-current")).toHaveAttribute("data-note-x", writtenCurrentX!);
   await expect(page.getByText("Pitch reference")).toHaveCount(0);
+});
+
+test("compares a session-only target written pitch derived from concert pitch on a phone", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "live-staff.preferences",
+      JSON.stringify({ instrumentId: "b-flat-trumpet", mainsHumFrequency: "off", inputFilters: [] }),
+    );
+
+    class TestAudioContext {
+      readonly sampleRate = 44_100;
+      readonly state = "running";
+
+      createMediaStreamSource() {
+        return { connect() {}, disconnect() {} };
+      }
+
+      createAnalyser() {
+        let sample = 0;
+        return {
+          fftSize: 0,
+          connect() {},
+          disconnect() {},
+          getFloatTimeDomainData(frame: Float32Array) {
+            for (let index = 0; index < frame.length; index += 1) {
+              frame[index] = Math.sin((2 * Math.PI * 261.625565 * (sample + index)) / 44_100);
+            }
+            sample += frame.length;
+          },
+        };
+      }
+
+      close() {
+        return Promise.resolve();
+      }
+    }
+
+    Object.defineProperty(navigator.mediaDevices, "getUserMedia", {
+      configurable: true,
+      value: () => Promise.resolve({ getTracks: () => [] }),
+    });
+    Object.defineProperty(window, "AudioContext", { configurable: true, value: TestAudioContext });
+  });
+
+  await page.goto("/");
+  await page.locator(".preferences > summary").press("Enter");
+  const target = page.getByLabel("Compare with target instrument");
+  await expect(target).toHaveValue("off");
+  await expect(target).toHaveAccessibleDescription("Shows another part's pitch for the same sounding note beside your own. Session-only.");
+  await expect(page.getByText(/^Target /)).toHaveCount(0);
+  await target.selectOption("e-flat-alto-saxophone");
+  await expect(page.getByText("Target written pitch for E-flat alto saxophone: --")).toBeVisible();
+
+  await page.getByRole("button", { name: "Start listening" }).click();
+  await expect(page.getByLabel("Detected pitch").getByText("D4", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("Target written pitch for E-flat alto saxophone: A4")).toBeVisible();
+
+  await page.getByLabel(/^Instrument/).selectOption("concert");
+  await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
+  await expect(page.getByText("Target written pitch for E-flat alto saxophone: A4")).toBeVisible();
+
+  await target.selectOption("concert");
+  await expect(page.getByText("Target concert pitch: C4")).toBeVisible();
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
+
+  await target.selectOption("off");
+  await expect(page.getByText(/^Target /)).toHaveCount(0);
+  await target.selectOption("f-horn");
+  await page.reload();
+  await page.locator(".preferences > summary").press("Enter");
+  await expect(page.getByLabel("Compare with target instrument")).toHaveValue("off");
 });
 
 test("freezes stopped history across inactive time and clears it after restart", async ({ page }) => {
@@ -441,7 +517,7 @@ test("exports frozen stabilized history locally after an explicit action", async
   await expect(page.getByLabel("Detected pitch").getByText("A3", { exact: true })).toBeVisible({ timeout: 10_000 });
   await page.getByRole("button", { name: "Stop listening" }).click();
   await page.locator(".preferences > summary").press("Enter");
-  await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await page.getByLabel(/^Instrument/).selectOption("b-flat-trumpet");
   await page.getByLabel("Format").selectOption("csv");
 
   const exportRequests: string[] = [];

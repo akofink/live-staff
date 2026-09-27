@@ -3,7 +3,7 @@
 ## First Run
 
 The first screen explains the value in one sentence and provides a prominent Start listening action beside the listening state.
-Instrument, A4 reference pitch, room calibration, and bounded input-filter controls are available in a collapsed Setup disclosure. The A4 reference defaults to 440 Hz and can be adjusted from 415 to 466 Hz.
+Instrument, target-instrument comparison, A4 reference pitch, room calibration, and bounded input-filter controls are available in a collapsed Setup disclosure. The A4 reference defaults to 440 Hz and can be adjusted from 415 to 466 Hz.
 Instrument selection determines the primary notation: concert instruments use concert notation and transposing instruments use their written notation.
 It remains available while listening so the current text and staff update immediately without restarting capture.
 It states clearly that audio remains on the device.
@@ -12,13 +12,15 @@ It states clearly that audio remains on the device.
 
 - Before permission: instrument selection and an explicit Start listening action.
 - Active without a stable note: a calm waiting state that does not flicker through guesses.
-- Active with a stable note: a persistent grand staff with the current note held in a stable current position, recent committed notes advancing independently in the bounded 10-second history, a session-only choice between equal event spacing and proportional onset time, and an optional compact concert-pitch reference for transposing instruments.
+- Active with a stable note: a persistent grand staff with the current note held in a stable current position, recent committed notes advancing independently in the bounded 10-second history, a session-only choice between equal event spacing and proportional onset time, an optional compact concert-pitch reference for transposing instruments, and an optional session-only target-instrument pitch readout.
 - Failure: a concise explanation with a recovery action for denied permission, unavailable input, or unsupported browser behavior.
 
 ## Main Screen
 
 The primary visual hierarchy is compact header, listening control, persistent grand staff with integrated 10-second history, current-note details, local history export, and compact setup.
 Frequency, cents, and confidence are secondary to notation.
+When a target instrument is chosen, the current-note details add one line with the target's written pitch, or its concert pitch for a concert target.
+The target choice adds nothing to the main screen until it is set and resets on reload.
 Recent notes represent committed stable-note events rather than raw detector updates, and the active note stays fixed at the current position while completed events advance through the compact history lane.
 Event spacing remains the default a-rhythmic layout.
 Proportional time places completed notes by observed onset so chronology is visible as horizontal space.

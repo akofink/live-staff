@@ -354,6 +354,16 @@ h2 {
   border-block: 1px solid #d8d0c1;
 }
 
+.target-pitch {
+  margin: 0.5rem 0 0;
+}
+
+.target-pitch strong {
+  color: #264d3d;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.2rem;
+}
+
 .history-export {
   display: flex;
   flex-wrap: wrap;

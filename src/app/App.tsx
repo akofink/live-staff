@@ -11,9 +11,10 @@ import { frequencyToNote, type DetectedNote } from "../pitch/note";
 import { NoteStabilizer } from "../pitch/stabilizer";
 import { GrandStaff } from "../components/GrandStaff";
 import { toDisplayPitch } from "../instruments/displayPitch";
+import { coachPitches } from "../instruments/coach";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
-import { instrumentOptions, maximumA4Hz, minimumA4Hz, type Preferences } from "../preferences/preferences";
+import { instrumentOptions, maximumA4Hz, minimumA4Hz, type InstrumentId, type Preferences } from "../preferences/preferences";
 import { PitchHistory } from "../pitch/pitchHistory";
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
@@ -65,6 +66,7 @@ export function App() {
   const [filterBypass, setFilterBypass] = useState(false);
   const [exportFormat, setExportFormat] = useState<HistoryExportFormat>("csv");
   const [exportMessage, setExportMessage] = useState("");
+  const [targetInstrumentId, setTargetInstrumentId] = useState<InstrumentId | "off">("off");
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -293,8 +295,12 @@ export function App() {
   const selectedInstrument = instruments.find(
     (instrument) => instrument.id === selectedInstrumentOption.definitionId,
   )!;
+  const targetOption = instrumentOptions.find((instrument) => instrument.id === targetInstrumentId);
+  const targetInstrument = targetOption && instruments.find((instrument) => instrument.id === targetOption.definitionId)!;
   const primaryPitchDisplay = selectedInstrument.writtenToConcertSemitones === 0 ? "concert" : "written";
-  const displayPitch = note && toDisplayPitch(note.midi, primaryPitchDisplay, selectedInstrument);
+  const comparedPitches = note && targetInstrument && coachPitches(note.midi, selectedInstrument, targetInstrument);
+  const displayPitch = comparedPitches?.player ?? (note && toDisplayPitch(note.midi, primaryPitchDisplay, selectedInstrument));
+  const targetPitch = comparedPitches?.target;
   const concertPitch = note && toDisplayPitch(note.midi, "concert", selectedInstrument);
   const pitchLabel = primaryPitchDisplay === "concert"
     ? "Concert pitch"
@@ -402,6 +408,14 @@ export function App() {
                 <dd>{note ? `${note.cents >= 0 ? "+" : ""}${note.cents} cents` : "--"}</dd>
               </div>
             </dl>
+            {targetInstrument && (
+              <p className="target-pitch">
+                {targetInstrument.writtenToConcertSemitones === 0
+                  ? "Target concert pitch"
+                  : `Target written pitch for ${targetInstrument.name}`}
+                : <strong>{targetPitch?.name ?? "--"}</strong>
+              </p>
+            )}
             {primaryPitchDisplay === "written" && concertPitch && (
               <details className="pitch-reference">
                 <summary>Pitch reference</summary>
@@ -468,6 +482,25 @@ export function App() {
             </label>
             <p id="instrument-guidance" className="preferences-help" role="status" aria-live="polite">
               Concert instruments show concert notation. Transposing instruments show their written notation. Changes apply immediately.
+            </p>
+            <label>
+              Compare with target instrument
+              <select
+                id="target-instrument"
+                value={targetInstrumentId}
+                aria-describedby="target-instrument-guidance"
+                onChange={(event) => setTargetInstrumentId(event.target.value as InstrumentId | "off")}
+              >
+                <option value="off">No target</option>
+                {instrumentOptions.map((instrument) => (
+                  <option key={instrument.id} value={instrument.id}>
+                    {instrument.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p id="target-instrument-guidance" className="preferences-help">
+              Shows another part's pitch for the same sounding note beside your own. Session-only.
             </p>
             <label>
               A4 reference pitch: {preferences.a4Hz} Hz

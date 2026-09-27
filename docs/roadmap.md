@@ -45,9 +45,13 @@ Subsequent shipped work added progressive disclosure, local preferences, room ca
 
 ## Milestone 6: Transposition Coach
 
-**Status: Not started. Not current work.**
+**Status: In progress.**
 
 Add target-instrument selection and a dual display derived independently from canonical concert pitch.
+[Issue #123](https://github.com/akofink/live-staff/issues/123) scopes the milestone into slices.
+The first slice adds a session-only target choice in Setup and a compact target pitch readout beside the player's note details.
+Player and target pitches are each derived from the same concert MIDI, never from each other.
+A second target staff, aligned target history, target persistence, and broader catalog or clef support remain follow-ups in that issue.
 
 ## Milestone 7: Version 1.0 Hardening
 
