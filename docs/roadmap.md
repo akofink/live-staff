@@ -41,7 +41,7 @@ The app selects written notation automatically for transposing instruments, prov
 
 Complete the first-run flow, selector, microphone states, labels, and phone layout.
 Success means a new user can understand the app without instruction.
-Subsequent shipped work added progressive disclosure, local preferences, room calibration, opt-in waveform and spectrum diagnostics, and up to four bounded interactive filters.
+Subsequent shipped work added progressive disclosure, local preferences, room calibration, opt-in waveform and spectrum diagnostics, up to four bounded interactive filters, and a configurable A4 reference pitch.
 
 ## Milestone 6: Transposition Coach
 
@@ -70,4 +70,4 @@ The boundary is in [melody transcription feasibility](melody-transcription-feasi
 Rhythm inference, rest symbols, and note values stay deferred.
 The [multi-pitch feasibility report](multi-pitch-feasibility.md) defers product polyphony, source separation, and timbre/source association while allowing only a bounded offline two-pitch benchmark.
 The [input filter chain](input-filter-chain-design.md), [room calibration](room-noise-calibration.md), and opt-in signal monitor are shipped.
-Configurable A4, more instruments, and separate pitch-display modes are ideas, not current work.
+More instruments and separate pitch-display modes remain ideas, not current work. Configurable A4 shipped in [issue #124](https://github.com/akofink/live-staff/issues/124).

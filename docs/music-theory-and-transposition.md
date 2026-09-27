@@ -4,7 +4,7 @@
 
 Use scientific pitch notation: middle C is C4.
 Detected frequency maps first to a concert MIDI pitch.
-A4 is MIDI 69 and is fixed at 440 Hz in the shipped app.
+A4 is MIDI 69. The app defaults to a 440 Hz reference and lets users select an integer reference from 415 to 466 Hz in Setup. Frequency-to-note conversion uses that selected reference; concert MIDI remains canonical.
 
 ## Pitch Terms
 

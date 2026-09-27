@@ -30,6 +30,7 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
     const parsedValue: unknown = JSON.parse(storedValue);
     if (isLegacyPreferences(parsedValue)) {
       return {
+        a4Hz: defaultPreferences.a4Hz,
         instrumentId: parsedValue.instrumentId,
         mainsHumFrequency: parsedValue.mainsHumFrequency ?? "off",
         inputFilters: parsedValue.mainsHumFrequency === 50 || parsedValue.mainsHumFrequency === 60
@@ -42,12 +43,18 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
       const previous = parsedValue as { instrumentId?: unknown; mainsHumFrequency?: unknown };
       if (typeof previous.instrumentId === "string" && (previous.mainsHumFrequency === "off" || previous.mainsHumFrequency === 50 || previous.mainsHumFrequency === 60)) {
         const migrated = {
+          a4Hz: defaultPreferences.a4Hz,
           instrumentId: previous.instrumentId,
           mainsHumFrequency: previous.mainsHumFrequency,
           inputFilters: previous.mainsHumFrequency === "off" ? [] : [{ id: "migrated-hum", type: "notch" as const, enabled: true, frequencyHz: previous.mainsHumFrequency, q: 30, attenuationDb: 24 }],
         };
         return isPreferences(migrated) ? migrated : defaultPreferences;
       }
+    }
+
+    if (typeof parsedValue === "object" && parsedValue !== null && !("a4Hz" in parsedValue)) {
+      const migrated = { ...parsedValue, a4Hz: defaultPreferences.a4Hz };
+      return isPreferences(migrated) ? migrated : defaultPreferences;
     }
 
     return isPreferences(parsedValue) ? parsedValue : defaultPreferences;

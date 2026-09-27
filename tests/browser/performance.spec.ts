@@ -70,8 +70,12 @@ test("progressively reveals settings and keeps instrument controls available dur
   const settings = page.locator(".preferences > summary");
   await expect(settings).toContainText("Instrument and input settings");
   await expect(page.getByLabel("Instrument")).not.toBeVisible();
+  await expect(page.getByLabel("A4 reference pitch")).not.toBeVisible();
   await settings.press("Enter");
   await expect(page.getByLabel("Instrument")).toBeVisible();
+  await expect(page.getByLabel("A4 reference pitch")).toHaveValue("440");
+  await expect(page.getByLabel("A4 reference pitch")).toHaveAttribute("min", "415");
+  await expect(page.getByLabel("A4 reference pitch")).toHaveAttribute("max", "466");
   const instrument = page.getByLabel("Instrument");
   const roomCalibration = page.getByRole("button", { name: "Calibrate room noise" });
   await expect(roomCalibration).toBeDisabled();
@@ -225,15 +229,19 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await page.goto("/");
   await page.locator(".preferences > summary").press("Enter");
   await page.getByLabel("Instrument").selectOption("b-flat-trumpet");
+  await page.getByLabel("A4 reference pitch").press("ArrowRight");
+  await page.getByLabel("A4 reference pitch").press("ArrowRight");
+  await expect(page.getByLabel("A4 reference pitch")).toHaveValue("442");
   await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("live-staff.preferences"))).toBe(
-    '{"instrumentId":"b-flat-trumpet","mainsHumFrequency":"off","inputFilters":[]}',
+    '{"a4Hz":442,"instrumentId":"b-flat-trumpet","mainsHumFrequency":"off","inputFilters":[]}',
   );
 
   await page.reload();
   await expect(page.locator(".preferences > summary")).toContainText("B-flat trumpet");
   await page.locator(".preferences > summary").press("Enter");
   await expect(page.getByLabel("Instrument")).toHaveValue("b-flat-trumpet");
+  await expect(page.getByLabel("A4 reference pitch")).toHaveValue("442");
 });
 
 test("migrates a legacy concert-display preference and renders the B-flat trumpet's written staff", async ({ page }) => {

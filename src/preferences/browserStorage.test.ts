@@ -21,6 +21,7 @@ describe("browser preferences storage", () => {
     const storage = createStorage('{"instrumentId":"b-flat-trumpet","pitchDisplay":"written"}');
 
     expect(loadPreferences(storage)).toEqual({
+      a4Hz: 440,
       instrumentId: "b-flat-trumpet",
       mainsHumFrequency: "off",
       inputFilters: [],
@@ -31,6 +32,7 @@ describe("browser preferences storage", () => {
     const storage = createStorage('{"instrumentId":"f-horn","pitchDisplay":"concert","mainsHumFrequency":60}');
 
     expect(loadPreferences(storage)).toEqual({
+      a4Hz: 440,
       instrumentId: "f-horn",
       mainsHumFrequency: 60,
       inputFilters: [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: 60, q: 30, attenuationDb: 24 }],
@@ -42,11 +44,14 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(createStorage('{"instrumentId":"unknown","pitchDisplay":"written"}'))).toEqual(
       defaultPreferences,
     );
+    expect(loadPreferences(createStorage('{"a4Hz":414,"instrumentId":"concert","mainsHumFrequency":"off","inputFilters":[]}'))).toEqual(defaultPreferences);
+    expect(loadPreferences(createStorage('{"a4Hz":467,"instrumentId":"concert","mainsHumFrequency":"off","inputFilters":[]}'))).toEqual(defaultPreferences);
   });
 
   it("stores the selected instrument and local hum setting", () => {
     const storage = createStorage(null);
     const preferences = {
+      a4Hz: 442,
       instrumentId: "f-horn",
       mainsHumFrequency: 60,
       inputFilters: [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: 60, q: 30, attenuationDb: 24 }] as const,
