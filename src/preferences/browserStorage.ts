@@ -1,4 +1,4 @@
-import { defaultPreferences, isLegacyPreferences, isPreferences, type Preferences } from "./preferences";
+import { defaultPreferences, isLegacyPreferences, isPreferences, isTargetSelection, type Preferences } from "./preferences";
 
 export const preferencesStorageKey = "live-staff.preferences";
 
@@ -32,6 +32,7 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
       return {
         a4Hz: defaultPreferences.a4Hz,
         instrumentId: parsedValue.instrumentId,
+        targetInstrumentId: "off",
         mainsHumFrequency: parsedValue.mainsHumFrequency ?? "off",
         inputFilters: parsedValue.mainsHumFrequency === 50 || parsedValue.mainsHumFrequency === 60
           ? [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: parsedValue.mainsHumFrequency, q: 30, attenuationDb: 24 }]
@@ -45,6 +46,7 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
         const migrated = {
           a4Hz: defaultPreferences.a4Hz,
           instrumentId: previous.instrumentId,
+          targetInstrumentId: "off",
           mainsHumFrequency: previous.mainsHumFrequency,
           inputFilters: previous.mainsHumFrequency === "off" ? [] : [{ id: "migrated-hum", type: "notch" as const, enabled: true, frequencyHz: previous.mainsHumFrequency, q: 30, attenuationDb: 24 }],
         };
@@ -54,10 +56,14 @@ export function loadPreferences(storage: StorageAdapter | undefined): Preference
 
     if (typeof parsedValue === "object" && parsedValue !== null && !("a4Hz" in parsedValue)) {
       const migrated = { ...parsedValue, a4Hz: defaultPreferences.a4Hz };
-      return isPreferences(migrated) ? migrated : defaultPreferences;
+      return isPreferences(migrated)
+        ? { ...migrated, targetInstrumentId: isTargetSelection(migrated.targetInstrumentId) ? migrated.targetInstrumentId : "off" }
+        : defaultPreferences;
     }
 
-    return isPreferences(parsedValue) ? parsedValue : defaultPreferences;
+    return isPreferences(parsedValue)
+      ? { ...parsedValue, targetInstrumentId: isTargetSelection(parsedValue.targetInstrumentId) ? parsedValue.targetInstrumentId : "off" }
+      : defaultPreferences;
   } catch {
     return defaultPreferences;
   }

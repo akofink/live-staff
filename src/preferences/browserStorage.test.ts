@@ -23,6 +23,7 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(storage)).toEqual({
       a4Hz: 440,
       instrumentId: "b-flat-trumpet",
+      targetInstrumentId: "off",
       mainsHumFrequency: "off",
       inputFilters: [],
     });
@@ -34,6 +35,7 @@ describe("browser preferences storage", () => {
     expect(loadPreferences(storage)).toEqual({
       a4Hz: 440,
       instrumentId: "f-horn",
+      targetInstrumentId: "off",
       mainsHumFrequency: 60,
       inputFilters: [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: 60, q: 30, attenuationDb: 24 }],
     });
@@ -53,6 +55,7 @@ describe("browser preferences storage", () => {
     const preferences = {
       a4Hz: 442,
       instrumentId: "f-horn",
+      targetInstrumentId: "tuba",
       mainsHumFrequency: 60,
       inputFilters: [{ id: "migrated-hum", type: "notch", enabled: true, frequencyHz: 60, q: 30, attenuationDb: 24 }] as const,
     } as const;
@@ -60,6 +63,12 @@ describe("browser preferences storage", () => {
     expect(savePreferences(storage, preferences)).toBe(true);
     expect(storage.getItem(preferencesStorageKey)).toBe(JSON.stringify(preferences));
     expect(loadPreferences(storage)).toEqual(preferences);
+  });
+
+  it("defaults old saved preferences to no target and rejects unsupported target clefs", () => {
+    const previousPreferences = '{"a4Hz":440,"instrumentId":"concert","mainsHumFrequency":"off","inputFilters":[]}';
+    expect(loadPreferences(createStorage(previousPreferences))).toEqual(defaultPreferences);
+    expect(loadPreferences(createStorage(previousPreferences.replace('"inputFilters":[]', '"inputFilters":[],"targetInstrumentId":"viola"')))).toEqual(defaultPreferences);
   });
 
   it("does not fail the app when browser storage is unavailable", () => {

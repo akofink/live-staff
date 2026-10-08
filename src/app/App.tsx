@@ -14,7 +14,7 @@ import { toDisplayPitch } from "../instruments/displayPitch";
 import { coachPitches } from "../instruments/coach";
 import { instruments } from "../instruments/instruments";
 import { getBrowserStorage, loadPreferences, savePreferences } from "../preferences/browserStorage";
-import { instrumentOptions, maximumA4Hz, minimumA4Hz, type InstrumentId, type Preferences } from "../preferences/preferences";
+import { instrumentOptions, maximumA4Hz, minimumA4Hz, targetInstrumentOptions, type Preferences } from "../preferences/preferences";
 import { PitchHistory } from "../pitch/pitchHistory";
 import type { SignalMonitorHandle } from "../components/SignalMonitor";
 import { isLowPowerSignalMonitor } from "../audio/signalMonitor";
@@ -66,7 +66,6 @@ export function App() {
   const [filterBypass, setFilterBypass] = useState(false);
   const [exportFormat, setExportFormat] = useState<HistoryExportFormat>("csv");
   const [exportMessage, setExportMessage] = useState("");
-  const [targetInstrumentId, setTargetInstrumentId] = useState<InstrumentId | "off">("off");
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -295,7 +294,7 @@ export function App() {
   const selectedInstrument = instruments.find(
     (instrument) => instrument.id === selectedInstrumentOption.definitionId,
   )!;
-  const targetOption = instrumentOptions.find((instrument) => instrument.id === targetInstrumentId);
+  const targetOption = targetInstrumentOptions.find((instrument) => instrument.id === preferences.targetInstrumentId);
   const targetInstrument = targetOption && instruments.find((instrument) => instrument.id === targetOption.definitionId)!;
   const primaryPitchDisplay = selectedInstrument.writtenToConcertSemitones === 0 ? "concert" : "written";
   const comparedPitches = note && targetInstrument && coachPitches(note.midi, selectedInstrument, targetInstrument);
@@ -485,12 +484,12 @@ export function App() {
               Compare with target instrument
               <select
                 id="target-instrument"
-                value={targetInstrumentId}
+                value={preferences.targetInstrumentId}
                 aria-describedby="target-instrument-guidance"
-                onChange={(event) => setTargetInstrumentId(event.target.value as InstrumentId | "off")}
+                onChange={(event) => updatePreferences({ targetInstrumentId: event.target.value as Preferences["targetInstrumentId"] })}
               >
                 <option value="off">No target</option>
-                {instrumentOptions.map((instrument) => (
+                {targetInstrumentOptions.map((instrument) => (
                   <option key={instrument.id} value={instrument.id}>
                     {instrument.label}
                   </option>
@@ -498,7 +497,7 @@ export function App() {
               </select>
             </label>
             <p id="target-instrument-guidance" className="preferences-help">
-              Shows another part's pitch for the same sounding note beside your own. Session-only.
+              Shows the target pitch as text beside your staff. No target staff is rendered. Target choice is saved on this device.
             </p>
             <label>
               A4 reference pitch: {preferences.a4Hz} Hz
