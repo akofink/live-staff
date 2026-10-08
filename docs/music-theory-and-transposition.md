@@ -31,7 +31,7 @@ These examples are preserved by unit tests for the shipped instrument catalog.
 Instrument definitions are data, not conditional UI behavior.
 Each definition must include an identifier, display name, clef, transposition interval, practical ranges when known, and an accidental preference when useful.
 The domain catalog includes concert pitch, B-flat clarinet, E-flat alto saxophone, B-flat tenor saxophone, B-flat trumpet, F horn, trombone, tuba, violin, viola, cello, and double bass.
-The current compact UI exposes concert pitch, B-flat clarinet, B-flat trumpet, E-flat alto saxophone, and F horn.
+The player selector exposes concert pitch, B-flat clarinet, B-flat trumpet, E-flat alto saxophone, and F horn. The target comparison additionally offers existing treble- and bass-clef definitions, including B-flat tenor saxophone, trombone, tuba, violin, cello, and double bass; it remains a text readout and does not render a target staff.
 Definitions are immutable and use written MIDI ranges, inclusive at both ends, when a practical range is supplied.
 The generic concert-pitch definition has no range because it represents a notation mode rather than a physical instrument.
 
@@ -54,8 +54,7 @@ The generic concert-pitch definition has no range because it represents a notati
 
 ## Clefs
 
-The persistent grand staff renders treble and bass clefs for all current display pitches.
-Alto and tenor clef support is deferred but must fit the domain model.
+The persistent player grand staff renders treble and bass clefs. Alto- and tenor-clef notation is unsupported and is not exposed by the target selector. An instrument name such as E-flat alto saxophone refers to the instrument, not an alto-clef rendering claim.
 
 ## Enharmonic Spelling
 

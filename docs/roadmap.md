@@ -49,10 +49,10 @@ Subsequent shipped work added progressive disclosure, local preferences, room ca
 
 Add target-instrument selection and a dual display derived independently from canonical concert pitch.
 [Issue #123](https://github.com/akofink/live-staff/issues/123) scopes the milestone into slices.
-The first slice added a session-only target choice in Setup and a compact target pitch readout.
+The first slice added a session-only target choice in Setup and a compact target pitch readout; the final #123 follow-up saves that choice locally and broadens it to existing treble- and bass-clef definitions.
 The second slice moved that readout beneath the player staff caption so it is visible sooner on a phone; it deferred a second staff and aligned target history after a 320 px comparison showed both cost space without a clear readability gain.
 Player and target pitches are each derived from the same concert MIDI, never from each other.
-Target persistence and broader catalog or clef support remain follow-ups in that issue.
+Target choices are compared as text only; no target staff is rendered, and alto- or tenor-clef notation remains unsupported. A second target staff and aligned target history remain deferred.
 
 ## Milestone 7: Version 1.0 Hardening
 

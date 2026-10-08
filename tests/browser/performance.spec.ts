@@ -234,7 +234,7 @@ test("keeps settings usable on a small screen and restores saved preferences", a
   await expect(page.getByLabel("A4 reference pitch")).toHaveValue("442");
   await expect(page.getByRole("status").filter({ hasText: "Preference saved on this device." })).toBeVisible();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("live-staff.preferences"))).toBe(
-    '{"a4Hz":442,"instrumentId":"b-flat-trumpet","mainsHumFrequency":"off","inputFilters":[]}',
+    '{"a4Hz":442,"instrumentId":"b-flat-trumpet","targetInstrumentId":"off","mainsHumFrequency":"off","inputFilters":[]}',
   );
 
   await page.reload();
@@ -315,13 +315,15 @@ test("migrates a legacy concert-display preference and renders the B-flat trumpe
   await expect(page.getByText("Pitch reference")).toHaveCount(0);
 });
 
-test("compares a session-only target written pitch derived from concert pitch on a phone", async ({ page }) => {
+test("compares a saved target written pitch derived from concert pitch on a phone", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.addInitScript(() => {
-    localStorage.setItem(
-      "live-staff.preferences",
-      JSON.stringify({ instrumentId: "b-flat-trumpet", mainsHumFrequency: "off", inputFilters: [] }),
-    );
+    if (localStorage.getItem("live-staff.preferences") === null) {
+      localStorage.setItem(
+        "live-staff.preferences",
+        JSON.stringify({ instrumentId: "b-flat-trumpet", mainsHumFrequency: "off", inputFilters: [] }),
+      );
+    }
 
     class TestAudioContext {
       readonly sampleRate = 44_100;
@@ -362,9 +364,11 @@ test("compares a session-only target written pitch derived from concert pitch on
   await page.locator(".preferences > summary").press("Enter");
   const target = page.getByLabel("Compare with target instrument");
   await expect(target).toHaveValue("off");
-  await expect(target).toHaveAccessibleDescription("Shows another part's pitch for the same sounding note beside your own. Session-only.");
+  await expect(target).toHaveAccessibleDescription("Shows the target pitch as text beside your staff. No target staff is rendered. Target choice is saved on this device.");
+  await expect(target.locator('option[value="tuba"]')).toHaveCount(1);
+  await expect(target.locator('option[value="viola"]')).toHaveCount(0);
   await expect(page.getByText(/^Target /)).toHaveCount(0);
-  await target.selectOption("e-flat-alto-saxophone");
+  await target.selectOption("eb-alto-saxophone");
   await expect(page.getByText("Target written pitch for E-flat alto saxophone: --")).toBeVisible();
 
   await page.getByRole("button", { name: "Start listening" }).click();
@@ -380,7 +384,7 @@ test("compares a session-only target written pitch derived from concert pitch on
   await expect(page.getByLabel("Detected pitch").getByText("C4", { exact: true })).toBeVisible();
   await expect(page.getByText("Target written pitch for E-flat alto saxophone: A4")).toBeVisible();
 
-  await target.selectOption("concert");
+  await target.selectOption("concert-pitch");
   await expect(page.getByText("Target concert pitch: C4")).toBeVisible();
   const dimensions = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
@@ -391,9 +395,10 @@ test("compares a session-only target written pitch derived from concert pitch on
   await target.selectOption("off");
   await expect(page.getByText(/^Target /)).toHaveCount(0);
   await target.selectOption("f-horn");
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("live-staff.preferences") ?? "{}").targetInstrumentId)).toBe("f-horn");
   await page.reload();
   await page.locator(".preferences > summary").press("Enter");
-  await expect(page.getByLabel("Compare with target instrument")).toHaveValue("off");
+  await expect(page.getByLabel("Compare with target instrument")).toHaveValue("f-horn");
 });
 
 test("freezes stopped history across inactive time and clears it after restart", async ({ page }) => {

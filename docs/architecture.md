@@ -52,8 +52,8 @@ Disabling the monitor or stopping capture removes the observer immediately.
 
 ## Local Preferences
 
-`src/preferences/` owns the serializable instrument, A4 reference pitch, and filter choices plus a small browser storage adapter.
-Only those choices are written to `localStorage`; microphone audio, audio frames, detected frequencies, detected notes, history, calibration, global bypass, and monitor samples are never persisted. The A4 reference defaults to 440 Hz and is bounded to 415 through 466 Hz.
+`src/preferences/` owns the serializable player instrument, target instrument, A4 reference pitch, and filter choices plus a small browser storage adapter.
+Only those choices are written to `localStorage`; microphone audio, audio frames, detected frequencies, detected notes, history, calibration, global bypass, and monitor samples are never persisted. The target instrument defaults to no target and is restricted to existing treble- and bass-clef definitions; it drives a text comparison, not target staff notation. The A4 reference defaults to 440 Hz and is bounded to 415 through 466 Hz.
 Signal-monitor state and samples are also never persisted.
 Malformed values and unavailable browser storage safely use defaults.
 The React UI resolves the selected preference to an instrument definition and derives its display pitch from canonical concert MIDI.

@@ -20,18 +20,18 @@ It excludes accounts, cloud storage, persisted audio or detection history, analy
 - Correct treble and bass staff display.
 - Instrument-first notation that defaults concert instruments to concert pitch and transposing instruments to written pitch.
 - A compact sounding or concert-pitch reference for transposing instruments.
-- Locally persisted instrument, A4 reference pitch, and filter preferences.
+- Locally persisted instrument, target-instrument choice, A4 reference pitch, and filter preferences.
 - Responsive phone, tablet, and desktop layouts.
 - Clear permission, listening, silence, and failure states.
 - Static deployment without an account or payment requirement.
 - Continued listening and interaction if the network is lost after the application has loaded.
 
 These instrument-first presentation requirements shipped in PR #53 and intentionally replaced separate pitch-display controls.
-Transposition Coach comparison has started: a session-only target instrument adds a compact target pitch readout immediately beneath the player's staff caption.
-The player staff stays the primary notation.
+Transposition Coach comparison adds a locally saved target-instrument choice and a compact target written-pitch text readout immediately beneath the player's staff caption.
+The player staff stays the primary notation; no target staff is rendered. The target catalog uses existing treble- and bass-clef definitions only; alto- and tenor-clef notation remain unsupported.
 A phone-width comparison found that a second staff displaced the player's note details by about 230 px, while a separate aligned-history row added another 51 px without resolving the limited notation width.
-Neither is planned for this slice; see [issue #123](https://github.com/akofink/live-staff/issues/123) for the remaining catalog and preference questions.
-A4 reference pitch is adjustable from 415 to 466 Hz, defaults to 440 Hz, and is saved with local preferences.
+Neither was planned; see [issue #123](https://github.com/akofink/live-staff/issues/123) for the completed catalog and preference decision.
+A4 reference pitch is adjustable from 415 to 466 Hz, defaults to 440 Hz, and is saved with local preferences. The target choice defaults to no target.
 
 A new visit or reload needs a network connection.
 After an online load, the client can continue if the connection drops.
